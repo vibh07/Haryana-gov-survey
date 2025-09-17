@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gov Survey Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Government Survey Portal</h1>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-link active" data-tab="survey-tab">📝 Survey</button>
+            <button class="tab-link" data-tab="details-tab">📊 Details</button>
+        </div>
+
+        <div id="survey-tab" class="tab-content active">
+            <form id="survey-form">
+                <div class="form-group">
+                    <label for="gali-no">Gali No:</label>
+                    <input type="text" id="gali-no" name="GaliNo" tabindex="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="house-no">House No:</label>
+                    <input type="text" id="house-no" name="HouseNo" tabindex="2" required>
+                </div>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="Name" tabindex="3" required>
+                </div>
+                <div class="form-group">
+                    <label for="relation">Relation:</label>
+                    <input type="text" id="relation" name="Relation" tabindex="4">
+                </div>
+                <div class="form-group">
+                    <label for="dob">Date of Birth (DOB):</label>
+                    <input type="date" id="dob" name="DOB" tabindex="5">
+                </div>
+                <div class="form-group">
+                    <label for="age">Age (Editable):</label>
+                    <input type="number" id="age" name="Age" tabindex="6">
+                </div>
+                <div class="form-group">
+                    <label for="education">Education:</label>
+                    <input type="text" id="education" name="Education" tabindex="7">
+                </div>
+                <div class="form-group">
+                    <label for="caste">Caste:</label>
+                    <input type="text" id="caste" name="Caste" tabindex="8">
+                </div>
+                <div class="form-group">
+                    <label for="aadhar">Aadhar No:</label>
+                    <input type="text" id="aadhar" name="AadharNo" pattern="\d{12}" title="Enter a valid 12-digit Aadhar number" tabindex="9">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone No:</label>
+                    <input type="tel" id="phone" name="PhoneNo" pattern="\d{10}" title="Enter a valid 10-digit phone number" tabindex="10">
+                </div>
+                <div class="form-group">
+                    <label for="ration-card">Ration Card:</label>
+                    <select id="ration-card" name="RationCard" tabindex="11">
+                        <option value="Not Filled">Select Card</option>
+                        <option value="Green">Green Card</option>
+                        <option value="Yellow">Yellow Card</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="married">Married:</label>
+                    <select id="married" name="Married" tabindex="12">
+                        <option value="Not Filled">Select Status</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+                 <div class="form-group">
+                    <label for="family-planning">Family Planning:</label>
+                    <input type="text" id="family-planning" name="FamilyPlanning" tabindex="13">
+                </div>
+                <div class="form-group">
+                    <label for="occupation">Occupation:</label>
+                    <select id="occupation" name="Occupation" tabindex="14">
+                        <option value="Not Filled">Select Occupation</option>
+                        <option value="Job">Job</option>
+                        <option value="Business">Business</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="disabled">Disabled:</label>
+                    <select id="disabled" name="Disabled" tabindex="15">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nasha">Nasha (Addiction):</label>
+                    <select id="nasha" name="Nasha" tabindex="16">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mediclaim">Mediclaim:</label>
+                    <select id="mediclaim" name="Mediclaim" tabindex="17">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="diseases">Diseases:</label>
+                    <input type="text" id="diseases" name="Diseases" tabindex="18">
+                </div>
+                <div class="form-group">
+                    <label for="owner">Owner:</label>
+                    <select id="owner" name="Owner" tabindex="19">
+                        <option value="Not Filled">Select Status</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+                
+                <button type="submit" id="save-button" tabindex="20">Save Data</button>
+            </form>
+            <p id="form-status"></p>
+        </div>
+
+        <div id="details-tab" class="tab-content">
+            <div class="filters">
+                <input type="text" id="filter-name" placeholder="Filter by Name...">
+                <input type="number" id="filter-age" placeholder="Filter by Age...">
+                <input type="text" id="filter-house" placeholder="Filter by House No...">
+                <input type="number" id="filter-year" placeholder="Filter by Birth Year...">
+            </div>
+            <div class="export-buttons">
+                <button id="download-excel">Download as Excel</button>
+                <button id="download-pdf">Download as PDF</button>
+            </div>
+            <div class="table-container">
+                <table id="details-table">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Gali</th>
+                            <th>House</th>
+                            <th>Name</th>
+                            <th>Relation</th>
+                            <th>DOB</th>
+                            <th>Age</th>
+                            <th>Aadhar</th>
+                            <th>Phone</th>
+                            <th>Married</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>

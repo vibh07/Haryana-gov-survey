@@ -1,0 +1,125 @@
+:root {
+    --primary-color: #0056b3;
+    --secondary-color: #f4f4f4;
+    --border-color: #ddd;
+    --text-color: #333;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--secondary-color);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-color);
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+header h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+.tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 20px;
+}
+.tab-link {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-size: 1.1em;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+.tab-link.active {
+    border-bottom-color: var(--primary-color);
+    font-weight: bold;
+    color: var(--primary-color);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+#survey-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px 20px;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.form-group input,
+.form-group select {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1em;
+}
+#save-button {
+    grid-column: 1 / -1;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+#save-button:hover { background-color: #004494; }
+#form-status {
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+}
+.filters, .export-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.filters input {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+.export-buttons button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+}
+.export-buttons #download-pdf { background-color: #dc3545; }
+.table-container { overflow-x: auto; }
+#details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+#details-table th, #details-table td {
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    text-align: left;
+}
+#details-table th {
+    background-color: var(--primary-color);
+    color: white;
+}
+#details-table tbody tr:nth-child(even) { background-color: var(--secondary-color); }
+@media (max-width: 768px) {
+    #survey-form { grid-template-columns: 1fr; }
+    .filters { flex-direction: column; }
+}
