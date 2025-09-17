@@ -123,3 +123,37 @@ header h1 {
     #survey-form { grid-template-columns: 1fr; }
     .filters { flex-direction: column; }
 }
+/* Paste this entire block at the end of your existing style.css file */
+
+/* --- NEW: Notification Bar Styles --- */
+.notification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px;
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: white;
+    z-index: 1000;
+    transform: translateY(-100%);
+    transition: transform 0.5s ease-in-out;
+}
+
+.notification.show {
+    transform: translateY(0);
+}
+
+/* Different colors for different notification types */
+.notification.success {
+    background-color: #28a745; /* Green */
+}
+
+.notification.error {
+    background-color: #dc3545; /* Red */
+}
+
+.notification.info {
+    background-color: #17a2b8; /* Blue */
+}
