@@ -519,6 +519,7 @@
                 <!-- 1. DIRECT PAY (Sanitized Link) -->
                 <!-- Note: Removed 'pn' parameter to bypass Name Mismatch Error -->
                 <!-- 1. DIRECT PAY (Fixed with Correct Name) -->
+<!-- 1. DIRECT PAY (Fixed URL Encoding) -->
 <a href="upi://pay?pa=9810017422@hdfc&pn=Anadi%20Industries%20Llp&cu=INR" 
    class="flex items-center justify-center gap-2 bg-brand text-white py-3 rounded-xl text-xs font-bold shadow-md shadow-green-900/10 active:scale-95 transition hover:bg-green-800">
     <i class="fa-solid fa-bolt"></i> Pay Now
@@ -547,10 +548,24 @@
         <p class="text-xs text-slate-400 mb-4">Anadi Industries Llp</p>
         
         <!-- API generated QR Code -->
-        <div class="bg-white p-2 rounded-xl border border-slate-100 shadow-inner inline-block mb-4">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=9810017422@hdfc&cu=INR" 
-                 alt="Payment QR" class="w-48 h-48 object-contain mix-blend-multiply">
-        </div>
+        <!-- QR Code (Fixed URL Encoding) -->
+<!-- QR Code with Loader & Fixed URL -->
+<div class="bg-white p-2 rounded-xl border border-slate-100 shadow-inner inline-block mb-4 relative min-w-[200px] min-h-[200px]">
+    
+    <!-- 1. Loader (Visible initially) -->
+    <div id="qr-loader" class="absolute inset-0 flex flex-col items-center justify-center bg-white z-10 rounded-xl">
+        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand mb-2"></i>
+        <span class="text-[10px] font-bold text-slate-400 animate-pulse">Generating QR...</span>
+    </div>
+
+    <!-- 2. Image (Hidden behind loader until loaded) -->
+    <!-- Note: Added onload event to hide loader automatically -->
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=9810017422@hdfc%26pn=Anadi%20Industries%20Llp%26cu=INR" 
+         alt="Payment QR" 
+         class="w-48 h-48 object-contain mix-blend-multiply relative z-20"
+         onload="document.getElementById('qr-loader').classList.add('hidden')"
+         onerror="document.getElementById('qr-loader').innerHTML='<span class=\'text-red-500 text-xs\'>Failed to load</span>'">
+</div>
         
         <p class="text-[10px] text-slate-500 mb-4 bg-slate-50 p-2 rounded-lg">
             Take a Screenshot & Select "Scan from Gallery" in Paytm/PhonePe
