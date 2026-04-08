@@ -540,6 +540,7 @@
 
         <!-- === VIEW: ORDERS (HISTORY) === -->
         <div id="view-orders" class="hidden animate-fade-in p-4 pb-32 pt-20">
+
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-bold text-slate-800">My Orders</h2>
                 <span class="text-xs bg-green-100 text-brand px-2 py-1 rounded font-bold" id="txn-count">0 Orders</span>
@@ -850,12 +851,34 @@
             return isNaN(num) ? 0 : num;
         };
 
-        // FIX: iOS-safe date parser — iOS fails on "YYYY-MM-DD HH:MM" format, needs ISO "T" separator
+        // FIX: Bulletproof multi-format date parser for iOS Safari
+        // iOS Safari only reliably parses ISO 8601 with T: "2026-03-08T07:30:00"
+        // Fails on: "2026-03-08 07:30:00", "08/03/2026", unix timestamps etc.
         const parseDate = (val) => {
             if (!val) return new Date(NaN);
-            // Replace space with "T" to make it ISO 8601 compliant for all browsers including Safari/iOS
-            const iso = String(val).replace(' ', 'T');
-            const d = new Date(iso);
+            const s = String(val).trim();
+
+            // 1. Unix timestamp (10 or 13 digits)
+            if (/^\d{10,13}$/.test(s)) {
+                const ms = s.length === 10 ? parseInt(s) * 1000 : parseInt(s);
+                return new Date(ms);
+            }
+
+            // 2. Most common Firebase format: "2026-03-08 07:30:00" or "2026-03-08 07:30"
+            // Replace space with T to make iOS-safe ISO 8601
+            const withT = s.replace(' ', 'T');
+            let d = new Date(withT);
+            if (!isNaN(d.getTime())) return d;
+
+            // 3. Indian format "DD/MM/YYYY" or "DD-MM-YYYY"
+            const dmyMatch = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+            if (dmyMatch) {
+                d = new Date(dmyMatch[3] + '-' + dmyMatch[2].padStart(2,'0') + '-' + dmyMatch[1].padStart(2,'0'));
+                if (!isNaN(d.getTime())) return d;
+            }
+
+            // 4. Last resort native parse (works Chrome/Android, may fail iOS)
+            d = new Date(s);
             return isNaN(d.getTime()) ? new Date(NaN) : d;
         };
 
@@ -1029,7 +1052,7 @@
             // Fix 5: Cleanup old listeners (Memory Leak)
             if (unsubscribe) { unsubscribe(); unsubscribe = null; }
 
-            const userRef = query(ref(db, `bills/${phone}`), limitToLast(100));
+            const userRef = query(ref(db, `bills/${phone}`), limitToLast(500));
 
             try {
                 unsubscribe = onValue(userRef, (snapshot) => {
@@ -1043,7 +1066,6 @@
                     btn.innerHTML = 'Get Started';
                     btn.disabled = false;
                 }, (error) => {
-                    // Fix 5: Unsubscribe on error
                     if (unsubscribe) unsubscribe();
                     console.error("Firebase Error:", error);
                     errorMsg.innerText = "Network unavailable. Try again.";
