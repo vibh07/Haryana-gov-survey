@@ -851,9 +851,9 @@
             return isNaN(num) ? 0 : num;
         };
 
-        // FIX: Bulletproof multi-format date parser for iOS Safari
-        // iOS Safari only reliably parses ISO 8601 with T: "2026-03-08T07:30:00"
-        // Fails on: "2026-03-08 07:30:00", "08/03/2026", unix timestamps etc.
+        // FIX: Bulletproof date parser — handles iOS UTC vs local time issue
+        // iOS parses "2026-02-19T18:30:00" as UTC → wrong date in IST (+5:30)
+        // Solution: manually extract date parts from string, never rely on JS Date parsing for display
         const parseDate = (val) => {
             if (!val) return new Date(NaN);
             const s = String(val).trim();
@@ -864,22 +864,26 @@
                 return new Date(ms);
             }
 
-            // 2. Most common Firebase format: "2026-03-08 07:30:00" or "2026-03-08 07:30"
-            // Replace space with T to make iOS-safe ISO 8601
-            const withT = s.replace(' ', 'T');
-            let d = new Date(withT);
-            if (!isNaN(d.getTime())) return d;
-
-            // 3. Indian format "DD/MM/YYYY" or "DD-MM-YYYY"
-            const dmyMatch = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
-            if (dmyMatch) {
-                d = new Date(dmyMatch[3] + '-' + dmyMatch[2].padStart(2,'0') + '-' + dmyMatch[1].padStart(2,'0'));
+            // 2. BEST: Extract YYYY-MM-DD directly from string (avoid timezone hell)
+            // Matches: "2026-03-08 07:30:00", "2026-03-08T07:30:00", "2026-03-08"
+            const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (isoMatch) {
+                // Use noon local time to avoid any date-boundary issues across timezones
+                const localStr = isoMatch[1] + '-' + isoMatch[2] + '-' + isoMatch[3] + 'T12:00:00';
+                const d = new Date(localStr);
                 if (!isNaN(d.getTime())) return d;
             }
 
-            // 4. Last resort native parse (works Chrome/Android, may fail iOS)
-            d = new Date(s);
-            return isNaN(d.getTime()) ? new Date(NaN) : d;
+            // 3. Indian format "DD/MM/YYYY"
+            const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+            if (dmyMatch) {
+                const localStr = dmyMatch[3] + '-' + dmyMatch[2].padStart(2,'0') + '-' + dmyMatch[1].padStart(2,'0') + 'T12:00:00';
+                const d = new Date(localStr);
+                if (!isNaN(d.getTime())) return d;
+            }
+
+            // 4. Last resort
+            return new Date(s);
         };
 
         const formatDate = (val) => {
