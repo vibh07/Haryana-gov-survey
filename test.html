@@ -477,19 +477,28 @@
         </div>
 
         <!-- === VIEW: ORDERS (HISTORY) === -->
+        <!-- === VIEW: ORDERS (HISTORY) === -->
         <div id="view-orders" class="hidden animate-fade-in p-4 pb-32 pt-20">
             <div class="flex items-center justify-between mb-6">
-                <!-- Added v2.0 text here -->
-                <h2 class="text-xl font-bold text-slate-800">My Orders <span class="text-[10px] text-slate-400 font-normal">v2.0</span></h2>
+                <h2 class="text-xl font-bold text-slate-800">My Orders <span class="text-[10px] text-slate-400 font-normal">v3.0</span></h2>
                 <span class="text-xs bg-green-100 text-brand px-2 py-1 rounded font-bold" id="txn-count">0 Orders</span>
             </div>
-            <div
-                class="bg-gradient-to-br from-brand to-green-900 text-white p-6 rounded-2xl shadow-lg mb-6 relative overflow-hidden">
+            
+            <!-- UPGRADED LIFETIME SPEND CARD -->
+            <div class="bg-[#114b32] text-white p-6 rounded-3xl shadow-xl mb-6 relative overflow-hidden">
                 <i class="fa-solid fa-wallet absolute -right-4 -bottom-4 text-8xl opacity-10"></i>
-                <p class="text-green-200 text-xs font-bold uppercase tracking-widest mb-1">Lifetime Spend</p>
-                <h1 class="text-4xl font-extrabold tracking-tight">₹ <span id="grand-total">0</span></h1>
-                <p class="text-sm mt-2 opacity-80" id="display-name">Guest User</p>
+                <p class="text-green-300 text-[10px] font-bold uppercase tracking-widest mb-1">Lifetime Spend</p>
+                <h1 class="text-4xl font-bold tracking-tight">₹<span id="grand-total">0</span></h1>
+                <p class="text-xs mt-1 text-green-100 uppercase tracking-wide font-normal" id="display-name">Guest User</p>
+                
+                <!-- NEW: Horizontal Scroll for Monthly Totals -->
+                <div class="mt-6 pt-5 border-t border-white/10 w-full overflow-x-auto hide-scrollbar -mx-6 px-6">
+                    <div id="monthly-totals-container" class="flex gap-3 w-max pb-2">
+                        <!-- JS handles this -->
+                    </div>
+                </div>
             </div>
+
             <div id="bill-list" class="space-y-3"></div>
             <div id="empty-state" class="hidden flex flex-col items-center justify-center py-10 text-center opacity-60">
                 <i class="fa-solid fa-basket-shopping text-6xl text-slate-300 mb-4"></i>
@@ -707,6 +716,7 @@
         // --- GLOBAL STATE ---
         let unsubscribe = null;
         let allBillsCache = [];
+        let allDaysCache = [];
         let currentLimit = 20;
         let currentProductTitle = "";
         let currentQty = 1;
@@ -719,7 +729,7 @@
         };
 
         const formatDate = (val) => {
-            if (!val) return { str: "?? ???", time: "", monthYear: "Unknown Date" };
+            if (!val) return { str: "?? ???", time: "", monthYear: "Unknown Date", shortMonthYear: "Unknown", timestamp: 0 };
 
             let date;
             let valStr = String(val).trim();
@@ -728,15 +738,14 @@
                 date = new Date(valStr.length === 10 ? Number(valStr) * 1000 : Number(valStr));
             } 
             else {
-                // IMPORTANT FIX: Database format is MM/DD/YYYY (Month First, Day Second)
                 const usFormat = valStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
                 const isoFormat = valStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
 
                 let day, month, year;
 
                 if (usFormat) {
-                    month = parseInt(usFormat[1], 10) - 1; // 1st Part is Month
-                    day = parseInt(usFormat[2], 10);       // 2nd Part is Day
+                    month = parseInt(usFormat[1], 10) - 1; 
+                    day = parseInt(usFormat[2], 10);       
                     year = parseInt(usFormat[3], 10);
                 } else if (isoFormat) {
                     year = parseInt(isoFormat[1], 10);
@@ -745,16 +754,7 @@
                 }
 
                 if (day !== undefined && month !== undefined && year !== undefined) {
-                    let hours = 0, minutes = 0;
-                    const timeMatch = valStr.match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
-                    if (timeMatch) {
-                        hours = parseInt(timeMatch[1], 10);
-                        minutes = parseInt(timeMatch[2], 10);
-                        const ampm = timeMatch[3] ? timeMatch[3].toLowerCase() : '';
-                        if (ampm === 'pm' && hours < 12) hours += 12;
-                        if (ampm === 'am' && hours === 12) hours = 0;
-                    }
-                    date = new Date(year, month, day, hours, minutes);
+                    date = new Date(year, month, day, 0, 0); 
                 } else {
                     date = new Date(valStr.replace(/-/g, '/'));
                 }
@@ -762,7 +762,6 @@
 
             if (!date || isNaN(date.getTime())) date = new Date(); 
 
-            // Hardcoded arrays so iOS/Android locale engines can't interfere
             const shortMonths = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
             const longMonths = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
             
@@ -770,17 +769,12 @@
             const mIndex = date.getMonth();
             const y = date.getFullYear();
 
-            let h = date.getHours();
-            let m = date.getMinutes();
-            let ampm = h >= 12 ? 'pm' : 'am';
-            h = h % 12;
-            h = h ? h : 12; 
-            m = m < 10 ? '0' + m : m;
-
             return { 
                 str: `${d} ${shortMonths[mIndex]}`, 
-                time: `${h}:${m} ${ampm}`, 
-                monthYear: `${longMonths[mIndex]} ${y}` 
+                time: "12:00 am", 
+                monthYear: `${longMonths[mIndex]} ${y}`,
+                shortMonthYear: `${shortMonths[mIndex]} ${y}`,
+                timestamp: date.getTime() // <-- NEW: Used for strict sorting
             };
         };
 
@@ -975,89 +969,154 @@
 
         // --- DATA LOGIC ---
         function processData(data) {
-            allBillsCache = Object.entries(data).reverse().filter(item => item[1] !== null);
-            let grandTotal = 0;
-            let userName = "Valued Customer";
-
-            allBillsCache.forEach(([id, bill]) => {
-                grandTotal += safeFloat(bill.amount);
-                if (bill.details && bill.details.consumerName) userName = bill.details.consumerName;
+            // 1. Get raw data
+            let rawBills = Object.entries(data).filter(item => item[1] !== null);
+            
+            // 2. Parse dates FIRST so we can sort them
+            rawBills = rawBills.map(([id, bill]) => {
+                const dateInfo = formatDate(bill.date);
+                return { id, bill, dateInfo };
             });
 
+            // 3. STRICT SORTING: Newest Dates First (Descending Order)
+            rawBills.sort((a, b) => b.dateInfo.timestamp - a.dateInfo.timestamp);
+
+            let grandTotal = 0;
+            let userName = "Valued Customer";
+            
+            let monthlyTotals = {}; 
+            let orderedMonths = [];
+            let groupedByDay = {}; 
+            let orderedDays = []; 
+
+            // 4. Loop through the perfectly sorted bills
+            rawBills.forEach(({id, bill, dateInfo}) => {
+                const amt = safeFloat(bill.amount);
+                grandTotal += amt;
+                if (bill.details && bill.details.consumerName) userName = bill.details.consumerName;
+
+                const { str, monthYear, shortMonthYear } = dateInfo;
+                
+                // Build Monthly Totals
+                if (!monthlyTotals[shortMonthYear]) {
+                    monthlyTotals[shortMonthYear] = 0;
+                    orderedMonths.push(shortMonthYear);
+                }
+                monthlyTotals[shortMonthYear] += amt;
+
+                // Combine Multiple Orders on the Same Day
+                const dayKey = `${str} ${monthYear}`; 
+                if (!groupedByDay[dayKey]) {
+                    groupedByDay[dayKey] = {
+                        dateStr: str,
+                        monthYear: monthYear,
+                        totalAmount: 0,
+                        items: []
+                    };
+                    orderedDays.push(dayKey);
+                }
+                
+                groupedByDay[dayKey].totalAmount += amt;
+                
+                // Merge Items together
+                if (bill.details && Array.isArray(bill.details.items)) {
+                    bill.details.items.forEach(newItem => {
+                        let existingItem = groupedByDay[dayKey].items.find(i => i.name === newItem.name && i.price === newItem.price);
+                        if (existingItem) {
+                            existingItem.qty = safeFloat(existingItem.qty) + safeFloat(newItem.qty);
+                        } else {
+                            groupedByDay[dayKey].items.push({...newItem});
+                        }
+                    });
+                } else if (bill.item) {
+                    groupedByDay[dayKey].items.push({ name: bill.item, qty: 1, price: amt });
+                }
+            });
+
+            // Save arrays to cache
+            allBillsCache = rawBills; 
+            allDaysCache = orderedDays.map(key => groupedByDay[key]);
+
+            // UPDATE UI
             document.getElementById('grand-total').innerText = grandTotal.toLocaleString();
             document.getElementById('display-name').innerText = userName;
-            document.getElementById('txn-count').innerText = `${allBillsCache.length} Orders`;
+            document.getElementById('txn-count').innerText = `${allBillsCache.length} Orders`; 
+
+            // Render Horizontal Monthly Totals UI
+            let monthlyHtml = "";
+            orderedMonths.forEach(mYear => {
+                monthlyHtml += `
+                    <div class="bg-[#1a5b3e] border border-green-700/50 rounded-2xl p-4 min-w-[110px] flex flex-col gap-2 shadow-inner snap-center">
+                        <span class="text-[10px] font-bold text-green-200 uppercase tracking-widest">${mYear}</span>
+                        <span class="text-xl font-bold text-white tracking-tight">₹${monthlyTotals[mYear].toLocaleString()}</span>
+                    </div>
+                `;
+            });
+            
+            const monthlyContainer = document.getElementById('monthly-totals-container');
+            monthlyContainer.innerHTML = monthlyHtml;
+            // Enable smooth snapping for the horizontal scroll
+            monthlyContainer.classList.add('snap-x', 'snap-mandatory');
 
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('bill-list').classList.remove('hidden');
+            
+            currentLimit = 20; 
             renderListChunk();
         }
 
         function renderListChunk() {
             const listContainer = document.getElementById('bill-list');
-            const visibleBills = allBillsCache.slice(0, currentLimit);
+            const visibleDays = allDaysCache.slice(0, currentLimit); // Load 20 DAYS at a time
 
             let html = "";
             let currentMonthTracker = "";
 
-            visibleBills.forEach(([id, bill], index) => {
-                const amount = safeFloat(bill.amount);
-                // Calculate correct order number based on total bills
-                const orderNum = (allBillsCache.length - index).toString().padStart(4, '0');
-
-                // Get our newly formatted date strings
-                const { str: dateStr, time: timeStr, monthYear } = formatDate(bill.date);
-
-                // --- MONTH SEPARATOR LOGIC ---
-                if (monthYear !== currentMonthTracker) {
+            visibleDays.forEach(dayObj => {
+                // HIGHLIGHTED MONTH SEPARATOR
+                if (dayObj.monthYear !== currentMonthTracker) {
                     html += `
-                        <div class="sticky top-[60px] z-30 bg-[#f8fafc]/95 backdrop-blur-sm py-2 mt-4 mb-3 -mx-2 px-2 flex items-center gap-3">
-                            <div class="h-px bg-slate-200 flex-1"></div>
-                            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
-                                ${monthYear}
+                        <div class="sticky top-[60px] z-30 bg-[#f8fafc]/95 backdrop-blur-md py-3 mt-8 mb-4 -mx-2 px-4 flex items-center justify-center shadow-[0_4px_10px_-3px_rgba(0,0,0,0.05)] border-y border-slate-200/80 transition-all">
+                            <span class="text-xs font-black text-brand uppercase tracking-widest flex items-center gap-2 bg-green-50 px-4 py-1.5 rounded-full border border-green-100 shadow-sm">
+                                <i class="fa-solid fa-calendar-days text-green-600"></i> ${dayObj.monthYear}
                             </span>
-                            <div class="h-px bg-slate-200 flex-1"></div>
                         </div>
                     `;
-                    currentMonthTracker = monthYear;
+                    currentMonthTracker = dayObj.monthYear;
                 }
 
-                // Render internal items of the bill
-                let itemsHtml = (bill.details && Array.isArray(bill.details.items))
-                    ? bill.details.items.map(item => `
-                        <div class="flex justify-between py-1.5 text-xs text-slate-600 border-b border-slate-100 border-dashed last:border-0">
-                            <span>${item.name || 'Item'} <span class="text-slate-400 font-medium ml-1">x${item.qty || 1}</span></span>
-                            <span class="font-bold text-slate-700">₹${safeFloat(item.qty) * safeFloat(item.price)}</span>
-                        </div>`).join('')
-                    : `<div class="text-xs text-slate-400 italic py-1">${bill.item || "Details not available"}</div>`;
+                const dayNum = dayObj.dateStr.split(' ')[0] || "??";
+                const monthText = dayObj.dateStr.split(' ')[1] || "???";
 
-                // Split the dateStr ("15 Oct") to style day and month separately
-                const dayNum = dateStr.split(' ')[0] || "??";
-                const monthText = dateStr.split(' ')[1] || "???";
+                // Map merged items inside the daily card
+                let itemsHtml = dayObj.items.map(item => `
+                    <div class="flex justify-between items-center py-2 text-xs text-slate-600 border-b border-slate-200/60 border-dashed last:border-0">
+                        <span>${item.name || 'Item'} <span class="text-brand font-bold ml-1 bg-green-50 px-1.5 py-0.5 rounded">x${item.qty || 1}</span></span>
+                        <span class="font-bold text-slate-700">₹${safeFloat(item.qty) * safeFloat(item.price)}</span>
+                    </div>`).join('');
 
-                // Build the Bill Card
+                // Render Combined Daily Card
                 html += `
                     <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-3 animate-fade-in mb-4 hover:shadow-md transition">
-                        <div class="flex justify-between items-start">
+                        <div class="flex justify-between items-center border-b border-slate-50 pb-3">
                             <div class="flex items-center gap-3">
-                                <!-- Modern Calendar Icon -->
                                 <div class="bg-green-50 text-brand w-11 h-11 rounded-xl flex flex-col items-center justify-center shadow-inner leading-none p-1 border border-green-100/50">
                                     <span class="text-[15px] font-black">${dayNum}</span>
                                     <span class="text-[9px] uppercase font-bold opacity-80 mt-0.5">${monthText}</span>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-bold text-slate-800 tracking-tight">Order #${orderNum}</div>
+                                    <div class="text-sm font-bold text-slate-800 tracking-tight">Daily Summary</div>
                                     <div class="text-[10px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
-                                        <i class="fa-regular fa-clock"></i> ${timeStr}
+                                        <i class="fa-solid fa-boxes-stacked"></i> ${dayObj.items.length} Item(s) Delivered
                                     </div>
                                 </div>
                             </div>
                             <div class="text-right flex flex-col items-end gap-1.5">
-                                <div class="font-black text-brand text-base">₹${amount}</div>
-                                <span class="text-[9px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide">Delivered</span>
+                                <div class="font-black text-brand text-lg tracking-tight">₹${dayObj.totalAmount}</div>
+                                <span class="text-[9px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded shadow-sm font-bold uppercase tracking-wide"><i class="fa-solid fa-check mr-0.5"></i> Delivered</span>
                             </div>
                         </div>
-                        <div class="bg-slate-50 rounded-xl p-2.5 mt-1 border border-slate-100/60">
+                        <div class="bg-slate-50/50 rounded-xl px-3 py-1 border border-slate-100/50">
                             ${itemsHtml}
                         </div>
                     </div>`;
@@ -1065,15 +1124,15 @@
 
             listContainer.innerHTML = html;
 
-            // --- LOAD MORE BUTTON LOGIC ---
+            // Pagination button
             const existingBtn = document.getElementById('load-more-btn');
             if (existingBtn) existingBtn.remove();
 
-            if (allBillsCache.length > currentLimit) {
+            if (allDaysCache.length > currentLimit) {
                 const btn = document.createElement('button');
                 btn.id = "load-more-btn";
                 btn.className = "w-full py-3.5 text-xs text-brand font-bold bg-green-50 rounded-xl mt-2 mb-6 hover:bg-green-100 transition border border-green-100 shadow-sm active:scale-95 flex items-center justify-center gap-2";
-                btn.innerHTML = `Load Previous Orders <span class="bg-white px-1.5 py-0.5 rounded text-[10px]">${allBillsCache.length - currentLimit} more</span>`;
+                btn.innerHTML = `Load Previous Days <span class="bg-white px-1.5 py-0.5 rounded text-[10px] border border-green-100">${allDaysCache.length - currentLimit} more</span>`;
                 btn.onclick = loadMoreItems;
                 listContainer.appendChild(btn);
             }
