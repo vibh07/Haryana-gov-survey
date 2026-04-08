@@ -902,7 +902,7 @@
         const fmtYear     = d => d.getFullYear();
         const fmtMonYear  = d => MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear();   // "Mar 2026"
         const fmtMonYearLong = d => MONTHS_LONG[d.getMonth()] + " " + d.getFullYear(); // "March 2026"
-        const fmtFullDate = d => DAYS_SHORT[d.getDay()] + ", " + fmtDay(d).toString().padStart(2,"0") + " " + fmtMonShort(d) + " " + fmtYear(d); // "Wed, 08 Apr 2026"
+        const fmtFullDate = d => fmtMonShort(d) + "-" + String(fmtDay(d)).padStart(2,"0") + "-" + fmtYear(d); // "Apr-08-2026"
 
         // ─── CATALOG DATA ────────────────────────────────────────────
         const products = [
