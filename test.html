@@ -479,7 +479,8 @@
         <!-- === VIEW: ORDERS (HISTORY) === -->
         <div id="view-orders" class="hidden animate-fade-in p-4 pb-32 pt-20">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-slate-800">My Orders</h2>
+                <!-- Added v2.0 text here -->
+                <h2 class="text-xl font-bold text-slate-800">My Orders <span class="text-[10px] text-slate-400 font-normal">v2.0</span></h2>
                 <span class="text-xs bg-green-100 text-brand px-2 py-1 rounded font-bold" id="txn-count">0 Orders</span>
             </div>
             <div
@@ -723,22 +724,19 @@
             let date;
             let valStr = String(val).trim();
 
-            // 1. If it's a UNIX Timestamp (e.g. 1712534400000)
             if (/^\d+$/.test(valStr) && valStr.length >= 10) {
                 date = new Date(valStr.length === 10 ? Number(valStr) * 1000 : Number(valStr));
             } 
             else {
-                // 2. Strict Regex extraction to BYPASS Safari/Chrome bugs
-                // Looks for DD/MM/YYYY or DD-MM-YYYY 
+                // Strict regex to force Day-Month-Year extraction
                 const indFormat = valStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-                // Looks for YYYY-MM-DD
                 const isoFormat = valStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
 
                 let day, month, year;
 
                 if (indFormat) {
                     day = parseInt(indFormat[1], 10);
-                    month = parseInt(indFormat[2], 10) - 1; // JS months are 0-11
+                    month = parseInt(indFormat[2], 10) - 1; // JS Months are 0-11
                     year = parseInt(indFormat[3], 10);
                 } else if (isoFormat) {
                     year = parseInt(isoFormat[1], 10);
@@ -746,10 +744,7 @@
                     day = parseInt(isoFormat[3], 10);
                 }
 
-                // If we successfully grabbed the exact Day, Month, Year
                 if (day !== undefined && month !== undefined && year !== undefined) {
-                    
-                    // Extract Time if it exists (e.g., 12:00 am)
                     let hours = 0, minutes = 0;
                     const timeMatch = valStr.match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
                     if (timeMatch) {
@@ -759,22 +754,15 @@
                         if (ampm === 'pm' && hours < 12) hours += 12;
                         if (ampm === 'am' && hours === 12) hours = 0;
                     }
-
-                    // Create the identical date across ALL devices
                     date = new Date(year, month, day, hours, minutes);
                 } else {
-                    // Final fallback for purely written strings (like "April 8, 2026")
-                    // Safari hates dashes, so replace them with slashes
                     date = new Date(valStr.replace(/-/g, '/'));
                 }
             }
 
-            // Failsafe so the UI doesn't crash if data is totally corrupted
-            if (!date || isNaN(date.getTime())) {
-                date = new Date(); 
-            }
+            if (!date || isNaN(date.getTime())) date = new Date(); 
 
-            // 3. HARDCODE Month Names to prevent Locale Translation differences
+            // Hardcoded arrays so iOS/Android locale engines can't interfere
             const shortMonths = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
             const longMonths = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
             
@@ -782,21 +770,18 @@
             const mIndex = date.getMonth();
             const y = date.getFullYear();
 
-            // Output Strings
-            const str = `${d} ${shortMonths[mIndex]}`;
-            
-            // Handle time formatting (e.g., "12:00 am")
             let h = date.getHours();
             let m = date.getMinutes();
             let ampm = h >= 12 ? 'pm' : 'am';
             h = h % 12;
-            h = h ? h : 12; // the hour '0' should be '12'
+            h = h ? h : 12; 
             m = m < 10 ? '0' + m : m;
-            const time = `${h}:${m} ${ampm}`;
 
-            const monthYear = `${longMonths[mIndex]} ${y}`;
-            
-            return { str, time, monthYear };
+            return { 
+                str: `${d} ${shortMonths[mIndex]}`, 
+                time: `${h}:${m} ${ampm}`, 
+                monthYear: `${longMonths[mIndex]} ${y}` 
+            };
         };
 
         // --- CATALOG DATA ---
