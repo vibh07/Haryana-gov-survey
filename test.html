@@ -721,69 +721,80 @@
             if (!val) return { str: "?? ???", time: "", monthYear: "Unknown Date" };
 
             let date;
+            let valStr = String(val).trim();
 
-            // 1. Check if it's a numeric timestamp
-            if (!isNaN(val) && val.toString().length > 10) {
-                date = new Date(Number(val));
+            // 1. If it's a UNIX Timestamp (e.g. 1712534400000)
+            if (/^\d+$/.test(valStr) && valStr.length >= 10) {
+                date = new Date(valStr.length === 10 ? Number(valStr) * 1000 : Number(valStr));
             } 
-            // 2. Safe String Parsing to fix iOS (Safari) MM/DD vs DD/MM bug
-            else if (typeof val === 'string') {
-                // Split date and time parts (handles spaces or 'T')
-                const partsStr = val.split(/[ T]/);
-                const datePart = partsStr[0]; 
-                const timeString = partsStr.slice(1).join(' '); // "12:00 am"
+            else {
+                // 2. Strict Regex extraction to BYPASS Safari/Chrome bugs
+                // Looks for DD/MM/YYYY or DD-MM-YYYY 
+                const indFormat = valStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                // Looks for YYYY-MM-DD
+                const isoFormat = valStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
 
-                const parts = datePart.split(/[-/]/);
+                let day, month, year;
 
-                if (parts.length === 3) {
-                    let year, month, day;
+                if (indFormat) {
+                    day = parseInt(indFormat[1], 10);
+                    month = parseInt(indFormat[2], 10) - 1; // JS months are 0-11
+                    year = parseInt(indFormat[3], 10);
+                } else if (isoFormat) {
+                    year = parseInt(isoFormat[1], 10);
+                    month = parseInt(isoFormat[2], 10) - 1;
+                    day = parseInt(isoFormat[3], 10);
+                }
 
-                    // If format is YYYY-MM-DD
-                    if (parts[0].length === 4) {
-                        year = parseInt(parts[0], 10);
-                        month = parseInt(parts[1], 10) - 1; // JS months are 0-11
-                        day = parseInt(parts[2], 10);
-                    } 
-                    // If format is DD-MM-YYYY or DD/MM/YYYY
-                    else {
-                        day = parseInt(parts[0], 10);
-                        month = parseInt(parts[1], 10) - 1;
-                        year = parseInt(parts[2], 10);
-                        if (year < 100) year += 2000; // Handle 2-digit years
-                    }
-
-                    // Parse Time if exists (Handles "12:00 am", "14:30", etc.)
+                // If we successfully grabbed the exact Day, Month, Year
+                if (day !== undefined && month !== undefined && year !== undefined) {
+                    
+                    // Extract Time if it exists (e.g., 12:00 am)
                     let hours = 0, minutes = 0;
-                    if (timeString) {
-                        const timeMatch = timeString.match(/(\d+):(\d+)\s*(am|pm)?/i);
-                        if (timeMatch) {
-                            hours = parseInt(timeMatch[1], 10);
-                            minutes = parseInt(timeMatch[2], 10);
-                            const modifier = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
-                            
-                            if (modifier === 'pm' && hours < 12) hours += 12;
-                            if (modifier === 'am' && hours === 12) hours = 0;
-                        }
+                    const timeMatch = valStr.match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+                    if (timeMatch) {
+                        hours = parseInt(timeMatch[1], 10);
+                        minutes = parseInt(timeMatch[2], 10);
+                        const ampm = timeMatch[3] ? timeMatch[3].toLowerCase() : '';
+                        if (ampm === 'pm' && hours < 12) hours += 12;
+                        if (ampm === 'am' && hours === 12) hours = 0;
                     }
 
-                    // Safely construct Date
+                    // Create the identical date across ALL devices
                     date = new Date(year, month, day, hours, minutes);
                 } else {
-                    date = new Date(val); // Fallback for pure English strings
+                    // Final fallback for purely written strings (like "April 8, 2026")
+                    // Safari hates dashes, so replace them with slashes
+                    date = new Date(valStr.replace(/-/g, '/'));
                 }
-            } else {
-                date = new Date(val);
             }
 
-            // Final safety check
+            // Failsafe so the UI doesn't crash if data is totally corrupted
             if (!date || isNaN(date.getTime())) {
-                return { str: "?? ???", time: "--:--", monthYear: "Unknown Date" };
+                date = new Date(); 
             }
 
-            // Forced 'en-US' locale ensures exact same spelling on Android and iOS devices
-            const str = `${date.getDate()} ${date.toLocaleString('en-US', { month: 'short' })}`;
-            const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }).toLowerCase();
-            const monthYear = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            // 3. HARDCODE Month Names to prevent Locale Translation differences
+            const shortMonths = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            const longMonths = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+            
+            const d = date.getDate();
+            const mIndex = date.getMonth();
+            const y = date.getFullYear();
+
+            // Output Strings
+            const str = `${d} ${shortMonths[mIndex]}`;
+            
+            // Handle time formatting (e.g., "12:00 am")
+            let h = date.getHours();
+            let m = date.getMinutes();
+            let ampm = h >= 12 ? 'pm' : 'am';
+            h = h % 12;
+            h = h ? h : 12; // the hour '0' should be '12'
+            m = m < 10 ? '0' + m : m;
+            const time = `${h}:${m} ${ampm}`;
+
+            const monthYear = `${longMonths[mIndex]} ${y}`;
             
             return { str, time, monthYear };
         };
