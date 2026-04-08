@@ -728,16 +728,16 @@
                 date = new Date(valStr.length === 10 ? Number(valStr) * 1000 : Number(valStr));
             } 
             else {
-                // Strict regex to force Day-Month-Year extraction
-                const indFormat = valStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                // IMPORTANT FIX: Database format is MM/DD/YYYY (Month First, Day Second)
+                const usFormat = valStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
                 const isoFormat = valStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
 
                 let day, month, year;
 
-                if (indFormat) {
-                    day = parseInt(indFormat[1], 10);
-                    month = parseInt(indFormat[2], 10) - 1; // JS Months are 0-11
-                    year = parseInt(indFormat[3], 10);
+                if (usFormat) {
+                    month = parseInt(usFormat[1], 10) - 1; // 1st Part is Month
+                    day = parseInt(usFormat[2], 10);       // 2nd Part is Day
+                    year = parseInt(usFormat[3], 10);
                 } else if (isoFormat) {
                     year = parseInt(isoFormat[1], 10);
                     month = parseInt(isoFormat[2], 10) - 1;
