@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>VEDA — Sacred Tarot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Cinzel:wght@400;500;600&family=Raleway:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Cinzel:wght@400;500;600&family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ─── RESET & VARIABLES ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,7 +17,7 @@
   --gold: #A87C3E;           
   --gold-light: #DFCDA1;     
   --gold-bg: #F8F4EC;        
-  --border: #E5DFD3;         
+  --border: #E6E2D8;         
 }
 
 html { scroll-behavior: smooth; }
@@ -40,10 +40,10 @@ body {
   mix-blend-mode: multiply; opacity: 0.4;
 }
 
-/* ─── MOBILE/CREATOR PROFILE CONTAINER ─── */
+/* ─── PROFILE CONTAINER ─── */
 .profile-container {
   position: relative; z-index: 2;
-  max-width: 480px; /* This makes it compact and small like Superprofile */
+  max-width: 480px; 
   margin: 0 auto;
   padding: 40px 20px 60px;
   min-height: 100vh;
@@ -52,7 +52,7 @@ body {
   gap: 32px;
 }
 
-/* ─── PROFILE HEADER ─── */
+/* ─── HEADER ─── */
 .header { text-align: center; }
 .avatar {
   width: 96px; height: 96px; margin: 0 auto 16px;
@@ -68,59 +68,97 @@ body {
   font-family: 'Playfair Display', serif; font-size: 16px;
   color: var(--text-muted); font-style: italic; margin-bottom: 16px;
 }
-.socials {
-  display: flex; justify-content: center; gap: 16px; margin-top: 16px;
-}
-.social-icon {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--bg-card); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gold); text-decoration: none; transition: 0.3s;
-}
-.social-icon:hover { background: var(--gold-bg); border-color: var(--gold-light); transform: translateY(-2px); }
-.social-icon svg { width: 20px; height: 20px; fill: currentColor; }
 
-/* ─── LINKS / OFFERINGS ─── */
-.links-section { display: flex; flex-direction: column; gap: 16px; }
+/* ─── STORE / PRODUCTS GRID (From Screenshot) ─── */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+/* If screen gets super small, stack them */
+@media (max-width: 360px) {
+  .products-grid { grid-template-columns: 1fr; }
+}
 
-.link-card {
+.product-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 16px; padding: 16px 20px;
-  display: flex; align-items: center; text-decoration: none;
-  color: var(--text-main); transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-  position: relative; overflow: hidden;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-.link-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(168,124,62,0.1); border-color: var(--gold-light); }
-
-.link-card.featured {
-  background: var(--gold-bg);
-  border: 1px solid var(--gold);
-}
-.featured-badge {
-  position: absolute; top: 0; right: 20px;
-  background: var(--gold); color: #FFF;
-  font-family: 'Cinzel', serif; font-size: 9px; font-weight: 600;
-  letter-spacing: 1px; text-transform: uppercase;
-  padding: 4px 12px; border-radius: 0 0 8px 8px;
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
 }
 
-.card-icon { font-size: 28px; margin-right: 16px; }
-.card-content { flex: 1; }
-.card-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; margin-bottom: 2px; }
-.card-subtitle { font-size: 13px; color: var(--text-muted); }
-.card-price {
-  font-family: 'Cinzel', serif; font-weight: 600;
-  color: var(--gold); font-size: 16px; text-align: right;
+.product-img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--border);
 }
+
+.product-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.product-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.product-link {
+  font-size: 12px;
+  color: #1A73E8; /* Blue link matching screenshot */
+  text-decoration: underline;
+  margin-bottom: 8px;
+}
+
+.product-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 16px;
+}
+
+.btn-cart {
+  margin-top: auto;
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid #DCDCDC;
+  border-radius: 4px;
+  padding: 8px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-cart:hover { background: #F8F9FA; }
+.btn-cart svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; }
 
 /* ─── BOOKING FORM ─── */
 .booking-section {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 32px 24px;
+  border-radius: 12px;
+  padding: 28px 20px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.03);
   margin-top: 16px;
 }
@@ -129,31 +167,30 @@ body {
   color: var(--gold); text-align: center; margin-bottom: 24px; letter-spacing: 2px;
 }
 
-.field { margin-bottom: 20px; }
-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.field { margin-bottom: 16px; }
+label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
 input, select, textarea {
-  width: 100%; padding: 14px 16px;
+  width: 100%; padding: 12px 14px;
   background: var(--bg-main); border: 1px solid var(--border);
-  border-radius: 12px; font-family: 'Raleway', sans-serif;
-  font-size: 15px; color: var(--text-main);
-  transition: all 0.3s;
-  appearance: none;
+  border-radius: 8px; font-family: 'Raleway', sans-serif;
+  font-size: 14px; color: var(--text-main);
+  transition: all 0.3s; appearance: none;
 }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); background: #FFF; }
-textarea { resize: vertical; min-height: 100px; }
+textarea { resize: vertical; min-height: 80px; }
 
 .btn-submit {
-  width: 100%; padding: 16px;
+  width: 100%; padding: 14px;
   background: var(--gold); color: #FFF;
-  border: none; border-radius: 12px;
-  font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600;
+  border: none; border-radius: 8px;
+  font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
   letter-spacing: 2px; text-transform: uppercase;
   cursor: pointer; transition: 0.3s; margin-top: 8px;
 }
 .btn-submit:hover { background: #8C6630; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(168,124,62,0.25); }
 
 /* ─── FOOTER ─── */
-.footer { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 20px; }
+.footer { text-align: center; font-size: 11px; color: var(--text-muted); padding-top: 20px; }
 </style>
 </head>
 <body>
@@ -168,70 +205,70 @@ textarea { resize: vertical; min-height: 100px; }
     <div class="avatar">🌙</div>
     <h1 class="name">VEDA</h1>
     <p class="bio">Seek the Truth. Let the Cards Guide You.</p>
-    
-    <div class="socials">
-      <!-- Instagram Icon -->
-      <a href="#" class="social-icon">
-        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-      </a>
-      <!-- WhatsApp Icon -->
-      <a href="#" class="social-icon">
-        <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.88-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.347-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.876 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-      </a>
-    </div>
   </header>
 
-  <!-- OFFERINGS LIST (Linktree style cards) -->
-  <section class="links-section">
+  <!-- PRODUCTS GRID (Like Screenshot) -->
+  <section class="products-grid">
     
-    <!-- Plan 1 -->
-    <a href="#book" class="link-card" onclick="selectPlan('quick')">
-      <div class="card-icon">🔮</div>
-      <div class="card-content">
-        <h3 class="card-title">Quick Clarity</h3>
-        <p class="card-subtitle">1 Question · WhatsApp Chat</p>
+    <!-- Product 1 -->
+    <div class="product-card">
+      <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=400&q=80" alt="Tarot Cards" class="product-img">
+      <div class="product-info">
+        <h3 class="product-title">tarot card reading session (30 min )</h3>
+        <a href="#book" class="product-link">View details</a>
+        <div class="product-price">₹ 3999</div>
+        <a href="#book" class="btn-cart" onclick="selectPlan('30min')">
+          <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          Add to cart
+        </a>
       </div>
-      <div class="card-price">₹50</div>
-    </a>
+    </div>
 
-    <!-- Plan 2 (Featured) -->
-    <a href="#book" class="link-card featured" onclick="selectPlan('full')">
-      <div class="featured-badge">Most Chosen</div>
-      <div class="card-icon">🌙</div>
-      <div class="card-content">
-        <h3 class="card-title">Deep Session</h3>
-        <p class="card-subtitle">30 Mins · Voice Call</p>
+    <!-- Product 2 -->
+    <div class="product-card">
+      <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=400&q=80" alt="Tarot Cards" class="product-img">
+      <div class="product-info">
+        <h3 class="product-title">Tarot card reading session(60 min)</h3>
+        <a href="#book" class="product-link">View details</a>
+        <div class="product-price">₹ 7777</div>
+        <a href="#book" class="btn-cart" onclick="selectPlan('60min')">
+          <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          Add to cart
+        </a>
       </div>
-      <div class="card-price">₹450</div>
-    </a>
+    </div>
 
-    <!-- Plan 3 -->
-    <a href="#book" class="link-card" onclick="selectPlan('premium')">
-      <div class="card-icon">⭐</div>
-      <div class="card-content">
-        <h3 class="card-title">Premium Video</h3>
-        <p class="card-subtitle">30 Mins · Live Video</p>
+    <!-- Product 3 -->
+    <div class="product-card">
+      <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=400&q=80" alt="Tarot Cards" class="product-img">
+      <div class="product-info">
+        <h3 class="product-title">Tarot card reading session (2 hour)</h3>
+        <a href="#book" class="product-link">View details</a>
+        <div class="product-price">₹ 13333</div>
+        <a href="#book" class="btn-cart" onclick="selectPlan('2hr')">
+          <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          Add to cart
+        </a>
       </div>
-      <div class="card-price">₹599</div>
-    </a>
+    </div>
 
   </section>
 
   <!-- BOOKING FORM -->
   <section id="book" class="booking-section">
-    <h2 class="booking-title">Book a Session</h2>
+    <h2 class="booking-title">Book Your Reading</h2>
     
     <div class="field">
-      <label>Select Reading</label>
+      <label>Selected Session</label>
       <select id="readingDropdown">
-        <option value="quick">Quick Clarity - ₹50</option>
-        <option value="full" selected>Deep Session (30 Min) - ₹450</option>
-        <option value="premium">Premium Video (30 Min) - ₹599</option>
+        <option value="30min">Reading Session (30 min) - ₹3999</option>
+        <option value="60min">Reading Session (60 min) - ₹7777</option>
+        <option value="2hr">Reading Session (2 hour) - ₹13333</option>
       </select>
     </div>
 
     <div class="field">
-      <label>Your Name</label>
+      <label>Full Name</label>
       <input type="text" placeholder="Enter your name" required>
     </div>
 
@@ -241,21 +278,21 @@ textarea { resize: vertical; min-height: 100px; }
     </div>
 
     <div class="field">
-      <label>Your Question</label>
-      <textarea placeholder="What would you like the cards to illuminate for you today?..." required></textarea>
+      <label>Intention / Focus</label>
+      <textarea placeholder="What would you like the cards to illuminate?..." required></textarea>
     </div>
 
-    <button class="btn-submit" onclick="submitForm()">Request Booking</button>
+    <button class="btn-submit" onclick="submitForm()">Confirm Booking</button>
   </section>
 
   <footer class="footer">
-    &copy; 2024 VEDA Tarot. All rights reserved.
+    &copy; 2024 VEDA Tarot. Sacred guidance.
   </footer>
 
 </main>
 
 <script>
-  // Simple background particles 
+  // Soft gold background particles
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
   let W, H, particles = [];
@@ -273,10 +310,9 @@ textarea { resize: vertical; min-height: 100px; }
     this.r = Math.random() * 1.5 + 0.5;
     this.speed = Math.random() * 0.2 + 0.05;
     this.angle = Math.random() * Math.PI * 2;
-    this.opacity = Math.random() * 0.5 + 0.1;
+    this.opacity = Math.random() * 0.4 + 0.1;
   }
-  // Less particles since screen is smaller/contained
-  for (let i = 0; i < 40; i++) particles.push(new Particle());
+  for (let i = 0; i < 35; i++) particles.push(new Particle());
 
   function drawCanvas() {
     ctx.clearRect(0, 0, W, H);
@@ -295,14 +331,14 @@ textarea { resize: vertical; min-height: 100px; }
   }
   drawCanvas();
 
-  // Function to auto-select dropdown when a card is clicked
+  // Update dropdown when "Add to cart" is clicked
   function selectPlan(planValue) {
     document.getElementById('readingDropdown').value = planValue;
   }
 
-  // Simple alert to act as form submission
+  // Simple form submission mock
   function submitForm() {
-    alert("Thank you! Your request has been received. I will message you on WhatsApp shortly to confirm your reading time and payment.");
+    alert("Thank you! Your request has been received. You will be contacted via WhatsApp shortly for payment and scheduling details.");
   }
 </script>
 </body>
