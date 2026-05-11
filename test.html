@@ -69,13 +69,12 @@ body {
   color: var(--text-muted); font-style: italic; margin-bottom: 16px;
 }
 
-/* ─── STORE / PRODUCTS GRID (From Screenshot) ─── */
+/* ─── PRODUCTS GRID ─── */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
-/* If screen gets super small, stack them */
 @media (max-width: 360px) {
   .products-grid { grid-template-columns: 1fr; }
 }
@@ -97,7 +96,7 @@ body {
 
 .product-img {
   width: 100%;
-  height: 110px;
+  height: 120px;
   object-fit: cover;
   border-bottom: 1px solid var(--border);
 }
@@ -111,7 +110,7 @@ body {
 
 .product-title {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-main);
   line-height: 1.3;
   margin-bottom: 4px;
@@ -119,9 +118,10 @@ body {
 
 .product-link {
   font-size: 12px;
-  color: #1A73E8; /* Blue link matching screenshot */
+  color: #1A73E8; 
   text-decoration: underline;
   margin-bottom: 8px;
+  cursor: pointer;
 }
 
 .product-price {
@@ -131,40 +131,64 @@ body {
   margin-bottom: 16px;
 }
 
-.btn-cart {
+.btn-book {
   margin-top: auto;
   width: 100%;
-  background: #FFFFFF;
-  border: 1px solid #DCDCDC;
+  background: var(--gold);
+  border: none;
   border-radius: 4px;
-  padding: 8px;
+  padding: 10px 8px;
   font-family: 'Raleway', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: #333;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #FFF;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  text-decoration: none;
   transition: background 0.2s;
 }
-.btn-cart:hover { background: #F8F9FA; }
-.btn-cart svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.btn-book:hover { background: #8C6630; }
+.btn-book svg { width: 14px; height: 14px; fill: currentColor; }
 
-/* ─── BOOKING FORM ─── */
-.booking-section {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 28px 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.03);
-  margin-top: 16px;
+/* ─── MODAL (POP-UP) ─── */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: all 0.3s ease;
 }
+.modal-overlay.active {
+  opacity: 1; visibility: visible;
+}
+.modal-content {
+  background: var(--bg-card);
+  width: 90%; max-width: 400px;
+  border-radius: 16px; padding: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  position: relative;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+.modal-overlay.active .modal-content {
+  transform: translateY(0);
+}
+.close-btn {
+  position: absolute; top: 12px; right: 16px;
+  background: none; border: none;
+  font-size: 28px; color: var(--text-muted);
+  cursor: pointer; line-height: 1;
+}
+.close-btn:hover { color: var(--text-main); }
+
 .booking-title {
   font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600;
-  color: var(--gold); text-align: center; margin-bottom: 24px; letter-spacing: 2px;
+  color: var(--gold); text-align: center; margin-bottom: 20px; letter-spacing: 1px;
 }
 
 .field { margin-bottom: 16px; }
@@ -189,8 +213,16 @@ textarea { resize: vertical; min-height: 80px; }
 }
 .btn-submit:hover { background: #8C6630; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(168,124,62,0.25); }
 
+/* Success Screen inside Modal */
+.success-screen {
+  text-align: center; padding: 20px 0 10px;
+}
+.success-icon { font-size: 50px; margin-bottom: 16px; }
+.success-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--gold); margin-bottom: 8px; }
+.success-text { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+
 /* ─── FOOTER ─── */
-.footer { text-align: center; font-size: 11px; color: var(--text-muted); padding-top: 20px; }
+.footer { text-align: center; font-size: 11px; color: var(--text-muted); padding-top: 20px; border-top: 1px solid var(--border); margin-top: 20px; }
 </style>
 </head>
 <body>
@@ -207,82 +239,51 @@ textarea { resize: vertical; min-height: 80px; }
     <p class="bio">Seek the Truth. Let the Cards Guide You.</p>
   </header>
 
-  <!-- PRODUCTS GRID (Like Screenshot) -->
+  <!-- PRODUCTS GRID -->
   <section class="products-grid">
     
     <!-- Product 1 -->
     <div class="product-card">
-      <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=400&q=80" alt="Tarot Cards" class="product-img">
+      <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=400&q=80" alt="Tarot Cards Reading" class="product-img">
       <div class="product-info">
-        <h3 class="product-title">tarot card reading session (30 min )</h3>
-        <a href="#book" class="product-link">View details</a>
+        <h3 class="product-title">Tarot card reading session (30 min)</h3>
+        <span class="product-link" onclick="openModal('30min')">View details</span>
         <div class="product-price">₹ 3999</div>
-        <a href="#book" class="btn-cart" onclick="selectPlan('30min')">
-          <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-          Add to cart
-        </a>
+        <button class="btn-book" onclick="openModal('30min')">
+          <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+          Book Session
+        </button>
       </div>
     </div>
 
     <!-- Product 2 -->
     <div class="product-card">
-      <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=400&q=80" alt="Tarot Cards" class="product-img">
+      <img src="https://images.unsplash.com/photo-1617331140180-e8262094733a?auto=format&fit=crop&w=400&q=80" alt="Tarot Session with Crystals" class="product-img">
       <div class="product-info">
-        <h3 class="product-title">Tarot card reading session(60 min)</h3>
-        <a href="#book" class="product-link">View details</a>
+        <h3 class="product-title">Tarot card reading session (60 min)</h3>
+        <span class="product-link" onclick="openModal('60min')">View details</span>
         <div class="product-price">₹ 7777</div>
-        <a href="#book" class="btn-cart" onclick="selectPlan('60min')">
-          <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-          Add to cart
-        </a>
+        <button class="btn-book" onclick="openModal('60min')">
+          <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+          Book Session
+        </button>
       </div>
     </div>
 
     <!-- Product 3 -->
     <div class="product-card">
-      <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=400&q=80" alt="Tarot Cards" class="product-img">
+      <img src="https://images.unsplash.com/photo-1544027993-37db244df7d7?auto=format&fit=crop&w=400&q=80" alt="Astrology and Tarot" class="product-img">
       <div class="product-info">
         <h3 class="product-title">Tarot card reading session (2 hour)</h3>
-        <a href="#book" class="product-link">View details</a>
+        <span class="product-link" onclick="openModal('2hr')">View details</span>
         <div class="product-price">₹ 13333</div>
-        <a href="#book" class="btn-cart" onclick="selectPlan('2hr')">
-          <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-          Add to cart
-        </a>
+        <button class="btn-book" onclick="openModal('2hr')">
+          <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+          Book Session
+        </button>
       </div>
     </div>
 
-  </section>
-
-  <!-- BOOKING FORM -->
-  <section id="book" class="booking-section">
-    <h2 class="booking-title">Book Your Reading</h2>
-    
-    <div class="field">
-      <label>Selected Session</label>
-      <select id="readingDropdown">
-        <option value="30min">Reading Session (30 min) - ₹3999</option>
-        <option value="60min">Reading Session (60 min) - ₹7777</option>
-        <option value="2hr">Reading Session (2 hour) - ₹13333</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>Full Name</label>
-      <input type="text" placeholder="Enter your name" required>
-    </div>
-
-    <div class="field">
-      <label>WhatsApp Number</label>
-      <input type="tel" placeholder="+91 00000 00000" required>
-    </div>
-
-    <div class="field">
-      <label>Intention / Focus</label>
-      <textarea placeholder="What would you like the cards to illuminate?..." required></textarea>
-    </div>
-
-    <button class="btn-submit" onclick="submitForm()">Confirm Booking</button>
   </section>
 
   <footer class="footer">
@@ -290,6 +291,47 @@ textarea { resize: vertical; min-height: 80px; }
   </footer>
 
 </main>
+
+<!-- BOOKING MODAL (POP-UP) -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">&times;</button>
+    
+    <!-- Dynamic Body (Swaps from Form to Success Message) -->
+    <div id="modalBody">
+      <h2 class="booking-title">Reserve Your Reading</h2>
+      
+      <form onsubmit="handleBooking(event)">
+        <div class="field">
+          <label>Selected Session</label>
+          <select id="readingDropdown" required>
+            <option value="30min">Reading Session (30 min) - ₹3999</option>
+            <option value="60min">Reading Session (60 min) - ₹7777</option>
+            <option value="2hr">Reading Session (2 hour) - ₹13333</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" placeholder="Enter your name" required>
+        </div>
+
+        <div class="field">
+          <label>WhatsApp Number</label>
+          <input type="tel" placeholder="+91 00000 00000" required>
+        </div>
+
+        <div class="field">
+          <label>Intention / Focus</label>
+          <textarea placeholder="What would you like the cards to illuminate?..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Confirm Booking</button>
+      </form>
+    </div>
+
+  </div>
+</div>
 
 <script>
   // Soft gold background particles
@@ -331,14 +373,48 @@ textarea { resize: vertical; min-height: 80px; }
   }
   drawCanvas();
 
-  // Update dropdown when "Add to cart" is clicked
-  function selectPlan(planValue) {
+  // --- MODAL LOGIC ---
+  const modal = document.getElementById('bookingModal');
+  const modalBody = document.getElementById('modalBody');
+  
+  // Store the original form HTML so we can reset it later
+  const originalFormHTML = modalBody.innerHTML;
+
+  function openModal(planValue) {
+    // Reset modal content back to the form in case it was showing "Success"
+    modalBody.innerHTML = originalFormHTML;
+    
+    // Set the dropdown to match the clicked button
     document.getElementById('readingDropdown').value = planValue;
+    
+    // Show modal
+    modal.classList.add('active');
   }
 
-  // Simple form submission mock
-  function submitForm() {
-    alert("Thank you! Your request has been received. You will be contacted via WhatsApp shortly for payment and scheduling details.");
+  function closeModal() {
+    modal.classList.remove('active');
+  }
+
+  // Close modal when clicking outside the white box
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Handle Form Submission
+  function handleBooking(event) {
+    event.preventDefault(); // Stop page refresh
+    
+    // Replace form with Success Message
+    modalBody.innerHTML = `
+      <div class="success-screen">
+        <div class="success-icon">✨</div>
+        <h2 class="success-title">Session Booked!</h2>
+        <p class="success-text">Thank you for trusting VEDA.<br>Your request has been securely received. I will message you on WhatsApp shortly to confirm your reading time and payment details.</p>
+        <button class="btn-submit" onclick="closeModal()">Done</button>
+      </div>
+    `;
   }
 </script>
 </body>
