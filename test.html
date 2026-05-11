@@ -229,7 +229,7 @@ textarea { resize: vertical; min-height: 80px; }
         <div class="product-price-row">
           <div class="price-line"><strong>₹ 50</strong></div>
         </div>
-        <button class="btn-book" onclick="openBooking('opt1')">
+        <button class="btn-book" onclick="openBooking('group1')">
           <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
           Book Session
         </button>
@@ -252,7 +252,10 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="price-line">30 Min: <strong>₹ 450</strong></div>
           <div class="price-line">1 Hour: <strong>₹ 800</strong></div>
         </div>
-        <button class="btn-book" onclick="openBooking('opt2')">Book Session</button>
+        <button class="btn-book" onclick="openBooking('group2')">
+          <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+          Book Session
+        </button>
       </div>
     </div>
 
@@ -273,7 +276,10 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="price-line">30 Min: <strong>₹ 599</strong></div>
           <div class="price-line">1 Hour: <strong>₹ 1100</strong></div>
         </div>
-        <button class="btn-book" onclick="openBooking('opt4')">Book Session</button>
+        <button class="btn-book" onclick="openBooking('group3')">
+          <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
+          Book Session
+        </button>
       </div>
     </div>
 
@@ -330,7 +336,8 @@ textarea { resize: vertical; min-height: 80px; }
       img: "https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=600&q=80",
       pricingHtml: `<div class="detail-price-row"><span>1 Question</span><span>₹ 50</span></div>`,
       desc: `<strong>Modes:</strong> WhatsApp Chat or Voice Note.<br><br>
-             Perfect when you have one specific, burning question. I will pull the cards and provide a clear, honest answer directly to your WhatsApp.`
+             Perfect when you have one specific, burning question. I will pull the cards and provide a clear, honest answer directly to your WhatsApp.`,
+      groupId: 'group1'
     },
     'plan2': { 
       title: "Standard Full Session", 
@@ -344,7 +351,8 @@ textarea { resize: vertical; min-height: 80px; }
              <ul>
                <li>Ask unlimited questions within the time limit.</li>
                <li>Detailed focus on Love, Career, or Personal Growth.</li>
-             </ul>`
+             </ul>`,
+      groupId: 'group2'
     },
     'plan3': { 
       title: "Premium Live Session", 
@@ -358,8 +366,24 @@ textarea { resize: vertical; min-height: 80px; }
              <ul>
                <li>Highly interactive and personalized.</li>
                <li>Unlimited questions within the timeframe.</li>
-             </ul>`
+             </ul>`,
+      groupId: 'group3'
     }
+  };
+
+  // --- DATA FOR BOOKING DROPDOWN ---
+  const bookingOptionsData = {
+    'group1': [
+      { val: "g1_single", text: "Single Question (Chat/Voice Note) - ₹50" }
+    ],
+    'group2': [
+      { val: "g2_30", text: "30 Min Full Session (Voice/Chat) - ₹450" },
+      { val: "g2_60", text: "1 Hour Full Session (Voice/Chat) - ₹800" }
+    ],
+    'group3': [
+      { val: "g3_30", text: "30 Min Premium Session (Video/Voice/Chat) - ₹599" },
+      { val: "g3_60", text: "1 Hour Premium Session (Video/Voice/Chat) - ₹1100" }
+    ]
   };
 
   // --- MODAL LOGIC ---
@@ -381,33 +405,25 @@ textarea { resize: vertical; min-height: 80px; }
         ${p.pricingHtml}
       </div>
       <div class="details-desc">${p.desc}</div>
-      <button class="btn-submit" onclick="closeModal()">Close</button>
+      <button class="btn-submit" onclick="openBooking('${p.groupId}')">Book This Session</button>
     `;
     openModal();
   }
 
-  // 2. Show Booking Form
-  function openBooking(selectedOptionVal) {
-    // Dropdown options mapped explicitly
-    const options = [
-      { val: "opt1", text: "Single Question (Chat/Voice Note) - ₹50" },
-      { val: "opt2", text: "Standard Session - 30 Min (Voice/Chat) - ₹450" },
-      { val: "opt3", text: "Standard Session - 1 Hour (Voice/Chat) - ₹800" },
-      { val: "opt4", text: "Premium Session - 30 Min (Video/Voice/Chat) - ₹599" },
-      { val: "opt5", text: "Premium Session - 1 Hour (Video/Voice/Chat) - ₹1100" }
-    ];
-
+  // 2. Show Booking Form (Only shows options for the selected group)
+  function openBooking(groupId) {
+    const optionsArray = bookingOptionsData[groupId];
     let optionsHtml = '';
-    options.forEach(opt => {
-      const isSelected = opt.val === selectedOptionVal ? 'selected' : '';
-      optionsHtml += `<option value="${opt.val}" ${isSelected}>${opt.text}</option>`;
+    
+    optionsArray.forEach(opt => {
+      optionsHtml += `<option value="${opt.val}">${opt.text}</option>`;
     });
 
     modalBody.innerHTML = `
       <h2 class="modal-title">Book Your Session</h2>
       <form onsubmit="handleBooking(event)">
         <div class="field">
-          <label>Select Your Plan</label>
+          <label>Selected Plan</label>
           <select id="readingDropdown" required>
             ${optionsHtml}
           </select>
