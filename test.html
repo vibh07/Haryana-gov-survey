@@ -60,13 +60,13 @@ body {
   color: var(--gold); letter-spacing: 4px; margin-bottom: 6px;
 }
 .bio {
-  font-family: 'Playfair Display', serif; font-size: 16px;
+  font-family: 'Playfair Display', serif; font-size: 15px;
   color: var(--text-muted); font-style: italic;
 }
 
 /* ─── PROFESSIONAL PRODUCTS LIST (3 CARDS) ─── */
 .products-list {
-  display: flex; flex-direction: column; gap: 20px;
+  display: flex; flex-direction: column; gap: 24px;
 }
 
 .product-card {
@@ -95,10 +95,10 @@ body {
   display: flex; justify-content: space-between; align-items: flex-start;
 }
 .product-title {
-  font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--text-main);
+  font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--text-main); line-height: 1.2;
 }
 .product-link {
-  font-size: 12px; color: var(--gold); text-decoration: underline; cursor: pointer; font-weight: 600; white-space: nowrap; margin-left: 10px;
+  font-size: 12px; color: var(--gold); text-decoration: underline; cursor: pointer; font-weight: 600; white-space: nowrap; margin-left: 10px; padding-top: 2px;
 }
 
 .product-modes {
@@ -110,18 +110,25 @@ body {
   color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
 }
 
+/* Super simple bullet points for the cards */
+.card-bullets {
+  margin: 6px 0 8px 20px; font-size: 13px; color: var(--text-muted); line-height: 1.5;
+}
+.card-bullets li { margin-bottom: 4px; }
+
 .product-price-row {
-  display: flex; flex-direction: column; gap: 2px; margin-top: 4px; margin-bottom: 8px;
+  display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;
+  background: var(--gold-bg); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--gold-light);
 }
 .price-line {
-  font-size: 14px; font-weight: 500; color: var(--text-main);
+  font-size: 14px; font-weight: 600; color: var(--text-main); display: flex; justify-content: space-between;
 }
-.price-line strong { font-size: 16px; font-weight: 700; color: var(--text-main); }
+.price-line strong { font-size: 16px; font-weight: 700; color: var(--gold); }
 
 .btn-book {
   width: 100%; background: var(--gold); border: none; border-radius: 8px;
-  padding: 12px; font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 1px; color: #FFF;
+  padding: 14px; font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px; color: #FFF;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   cursor: pointer; transition: background 0.2s;
 }
@@ -151,24 +158,9 @@ body {
 
 /* Modal Specific Styles */
 .modal-title {
-  font-family: 'Cinzel', serif; font-size: 20px; font-weight: 600;
+  font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600;
   color: var(--gold); text-align: center; margin-bottom: 24px; letter-spacing: 1px;
 }
-
-/* Details Modal View */
-.details-img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 16px; }
-.details-pricing-box {
-  background: var(--gold-bg); border: 1px solid var(--gold-light);
-  border-radius: 8px; padding: 16px; margin-bottom: 16px;
-}
-.detail-price-row {
-  display: flex; justify-content: space-between; font-size: 14px; font-weight: 600;
-  padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--gold-light);
-}
-.detail-price-row:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-.details-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
-.details-desc ul { margin-left: 20px; margin-top: 8px; }
-.details-desc li { margin-bottom: 4px; }
 
 /* Booking Form View */
 .field { margin-bottom: 16px; }
@@ -219,15 +211,21 @@ textarea { resize: vertical; min-height: 80px; }
       <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=600&q=80" alt="Tarot Card Single Question" class="product-img">
       <div class="product-info">
         <div class="product-header">
-          <h3 class="product-title">Single Question Clarity</h3>
-          <span class="product-link" onclick="openDetails('plan1')">Details</span>
+          <h3 class="product-title">Tarot reading single question</h3>
+          <span class="product-link" onclick="openDetails('plan1')">View Details</span>
         </div>
         <div class="product-modes">
           <span class="mode-tag">💬 Chat</span>
           <span class="mode-tag">🎙️ Voice Note</span>
         </div>
+        
+        <ul class="card-bullets">
+          <li>1 specific question answered clearly</li>
+          <li>Delivered directly to WhatsApp</li>
+        </ul>
+
         <div class="product-price-row">
-          <div class="price-line"><strong>₹ 50</strong></div>
+          <div class="price-line"><span>Single Question</span> <strong>₹ 50</strong></div>
         </div>
         <button class="btn-book" onclick="openBooking('group1')">
           <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
@@ -241,16 +239,22 @@ textarea { resize: vertical; min-height: 80px; }
       <img src="https://images.unsplash.com/photo-1617331140180-e8262094733a?auto=format&fit=crop&w=600&q=80" alt="Standard Full Session" class="product-img">
       <div class="product-info">
         <div class="product-header">
-          <h3 class="product-title">Standard Full Session</h3>
-          <span class="product-link" onclick="openDetails('plan2')">Details</span>
+          <h3 class="product-title">Tarot reading session</h3>
+          <span class="product-link" onclick="openDetails('plan2')">View Details</span>
         </div>
         <div class="product-modes">
           <span class="mode-tag">📞 Voice Call</span>
           <span class="mode-tag">💬 Chat</span>
+          <span class="mode-tag">🎙️ Voice Note</span>
         </div>
+        
+        <ul class="card-bullets">
+          <li>Detailed general reading</li>
+          <li>Choose your preferred mode of contact</li>
+        </ul>
+
         <div class="product-price-row">
-          <div class="price-line">30 Min: <strong>₹ 450</strong></div>
-          <div class="price-line">1 Hour: <strong>₹ 800</strong></div>
+          <div class="price-line"><span>Full Session</span> <strong>₹ 399</strong></div>
         </div>
         <button class="btn-book" onclick="openBooking('group2')">
           <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
@@ -264,17 +268,24 @@ textarea { resize: vertical; min-height: 80px; }
       <img src="https://images.unsplash.com/photo-1544027993-37db244df7d7?auto=format&fit=crop&w=600&q=80" alt="Premium Full Session" class="product-img">
       <div class="product-info">
         <div class="product-header">
-          <h3 class="product-title">Premium Live Session</h3>
-          <span class="product-link" onclick="openDetails('plan3')">Details</span>
+          <h3 class="product-title">Tarot reading 1:1 session</h3>
+          <span class="product-link" onclick="openDetails('plan3')">View Details</span>
         </div>
         <div class="product-modes">
           <span class="mode-tag">📹 Video Call</span>
           <span class="mode-tag">📞 Voice Call</span>
           <span class="mode-tag">💬 Chat</span>
         </div>
+        
+        <ul class="card-bullets">
+          <li>Live 1 on 1 interaction</li>
+          <li>Ask unlimited questions in your time</li>
+          <li>Deep dive into Love, Career, or Life</li>
+        </ul>
+
         <div class="product-price-row">
-          <div class="price-line">30 Min: <strong>₹ 599</strong></div>
-          <div class="price-line">1 Hour: <strong>₹ 1100</strong></div>
+          <div class="price-line"><span>30 Mins</span> <strong>₹ 599</strong></div>
+          <div class="price-line"><span>60 Mins</span> <strong>₹ 900</strong></div>
         </div>
         <button class="btn-book" onclick="openBooking('group3')">
           <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
@@ -332,41 +343,45 @@ textarea { resize: vertical; min-height: 80px; }
   // --- DATA FOR DETAILS MODAL ---
   const planDetails = {
     'plan1': { 
-      title: "Single Question Clarity", 
-      img: "https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=600&q=80",
-      pricingHtml: `<div class="detail-price-row"><span>1 Question</span><span>₹ 50</span></div>`,
-      desc: `<strong>Modes:</strong> WhatsApp Chat or Voice Note.<br><br>
-             Perfect when you have one specific, burning question. I will pull the cards and provide a clear, honest answer directly to your WhatsApp.`,
+      title: "Tarot reading single question", 
+      pricingHtml: `<div class="price-line"><span>1 Question</span> <strong>₹ 50</strong></div>`,
+      desc: `
+        <ul class="card-bullets" style="margin-left:0;">
+          <li><strong>Modes:</strong> Chat or Voice Note</li>
+          <li>One clear, specific question answered</li>
+          <li>Direct and honest guidance</li>
+          <li>Delivered straight to your WhatsApp</li>
+        </ul>
+      `,
       groupId: 'group1'
     },
     'plan2': { 
-      title: "Standard Full Session", 
-      img: "https://images.unsplash.com/photo-1617331140180-e8262094733a?auto=format&fit=crop&w=600&q=80",
-      pricingHtml: `
-        <div class="detail-price-row"><span>30 Minutes</span><span>₹ 450</span></div>
-        <div class="detail-price-row"><span>1 Hour</span><span>₹ 800</span></div>
+      title: "Tarot reading session", 
+      pricingHtml: `<div class="price-line"><span>Full Session</span> <strong>₹ 399</strong></div>`,
+      desc: `
+        <ul class="card-bullets" style="margin-left:0;">
+          <li><strong>Modes:</strong> Voice Call, Chat, or Voice Note</li>
+          <li>Detailed reading on your current life situation</li>
+          <li>Guidance on a specific focus area</li>
+          <li>Interactive and easy to understand</li>
+        </ul>
       `,
-      desc: `<strong>Modes:</strong> Voice Call or WhatsApp Chat.<br><br>
-             A dedicated session to deep dive into your life. 
-             <ul>
-               <li>Ask unlimited questions within the time limit.</li>
-               <li>Detailed focus on Love, Career, or Personal Growth.</li>
-             </ul>`,
       groupId: 'group2'
     },
     'plan3': { 
-      title: "Premium Live Session", 
-      img: "https://images.unsplash.com/photo-1544027993-37db244df7d7?auto=format&fit=crop&w=600&q=80",
+      title: "Tarot reading 1:1 session", 
       pricingHtml: `
-        <div class="detail-price-row"><span>30 Minutes</span><span>₹ 599</span></div>
-        <div class="detail-price-row"><span>1 Hour</span><span>₹ 1100</span></div>
+        <div class="price-line" style="margin-bottom:8px;"><span>30 Mins</span> <strong>₹ 599</strong></div>
+        <div class="price-line"><span>60 Mins</span> <strong>₹ 900</strong></div>
       `,
-      desc: `<strong>Modes:</strong> Video Call, Voice Call, or Chat.<br><br>
-             The ultimate spiritual experience. Watch the cards being shuffled and pulled live on video.
-             <ul>
-               <li>Highly interactive and personalized.</li>
-               <li>Unlimited questions within the timeframe.</li>
-             </ul>`,
+      desc: `
+        <ul class="card-bullets" style="margin-left:0;">
+          <li><strong>Modes:</strong> Video Call, Voice Call, or Chat</li>
+          <li>Live 1 on 1 interaction</li>
+          <li>Ask unlimited questions within your booked time</li>
+          <li>Deep dive into Love, Career, or Personal blocks</li>
+        </ul>
+      `,
       groupId: 'group3'
     }
   };
@@ -374,15 +389,14 @@ textarea { resize: vertical; min-height: 80px; }
   // --- DATA FOR BOOKING DROPDOWN ---
   const bookingOptionsData = {
     'group1': [
-      { val: "g1_single", text: "Single Question (Chat/Voice Note) - ₹50" }
+      { val: "g1_single", text: "Single Question (Chat/Voice Note) - ₹ 50" }
     ],
     'group2': [
-      { val: "g2_30", text: "30 Min Full Session (Voice/Chat) - ₹450" },
-      { val: "g2_60", text: "1 Hour Full Session (Voice/Chat) - ₹800" }
+      { val: "g2_session", text: "Tarot reading session (Voice/Chat) - ₹ 399" }
     ],
     'group3': [
-      { val: "g3_30", text: "30 Min Premium Session (Video/Voice/Chat) - ₹599" },
-      { val: "g3_60", text: "1 Hour Premium Session (Video/Voice/Chat) - ₹1100" }
+      { val: "g3_30", text: "1:1 Session - 30 mins (Video/Voice/Chat) - ₹ 599" },
+      { val: "g3_60", text: "1:1 Session - 60 mins (Video/Voice/Chat) - ₹ 900" }
     ]
   };
 
@@ -395,26 +409,26 @@ textarea { resize: vertical; min-height: 80px; }
 
   modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
 
-  // 1. Show Details
+  // 1. Show Details View
   function openDetails(planId) {
     const p = planDetails[planId];
     modalBody.innerHTML = `
       <h2 class="modal-title">${p.title}</h2>
-      <img src="${p.img}" class="details-img" alt="Tarot">
-      <div class="details-pricing-box">
+      <div class="product-price-row" style="margin-bottom: 20px;">
         ${p.pricingHtml}
       </div>
-      <div class="details-desc">${p.desc}</div>
+      <div style="margin-bottom: 24px;">${p.desc}</div>
       <button class="btn-submit" onclick="openBooking('${p.groupId}')">Book This Session</button>
     `;
     openModal();
   }
 
-  // 2. Show Booking Form (Only shows options for the selected group)
+  // 2. Show Booking Form (Only shows exact options for selected group)
   function openBooking(groupId) {
     const optionsArray = bookingOptionsData[groupId];
     let optionsHtml = '';
     
+    // If only 1 option exists, we can still use a select, or it just auto-selects.
     optionsArray.forEach(opt => {
       optionsHtml += `<option value="${opt.val}">${opt.text}</option>`;
     });
@@ -424,7 +438,7 @@ textarea { resize: vertical; min-height: 80px; }
       <form onsubmit="handleBooking(event)">
         <div class="field">
           <label>Selected Plan</label>
-          <select id="readingDropdown" required>
+          <select id="readingDropdown" required style="background-color: var(--gold-bg); border-color: var(--gold-light); font-weight:600;">
             ${optionsHtml}
           </select>
         </div>
