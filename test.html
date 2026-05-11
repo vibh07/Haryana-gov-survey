@@ -31,25 +31,20 @@ body {
 
 /* ─── BACKGROUND TEXTURES ─── */
 #bg-canvas {
-  position: fixed; inset: 0; z-index: 0;
-  pointer-events: none; opacity: 0.6;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.6;
 }
 .grain {
   position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-  mix-blend-mode: multiply; opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply; opacity: 0.5;
 }
 
 /* ─── PROFILE CONTAINER ─── */
 .profile-container {
   position: relative; z-index: 2;
-  max-width: 480px; 
-  margin: 0 auto;
-  padding: 40px 20px 60px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+  max-width: 480px; margin: 0 auto;
+  padding: 40px 20px 60px; min-height: 100vh;
+  display: flex; flex-direction: column; gap: 32px;
 }
 
 /* ─── HEADER ─── */
@@ -66,113 +61,120 @@ body {
 }
 .bio {
   font-family: 'Playfair Display', serif; font-size: 16px;
-  color: var(--text-muted); font-style: italic; margin-bottom: 16px;
+  color: var(--text-muted); font-style: italic;
 }
 
-/* ─── PRODUCTS GRID ─── */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-/* Make the first product span full width to look nice with 5 items */
-.products-grid .product-card:first-child {
-  grid-column: span 2;
-  flex-direction: row;
-}
-.products-grid .product-card:first-child .product-img {
-  width: 140px; height: auto; border-bottom: none; border-right: 1px solid var(--border);
-}
-
-@media (max-width: 380px) {
-  .products-grid { grid-template-columns: 1fr; }
-  .products-grid .product-card:first-child { flex-direction: column; grid-column: span 1; }
-  .products-grid .product-card:first-child .product-img { width: 100%; height: 120px; border-right: none; border-bottom: 1px solid var(--border); }
+/* ─── PROFESSIONAL PRODUCTS LIST (3 CARDS) ─── */
+.products-list {
+  display: flex; flex-direction: column; gap: 20px;
 }
 
 .product-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
+  border-radius: 12px;
+  display: flex; flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   transition: transform 0.2s, box-shadow 0.2s;
 }
-.product-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
+.product-card:hover {
+  transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color: var(--gold-light);
+}
 
 .product-img {
-  width: 100%; height: 120px; object-fit: cover;
+  width: 100%; height: 140px; object-fit: cover;
   border-bottom: 1px solid var(--border);
 }
 
 .product-info {
-  padding: 12px; display: flex; flex-direction: column; flex-grow: 1;
+  padding: 16px; display: flex; flex-direction: column; gap: 10px;
 }
 
+.product-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
 .product-title {
-  font-size: 13px; font-weight: 600; color: var(--text-main);
-  line-height: 1.3; margin-bottom: 4px;
+  font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--text-main);
 }
-.product-mode { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-
 .product-link {
-  font-size: 12px; color: #1A73E8; text-decoration: underline;
-  margin-bottom: 12px; cursor: pointer; display: inline-block;
+  font-size: 12px; color: var(--gold); text-decoration: underline; cursor: pointer; font-weight: 600; white-space: nowrap; margin-left: 10px;
 }
 
-.product-price { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 16px; }
+.product-modes {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.mode-tag {
+  background: var(--bg-main); border: 1px solid var(--border);
+  padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.product-price-row {
+  display: flex; flex-direction: column; gap: 2px; margin-top: 4px; margin-bottom: 8px;
+}
+.price-line {
+  font-size: 14px; font-weight: 500; color: var(--text-main);
+}
+.price-line strong { font-size: 16px; font-weight: 700; color: var(--text-main); }
 
 .btn-book {
-  margin-top: auto; width: 100%; background: var(--gold);
-  border: none; border-radius: 4px; padding: 10px 8px;
-  font-family: 'Raleway', sans-serif; font-size: 12px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.5px; color: #FFF;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; background: var(--gold); border: none; border-radius: 8px;
+  padding: 12px; font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px; color: #FFF;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
   cursor: pointer; transition: background 0.2s;
 }
 .btn-book:hover { background: #8C6630; }
-.btn-book svg { width: 14px; height: 14px; fill: currentColor; }
+.btn-book svg { width: 16px; height: 16px; fill: currentColor; }
 
 /* ─── MODALS (POP-UPS) ─── */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
   z-index: 1000; display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden; transition: all 0.3s ease; padding: 20px;
 }
 .modal-overlay.active { opacity: 1; visibility: visible; }
 .modal-content {
-  background: var(--bg-card); width: 100%; max-width: 400px;
-  border-radius: 16px; padding: 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  background: var(--bg-card); width: 100%; max-width: 420px;
+  border-radius: 16px; padding: 28px 24px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
   position: relative; transform: translateY(20px); transition: all 0.3s ease;
   max-height: 90vh; overflow-y: auto;
 }
 .modal-overlay.active .modal-content { transform: translateY(0); }
 .close-btn {
   position: absolute; top: 12px; right: 16px; background: none; border: none;
-  font-size: 28px; color: var(--text-muted); cursor: pointer; line-height: 1;
+  font-size: 30px; color: var(--text-muted); cursor: pointer; line-height: 1;
 }
 
 /* Modal Specific Styles */
 .modal-title {
-  font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600;
-  color: var(--gold); text-align: center; margin-bottom: 20px; letter-spacing: 1px;
+  font-family: 'Cinzel', serif; font-size: 20px; font-weight: 600;
+  color: var(--gold); text-align: center; margin-bottom: 24px; letter-spacing: 1px;
 }
 
 /* Details Modal View */
 .details-img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 16px; }
-.details-price { font-size: 24px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; text-align: center; }
-.details-mode { display: inline-block; background: var(--gold-bg); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; color: var(--gold); margin-bottom: 16px; text-align: center; width: 100%; }
+.details-pricing-box {
+  background: var(--gold-bg); border: 1px solid var(--gold-light);
+  border-radius: 8px; padding: 16px; margin-bottom: 16px;
+}
+.detail-price-row {
+  display: flex; justify-content: space-between; font-size: 14px; font-weight: 600;
+  padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--gold-light);
+}
+.detail-price-row:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
 .details-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+.details-desc ul { margin-left: 20px; margin-top: 8px; }
+.details-desc li { margin-bottom: 4px; }
 
 /* Booking Form View */
 .field { margin-bottom: 16px; }
 label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
 input, select, textarea {
-  width: 100%; padding: 12px 14px; background: var(--bg-main); border: 1px solid var(--border);
+  width: 100%; padding: 14px 16px; background: var(--bg-main); border: 1px solid var(--border);
   border-radius: 8px; font-family: 'Raleway', sans-serif; font-size: 14px; color: var(--text-main);
   transition: all 0.3s; appearance: none;
 }
@@ -180,20 +182,20 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 textarea { resize: vertical; min-height: 80px; }
 
 .btn-submit {
-  width: 100%; padding: 14px; background: var(--gold); color: #FFF;
-  border: none; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+  width: 100%; padding: 16px; background: var(--gold); color: #FFF;
+  border: none; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600;
   letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 8px;
 }
 .btn-submit:hover { background: #8C6630; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(168,124,62,0.25); }
 
 /* Success Screen inside Modal */
 .success-screen { text-align: center; padding: 20px 0 10px; }
-.success-icon { font-size: 50px; margin-bottom: 16px; }
-.success-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--gold); margin-bottom: 8px; }
-.success-text { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+.success-icon { font-size: 56px; margin-bottom: 16px; }
+.success-title { font-family: 'Cinzel', serif; font-size: 24px; color: var(--gold); margin-bottom: 8px; }
+.success-text { font-size: 15px; color: var(--text-muted); margin-bottom: 30px; line-height: 1.6; }
 
 /* ─── FOOTER ─── */
-.footer { text-align: center; font-size: 11px; color: var(--text-muted); padding-top: 20px; border-top: 1px solid var(--border); margin-top: 20px; }
+.footer { text-align: center; font-size: 12px; color: var(--text-muted); padding-top: 24px; border-top: 1px solid var(--border); margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -206,21 +208,28 @@ textarea { resize: vertical; min-height: 80px; }
   <header class="header">
     <div class="avatar">🌙</div>
     <h1 class="name">VEDA</h1>
-    <p class="bio">Seek the Truth. Let the Cards Guide You.</p>
+    <p class="bio">Clear answers. Sacred guidance.</p>
   </header>
 
-  <!-- PRODUCTS GRID -->
-  <section class="products-grid">
+  <!-- PROFESSIONAL PLANS LIST (EXACTLY 3) -->
+  <section class="products-list">
     
     <!-- Plan 1 -->
     <div class="product-card">
-      <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=400&q=80" alt="Tarot" class="product-img">
+      <img src="https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=600&q=80" alt="Tarot Card Single Question" class="product-img">
       <div class="product-info">
-        <h3 class="product-title">Single Question Reading</h3>
-        <p class="product-mode">Chat / Voice note</p>
-        <span class="product-link" onclick="openDetails('p1')">View details</span>
-        <div class="product-price">₹ 50</div>
-        <button class="btn-book" onclick="openBooking('p1')">
+        <div class="product-header">
+          <h3 class="product-title">Single Question Clarity</h3>
+          <span class="product-link" onclick="openDetails('plan1')">Details</span>
+        </div>
+        <div class="product-modes">
+          <span class="mode-tag">💬 Chat</span>
+          <span class="mode-tag">🎙️ Voice Note</span>
+        </div>
+        <div class="product-price-row">
+          <div class="price-line"><strong>₹ 50</strong></div>
+        </div>
+        <button class="btn-book" onclick="openBooking('opt1')">
           <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>
           Book Session
         </button>
@@ -229,56 +238,49 @@ textarea { resize: vertical; min-height: 80px; }
 
     <!-- Plan 2 -->
     <div class="product-card">
-      <img src="https://images.unsplash.com/photo-1617331140180-e8262094733a?auto=format&fit=crop&w=400&q=80" alt="Tarot Session" class="product-img">
+      <img src="https://images.unsplash.com/photo-1617331140180-e8262094733a?auto=format&fit=crop&w=600&q=80" alt="Standard Full Session" class="product-img">
       <div class="product-info">
-        <h3 class="product-title">Full Session (30 min)</h3>
-        <p class="product-mode">Voice call / Chat</p>
-        <span class="product-link" onclick="openDetails('p2')">View details</span>
-        <div class="product-price">₹ 450</div>
-        <button class="btn-book" onclick="openBooking('p2')">Book Session</button>
+        <div class="product-header">
+          <h3 class="product-title">Standard Full Session</h3>
+          <span class="product-link" onclick="openDetails('plan2')">Details</span>
+        </div>
+        <div class="product-modes">
+          <span class="mode-tag">📞 Voice Call</span>
+          <span class="mode-tag">💬 Chat</span>
+        </div>
+        <div class="product-price-row">
+          <div class="price-line">30 Min: <strong>₹ 450</strong></div>
+          <div class="price-line">1 Hour: <strong>₹ 800</strong></div>
+        </div>
+        <button class="btn-book" onclick="openBooking('opt2')">Book Session</button>
       </div>
     </div>
 
     <!-- Plan 3 -->
     <div class="product-card">
-      <img src="https://images.unsplash.com/photo-1544027993-37db244df7d7?auto=format&fit=crop&w=400&q=80" alt="Tarot Details" class="product-img">
+      <img src="https://images.unsplash.com/photo-1544027993-37db244df7d7?auto=format&fit=crop&w=600&q=80" alt="Premium Full Session" class="product-img">
       <div class="product-info">
-        <h3 class="product-title">Full Session (1 hr)</h3>
-        <p class="product-mode">Voice call / Chat</p>
-        <span class="product-link" onclick="openDetails('p3')">View details</span>
-        <div class="product-price">₹ 800</div>
-        <button class="btn-book" onclick="openBooking('p3')">Book Session</button>
-      </div>
-    </div>
-
-    <!-- Plan 4 -->
-    <div class="product-card">
-      <img src="https://images.unsplash.com/photo-1594834749740-74b3f6960010?auto=format&fit=crop&w=400&q=80" alt="Premium Tarot" class="product-img">
-      <div class="product-info">
-        <h3 class="product-title">Premium Session (30 min)</h3>
-        <p class="product-mode">Video / Voice / Chat</p>
-        <span class="product-link" onclick="openDetails('p4')">View details</span>
-        <div class="product-price">₹ 599</div>
-        <button class="btn-book" onclick="openBooking('p4')">Book Session</button>
-      </div>
-    </div>
-
-    <!-- Plan 5 -->
-    <div class="product-card">
-      <img src="https://images.unsplash.com/photo-1601058268499-e52658b8ebf8?auto=format&fit=crop&w=400&q=80" alt="Premium Tarot" class="product-img">
-      <div class="product-info">
-        <h3 class="product-title">Premium Session (1 hr)</h3>
-        <p class="product-mode">Video / Voice / Chat</p>
-        <span class="product-link" onclick="openDetails('p5')">View details</span>
-        <div class="product-price">₹ 1100</div>
-        <button class="btn-book" onclick="openBooking('p5')">Book Session</button>
+        <div class="product-header">
+          <h3 class="product-title">Premium Live Session</h3>
+          <span class="product-link" onclick="openDetails('plan3')">Details</span>
+        </div>
+        <div class="product-modes">
+          <span class="mode-tag">📹 Video Call</span>
+          <span class="mode-tag">📞 Voice Call</span>
+          <span class="mode-tag">💬 Chat</span>
+        </div>
+        <div class="product-price-row">
+          <div class="price-line">30 Min: <strong>₹ 599</strong></div>
+          <div class="price-line">1 Hour: <strong>₹ 1100</strong></div>
+        </div>
+        <button class="btn-book" onclick="openBooking('opt4')">Book Session</button>
       </div>
     </div>
 
   </section>
 
   <footer class="footer">
-    &copy; 2024 VEDA Tarot. Sacred guidance.
+    &copy; 2024 VEDA Tarot. All rights reserved.
   </footer>
 
 </main>
@@ -321,32 +323,42 @@ textarea { resize: vertical; min-height: 80px; }
   }
   drawCanvas();
 
-  // --- DATA FOR PLANS ---
-  const plansData = {
-    'p1': { 
-      title: "Single Question Reading", price: "₹ 50", mode: "Chat / Voice note", val: "p1",
-      img: "https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=400&q=80",
-      desc: "Have one specific, burning question? Get a clear, direct, and honest answer drawn straight from the cards. Delivered directly to your WhatsApp. Perfect for immediate clarity."
+  // --- DATA FOR DETAILS MODAL ---
+  const planDetails = {
+    'plan1': { 
+      title: "Single Question Clarity", 
+      img: "https://images.unsplash.com/photo-1636246441746-816a4eee4a50?auto=format&fit=crop&w=600&q=80",
+      pricingHtml: `<div class="detail-price-row"><span>1 Question</span><span>₹ 50</span></div>`,
+      desc: `<strong>Modes:</strong> WhatsApp Chat or Voice Note.<br><br>
+             Perfect when you have one specific, burning question. I will pull the cards and provide a clear, honest answer directly to your WhatsApp.`
     },
-    'p2': { 
-      title: "Full Tarot Session (30 min)", price: "₹ 450", mode: "Voice call / Chat", val: "p2",
-      img: "https://images.unsplash.com/photo-1617331140180-e8262094733a?auto=format&fit=crop&w=400&q=80",
-      desc: "A beautifully unhurried 30-minute reading. You can ask unlimited questions within the timeframe. We will deep dive into Love, Career, or Personal Growth to find the guidance you need."
+    'plan2': { 
+      title: "Standard Full Session", 
+      img: "https://images.unsplash.com/photo-1617331140180-e8262094733a?auto=format&fit=crop&w=600&q=80",
+      pricingHtml: `
+        <div class="detail-price-row"><span>30 Minutes</span><span>₹ 450</span></div>
+        <div class="detail-price-row"><span>1 Hour</span><span>₹ 800</span></div>
+      `,
+      desc: `<strong>Modes:</strong> Voice Call or WhatsApp Chat.<br><br>
+             A dedicated session to deep dive into your life. 
+             <ul>
+               <li>Ask unlimited questions within the time limit.</li>
+               <li>Detailed focus on Love, Career, or Personal Growth.</li>
+             </ul>`
     },
-    'p3': { 
-      title: "Full Tarot Session (1 hr)", price: "₹ 800", mode: "Voice call / Chat", val: "p3",
-      img: "https://images.unsplash.com/photo-1544027993-37db244df7d7?auto=format&fit=crop&w=400&q=80",
-      desc: "An extended, comprehensive 1-hour session. Ideal for exploring multiple complex areas of your life, past emotional blockages, and detailed future trajectories."
-    },
-    'p4': { 
-      title: "Premium Session (30 min)", price: "₹ 599", mode: "Video call / Voice / Chat", val: "p4",
-      img: "https://images.unsplash.com/photo-1594834749740-74b3f6960010?auto=format&fit=crop&w=400&q=80",
-      desc: "Experience the magic live. Watch the cards being shuffled and drawn for you on a live video call. A deeply personal and spiritual 30-minute connection."
-    },
-    'p5': { 
-      title: "Premium Session (1 hr)", price: "₹ 1100", mode: "Video call / Voice / Chat", val: "p5",
-      img: "https://images.unsplash.com/photo-1601058268499-e52658b8ebf8?auto=format&fit=crop&w=400&q=80",
-      desc: "The ultimate Tarot experience. A full 60-minute live video session offering profound spiritual insight, unlimited questions, and a deep emotional connection with the cards."
+    'plan3': { 
+      title: "Premium Live Session", 
+      img: "https://images.unsplash.com/photo-1544027993-37db244df7d7?auto=format&fit=crop&w=600&q=80",
+      pricingHtml: `
+        <div class="detail-price-row"><span>30 Minutes</span><span>₹ 599</span></div>
+        <div class="detail-price-row"><span>1 Hour</span><span>₹ 1100</span></div>
+      `,
+      desc: `<strong>Modes:</strong> Video Call, Voice Call, or Chat.<br><br>
+             The ultimate spiritual experience. Watch the cards being shuffled and pulled live on video.
+             <ul>
+               <li>Highly interactive and personalized.</li>
+               <li>Unlimited questions within the timeframe.</li>
+             </ul>`
     }
   };
 
@@ -357,50 +369,60 @@ textarea { resize: vertical; min-height: 80px; }
   function openModal() { modal.classList.add('active'); }
   function closeModal() { modal.classList.remove('active'); }
 
-  // Close when clicking outside the box
   modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
 
-  // 1. Show Details View
+  // 1. Show Details
   function openDetails(planId) {
-    const plan = plansData[planId];
+    const p = planDetails[planId];
     modalBody.innerHTML = `
-      <h2 class="modal-title">${plan.title}</h2>
-      <img src="${plan.img}" class="details-img" alt="Tarot">
-      <div class="details-price">${plan.price}</div>
-      <div class="details-mode">Modes: ${plan.mode}</div>
-      <p class="details-desc">${plan.desc}</p>
-      <button class="btn-submit" onclick="openBooking('${planId}')">Book This Session</button>
+      <h2 class="modal-title">${p.title}</h2>
+      <img src="${p.img}" class="details-img" alt="Tarot">
+      <div class="details-pricing-box">
+        ${p.pricingHtml}
+      </div>
+      <div class="details-desc">${p.desc}</div>
+      <button class="btn-submit" onclick="closeModal()">Close</button>
     `;
     openModal();
   }
 
-  // 2. Show Booking Form View
-  function openBooking(planId) {
+  // 2. Show Booking Form
+  function openBooking(selectedOptionVal) {
+    // Dropdown options mapped explicitly
+    const options = [
+      { val: "opt1", text: "Single Question (Chat/Voice Note) - ₹50" },
+      { val: "opt2", text: "Standard Session - 30 Min (Voice/Chat) - ₹450" },
+      { val: "opt3", text: "Standard Session - 1 Hour (Voice/Chat) - ₹800" },
+      { val: "opt4", text: "Premium Session - 30 Min (Video/Voice/Chat) - ₹599" },
+      { val: "opt5", text: "Premium Session - 1 Hour (Video/Voice/Chat) - ₹1100" }
+    ];
+
     let optionsHtml = '';
-    for (const key in plansData) {
-      const p = plansData[key];
-      const selected = key === planId ? 'selected' : '';
-      optionsHtml += `<option value="${p.val}" ${selected}>${p.title} - ${p.price}</option>`;
-    }
+    options.forEach(opt => {
+      const isSelected = opt.val === selectedOptionVal ? 'selected' : '';
+      optionsHtml += `<option value="${opt.val}" ${isSelected}>${opt.text}</option>`;
+    });
 
     modalBody.innerHTML = `
-      <h2 class="modal-title">Reserve Your Reading</h2>
+      <h2 class="modal-title">Book Your Session</h2>
       <form onsubmit="handleBooking(event)">
         <div class="field">
-          <label>Selected Session</label>
-          <select id="readingDropdown" required>${optionsHtml}</select>
+          <label>Select Your Plan</label>
+          <select id="readingDropdown" required>
+            ${optionsHtml}
+          </select>
         </div>
         <div class="field">
-          <label>Full Name</label>
-          <input type="text" placeholder="Enter your name" required>
+          <label>Your Name</label>
+          <input type="text" placeholder="Enter your full name" required>
         </div>
         <div class="field">
           <label>WhatsApp Number</label>
           <input type="tel" placeholder="+91 00000 00000" required>
         </div>
         <div class="field">
-          <label>Intention / Focus</label>
-          <textarea placeholder="What would you like the cards to illuminate?..." required></textarea>
+          <label>Your Question / Focus Area</label>
+          <textarea placeholder="What guidance are you seeking today?..." required></textarea>
         </div>
         <button type="submit" class="btn-submit">Confirm Booking</button>
       </form>
@@ -408,14 +430,14 @@ textarea { resize: vertical; min-height: 80px; }
     openModal();
   }
 
-  // 3. Handle Form Submission -> Show Success View
+  // 3. Handle Form Submission -> Show Success
   function handleBooking(event) {
     event.preventDefault(); 
     modalBody.innerHTML = `
       <div class="success-screen">
         <div class="success-icon">✨</div>
         <h2 class="success-title">Session Booked!</h2>
-        <p class="success-text">Your request has been securely received. <br><br>I will message you on WhatsApp shortly to confirm your preferred time and payment details.</p>
+        <p class="success-text">Your request has been securely received.<br><br>I will message you on WhatsApp shortly to confirm your preferred time and payment details.</p>
         <button class="btn-submit" onclick="closeModal()">Done</button>
       </div>
     `;
