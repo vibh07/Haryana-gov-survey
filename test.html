@@ -7,80 +7,81 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&family=Bebas+Neue&display=swap');
         
-        section { padding: 150px 10%; min-height: 100vh; border-bottom: 1px solid #222; }
-        h1 { font-size: clamp(50px, 10vw, 120px); line-height: 1; letter-spacing: -2px; }
-        .accent { color: #0ae448; }
+        * { cursor: none; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #080808; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        .work-item { margin-bottom: 100px; opacity: 0; transform: translateY(100px); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+        /* Cursor */
+        .cursor { width: 20px; height: 20px; background: #0ae448; border-radius: 50%; position: fixed; pointer-events: none; z-index: 999; mix-blend-mode: difference; }
+
+        /* Hero */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 10%; }
+        h1 { font-family: 'Bebas Neue', sans-serif; font-size: 15vw; line-height: 0.9; }
         
-        .stat-card { background: #111; padding: 40px; border-radius: 20px; text-align: center; }
-        .stat-num { font-size: 50px; font-weight: 700; color: #0ae448; }
+        /* Projects (Horizontal Scroll) */
+        .project-section { height: 300vh; }
+        .pin-wrapper { height: 100vh; display: flex; align-items: center; overflow: hidden; }
+        .project-track { display: flex; gap: 50px; padding: 0 50px; }
+        .project-card { min-width: 400px; height: 500px; background: #111; padding: 40px; border: 1px solid #222; }
+
+        /* Stats */
+        .stats { padding: 100px 10%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
     </style>
 </head>
 <body>
 
-    <section id="hero">
-        <h1 class="reveal">SHASWAT <br><span class="accent">MISHRA</span></h1>
-        <p>UI/UX & Product Designer. Building data-driven digital products.</p>
+    <div class="cursor"></div>
+
+    <section class="hero">
+        <h1 id="title">SHASWAT<br><span style="color:#0ae448">MISHRA</span></h1>
+        <p>UI/UX & Product Designer | 95% efficiency improvement specialist</p>
     </section>
 
-    <section id="experience">
-        <h2 class="reveal">EXPERIENCE</h2>
-        <div class="work-item">
-            <h3>Product Designer — Anadi Industries</h3>
-            <p>Jan 2025 – Present | Multi-modular Billing & Inventory system</p>
-            <ul>
-                <li>Processed INR 8 Lakhs/month in gross transactions.</li>
-                <li>Reduced billing time by 95% via UX automation.</li>
-            </ul>
-        </div>
-        <div class="work-item">
-            <h3>Lead UI/UX Designer — GDSC</h3>
-            <p>Aug 2022 – May 2024</p>
-            <p>Mentored 10+ junior designers & led 18+ community workshops.</p>
+    <!-- Project Gallery -->
+    <section class="project-section" id="projects">
+        <div class="pin-wrapper">
+            <div class="project-track" id="track">
+                <div class="project-card"><h3>Anadi Industries</h3><p>Billing & Inventory System</p><br><span>₹8 Lakhs/month revenue</span></div>
+                <div class="project-card"><h3>Dhun Magan</h3><p>Music Licensing Platform</p><br><span>3-step verification flow</span></div>
+                <div class="project-card"><h3>Fintech Wallet</h3><p>High-Retention Onboarding</p><br><span>40% drop-off reduction</span></div>
+                <div class="project-card"><h3>Food Ecosystem</h3><p>5-Persona Mobile App</p><br><span>Live spatial tracking</span></div>
+            </div>
         </div>
     </section>
 
-    <section id="stats">
-        <h2 class="reveal">BY THE NUMBERS</h2>
-        <div class="grid">
-            <div class="stat-card"><div class="stat-num">95%</div><p>Billing time reduction</p></div>
-            <div class="stat-card"><div class="stat-num">1.2k+</div><p>Professional network</p></div>
-        </div>
+    <!-- Skills & Stats -->
+    <section class="stats">
+        <div><h2>SKILLS</h2><p>Figma, React.js, Firebase, UX Strategy</p></div>
+        <div><h2>IMPACT</h2><p>95% reduction in billing time</p></div>
+        <div><h2>COMMUNITY</h2><p>1,200+ Network on LinkedIn</p></div>
     </section>
 
     <script>
         gsap.registerPlugin(ScrollTrigger);
 
-        // Hero Reveal
-        gsap.from("h1", { duration: 1.5, y: 100, opacity: 0, ease: "power4.out" });
-
-        // Scroll Animations for sections
-        gsap.utils.toArray(".work-item").forEach((item) => {
-            gsap.to(item, {
-                scrollTrigger: {
-                    trigger: item,
-                    start: "top 80%",
-                    toggleActions: "play none none reverse"
-                },
-                opacity: 1,
-                y: 0,
-                duration: 1
-            });
+        // Custom Cursor
+        window.addEventListener("mousemove", (e) => {
+            gsap.to(".cursor", { x: e.clientX, y: e.clientY, duration: 0.1 });
         });
 
-        // Parallax Effect for Heading
-        gsap.to("h1", {
+        // Horizontal Scroll Animation
+        let sections = gsap.utils.toArray(".project-card");
+        gsap.to("#track", {
+            x: () => -(document.querySelector("#track").scrollWidth - window.innerWidth),
+            ease: "none",
             scrollTrigger: {
-                scrub: true
-            },
-            y: -200
+                trigger: ".project-section",
+                start: "top top",
+                end: "+=3000",
+                scrub: 1,
+                pin: true,
+                anticipatePin: 1
+            }
         });
+
+        // Text Entrance
+        gsap.from("#title", { opacity: 0, y: 100, duration: 2, ease: "power4.out" });
     </script>
 </body>
 </html>
