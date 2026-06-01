@@ -4,84 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shaswat Mishra | Product Designer</title>
+    <!-- GSAP & Lenis for Smooth Scroll -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&family=Bebas+Neue&display=swap');
-        
-        * { cursor: none; margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #080808; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        :root { --g: #0ae448; --bg: #050505; --text: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
         /* Cursor */
-        .cursor { width: 20px; height: 20px; background: #0ae448; border-radius: 50%; position: fixed; pointer-events: none; z-index: 999; mix-blend-mode: difference; }
+        .cursor { width: 12px; height: 12px; background: var(--g); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; }
 
-        /* Hero */
-        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 10%; }
-        h1 { font-family: 'Bebas Neue', sans-serif; font-size: 15vw; line-height: 0.9; }
+        /* Sections */
+        .section { padding: 100px 5%; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+        h1 { font-size: clamp(60px, 12vw, 150px); line-height: 0.9; text-transform: uppercase; }
+        .accent { color: var(--g); }
         
-        /* Projects (Horizontal Scroll) */
-        .project-section { height: 300vh; }
-        .pin-wrapper { height: 100vh; display: flex; align-items: center; overflow: hidden; }
-        .project-track { display: flex; gap: 50px; padding: 0 50px; }
-        .project-card { min-width: 400px; height: 500px; background: #111; padding: 40px; border: 1px solid #222; }
-
-        /* Stats */
-        .stats { padding: 100px 10%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+        /* Project Horizontal Scroll */
+        .work-pin { height: 300vh; position: relative; }
+        .pin-wrap { height: 100vh; display: flex; align-items: center; overflow: hidden; }
+        .track { display: flex; gap: 50px; padding-left: 5vw; }
+        .card { min-width: 80vw; height: 60vh; background: #111; border-radius: 40px; padding: 60px; display: flex; flex-direction: column; justify-content: flex-end; }
     </style>
 </head>
 <body>
 
     <div class="cursor"></div>
 
-    <section class="hero">
-        <h1 id="title">SHASWAT<br><span style="color:#0ae448">MISHRA</span></h1>
-        <p>UI/UX & Product Designer | 95% efficiency improvement specialist</p>
+    <!-- Hero -->
+    <section class="section">
+        <h1 id="hero-title">SHASWAT <br><span class="accent">MISHRA</span></h1>
+        <p style="margin-top: 20px; font-size: 20px;">Product Designer & Frontend Developer</p>
     </section>
 
-    <!-- Project Gallery -->
-    <section class="project-section" id="projects">
-        <div class="pin-wrapper">
-            <div class="project-track" id="track">
-                <div class="project-card"><h3>Anadi Industries</h3><p>Billing & Inventory System</p><br><span>₹8 Lakhs/month revenue</span></div>
-                <div class="project-card"><h3>Dhun Magan</h3><p>Music Licensing Platform</p><br><span>3-step verification flow</span></div>
-                <div class="project-card"><h3>Fintech Wallet</h3><p>High-Retention Onboarding</p><br><span>40% drop-off reduction</span></div>
-                <div class="project-card"><h3>Food Ecosystem</h3><p>5-Persona Mobile App</p><br><span>Live spatial tracking</span></div>
+    <!-- Projects -->
+    <section class="work-pin" id="work">
+        <div class="pin-wrap" id="pin-wrap">
+            <div class="track" id="track">
+                <div class="card"><h2>Anadi Industries</h2><p>Billing & Inventory | ₹8L/month revenue</p></div>
+                <div class="card"><h2>Dhun Magan</h2><p>Music Licensing | 3-step checkout</p></div>
+                <div class="card"><h2>Fintech Wallet</h2><p>UX Overhaul | 40% less drop-off</p></div>
+                <div class="card"><h2>Food Ecosystem</h2><p>Core Mobile App | 5-Persona mapping</p></div>
             </div>
         </div>
     </section>
 
-    <!-- Skills & Stats -->
-    <section class="stats">
-        <div><h2>SKILLS</h2><p>Figma, React.js, Firebase, UX Strategy</p></div>
-        <div><h2>IMPACT</h2><p>95% reduction in billing time</p></div>
-        <div><h2>COMMUNITY</h2><p>1,200+ Network on LinkedIn</p></div>
+    <!-- Stats -->
+    <section class="section" style="text-align: center;">
+        <h2 style="font-size: 50px;">KEY ACHIEVEMENTS</h2>
+        <div style="display: flex; justify-content: center; gap: 50px; margin-top: 50px;">
+            <div><h3>95%</h3><p>Billing time reduction</p></div>
+            <div><h3>1.2k+</h3><p>Industry Network</p></div>
+            <div><h3>14+</h3><p>Case Challenges</p></div>
+        </div>
     </section>
 
     <script>
-        gsap.registerPlugin(ScrollTrigger);
+        // 1. Smooth Scroll Setup
+        const lenis = new Lenis();
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
 
-        // Custom Cursor
-        window.addEventListener("mousemove", (e) => {
-            gsap.to(".cursor", { x: e.clientX, y: e.clientY, duration: 0.1 });
-        });
+        // 2. Custom Cursor
+        const cur = document.querySelector('.cursor');
+        window.addEventListener('mousemove', e => gsap.to(cur, {x: e.clientX, y: e.clientY, duration: 0.2}));
 
-        // Horizontal Scroll Animation
-        let sections = gsap.utils.toArray(".project-card");
-        gsap.to("#track", {
-            x: () => -(document.querySelector("#track").scrollWidth - window.innerWidth),
+        // 3. Horizontal Scroll
+        let track = document.getElementById("track");
+        gsap.to(track, {
+            x: () => -(track.scrollWidth - window.innerWidth),
             ease: "none",
             scrollTrigger: {
-                trigger: ".project-section",
+                trigger: ".work-pin",
                 start: "top top",
                 end: "+=3000",
                 scrub: 1,
-                pin: true,
-                anticipatePin: 1
+                pin: true
             }
         });
 
-        // Text Entrance
-        gsap.from("#title", { opacity: 0, y: 100, duration: 2, ease: "power4.out" });
+        // 4. Reveal Animations
+        gsap.from("#hero-title", { opacity: 0, y: 100, duration: 2, ease: "power4.out" });
     </script>
 </body>
 </html>
