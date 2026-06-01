@@ -2,90 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shaswat Mishra | Product Designer</title>
-    <!-- GSAP & Lenis for Smooth Scroll -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
     <style>
-        :root { --g: #0ae448; --bg: #050505; --text: #fff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
         
-        /* Cursor */
-        .cursor { width: 12px; height: 12px; background: var(--g); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; }
+        body, html { margin: 0; background: #050505; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; cursor: none; }
+        
+        /* Custom Cursor */
+        .cursor { width: 10px; height: 10px; background: #0ae448; border-radius: 50%; position: fixed; z-index: 9999; pointer-events: none; transition: transform 0.1s; }
+        .cursor-follower { width: 40px; height: 40px; border: 1px solid #0ae448; border-radius: 50%; position: fixed; z-index: 9998; pointer-events: none; transition: transform 0.2s; }
 
-        /* Sections */
-        .section { padding: 100px 5%; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
-        h1 { font-size: clamp(60px, 12vw, 150px); line-height: 0.9; text-transform: uppercase; }
-        .accent { color: var(--g); }
+        /* Hero */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 10%; }
+        h1 { font-size: 12vw; line-height: 0.8; font-weight: 700; }
         
-        /* Project Horizontal Scroll */
-        .work-pin { height: 300vh; position: relative; }
-        .pin-wrap { height: 100vh; display: flex; align-items: center; overflow: hidden; }
-        .track { display: flex; gap: 50px; padding-left: 5vw; }
-        .card { min-width: 80vw; height: 60vh; background: #111; border-radius: 40px; padding: 60px; display: flex; flex-direction: column; justify-content: flex-end; }
+        /* Projects - Horizontal */
+        .project-section { height: 400vh; position: relative; }
+        .pin-container { height: 100vh; display: flex; align-items: center; overflow: hidden; }
+        .track { display: flex; gap: 100px; padding-left: 10vw; }
+        .card { min-width: 60vw; height: 70vh; background: #111; border-radius: 50px; padding: 60px; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
+        .card img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; opacity: 0.3; transition: 0.5s; }
+        .card:hover img { opacity: 0.6; transform: scale(1.05); }
+
+        /* Canvas bg */
+        #canvas { position: fixed; top: 0; left: 0; z-index: -1; }
     </style>
 </head>
 <body>
 
     <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <canvas id="canvas"></canvas>
 
-    <!-- Hero -->
-    <section class="section">
-        <h1 id="hero-title">SHASWAT <br><span class="accent">MISHRA</span></h1>
-        <p style="margin-top: 20px; font-size: 20px;">Product Designer & Frontend Developer</p>
+    <section class="hero">
+        <h1>SHASWAT<br><span style="color:#0ae448">MISHRA</span></h1>
+        <p style="font-size: 24px; margin-top: 20px;">UI/UX Designer & Product Developer</p>
     </section>
 
-    <!-- Projects -->
-    <section class="work-pin" id="work">
-        <div class="pin-wrap" id="pin-wrap">
+    <section class="project-section" id="work">
+        <div class="pin-container">
             <div class="track" id="track">
-                <div class="card"><h2>Anadi Industries</h2><p>Billing & Inventory | ₹8L/month revenue</p></div>
-                <div class="card"><h2>Dhun Magan</h2><p>Music Licensing | 3-step checkout</p></div>
-                <div class="card"><h2>Fintech Wallet</h2><p>UX Overhaul | 40% less drop-off</p></div>
-                <div class="card"><h2>Food Ecosystem</h2><p>Core Mobile App | 5-Persona mapping</p></div>
+                <div class="card"><h2>Anadi Industries</h2><p>Billing & Inventory Platform • ₹8L/month revenue</p></div>
+                <div class="card"><h2>Dhun Magan</h2><p>Music Licensing Flow • 3-step verification</p></div>
+                <div class="card"><h2>Fintech Wallet</h2><p>High-Retention Onboarding • 40% reduction in drop-off</p></div>
             </div>
         </div>
     </section>
 
-    <!-- Stats -->
-    <section class="section" style="text-align: center;">
-        <h2 style="font-size: 50px;">KEY ACHIEVEMENTS</h2>
-        <div style="display: flex; justify-content: center; gap: 50px; margin-top: 50px;">
-            <div><h3>95%</h3><p>Billing time reduction</p></div>
-            <div><h3>1.2k+</h3><p>Industry Network</p></div>
-            <div><h3>14+</h3><p>Case Challenges</p></div>
-        </div>
-    </section>
-
     <script>
-        // 1. Smooth Scroll Setup
-        const lenis = new Lenis();
-        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-        requestAnimationFrame(raf);
+        // 1. Particle Background Animation
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let particles = [];
+        
+        function animate() {
+            ctx.fillStyle = "#050505"; ctx.fillRect(0,0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                ctx.fillStyle = "#0ae448";
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        for(let i=0; i<100; i++) particles.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height});
+        animate();
 
         // 2. Custom Cursor
-        const cur = document.querySelector('.cursor');
-        window.addEventListener('mousemove', e => gsap.to(cur, {x: e.clientX, y: e.clientY, duration: 0.2}));
+        gsap.to(".cursor-follower", { duration: 0.3, ease: "power2.out" });
+        window.addEventListener("mousemove", e => {
+            gsap.to(".cursor", { x: e.clientX, y: e.clientY, duration: 0 });
+            gsap.to(".cursor-follower", { x: e.clientX - 15, y: e.clientY - 15, duration: 0.3 });
+        });
 
-        // 3. Horizontal Scroll
+        // 3. Scroll Trigger Pinning
+        gsap.registerPlugin(ScrollTrigger);
         let track = document.getElementById("track");
         gsap.to(track, {
             x: () => -(track.scrollWidth - window.innerWidth),
             ease: "none",
             scrollTrigger: {
-                trigger: ".work-pin",
+                trigger: "#work",
                 start: "top top",
                 end: "+=3000",
                 scrub: 1,
                 pin: true
             }
         });
-
-        // 4. Reveal Animations
-        gsap.from("#hero-title", { opacity: 0, y: 100, duration: 2, ease: "power4.out" });
     </script>
 </body>
 </html>
