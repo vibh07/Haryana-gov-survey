@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0E1526">
+<title>Delivery Photos — Anadi Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0E1526; --navy-2:#141D33; --paper:#F6F5F0; --card:#FFFFFF;
+    --orange:#FF5A36; --orange-dark:#E64A28;
+    --mint:#00C896; --mint-dark:#00A67D;
+    --slate:#8891A3; --slate-light:#B9BFCB; --line:#EAE7DC;
+    --danger:#FF4D5E;
+    --radius-sm:8px; --radius:14px; --radius-lg:20px;
+    --shadow-sm:0 2px 8px rgba(16,25,46,.07);
+    --shadow-md:0 8px 22px rgba(16,25,46,.10);
+    --safe-b:env(safe-area-inset-bottom,0px);
+    --safe-t:env(safe-area-inset-top,0px);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:'Inter',sans-serif; background:var(--paper); color:var(--navy); min-height:100vh; font-size:14.5px; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+  button{font-family:inherit; cursor:pointer;}
+  ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:#DEDBCF; border-radius:4px;}
+
+  #topbar{min-height:56px; background:var(--navy); display:flex; align-items:center; gap:12px; padding:10px 14px; padding-top:calc(10px + var(--safe-t)); color:white; flex-wrap:wrap;}
+  #topbar .brand{display:flex; align-items:center; gap:9px; font-family:'Space Grotesk'; font-weight:700; font-size:16px;}
+  #topbar .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 4px rgba(255,90,54,.2);}
+  #backBtn{margin-left:auto; background:transparent; border:1px solid #26314E; color:#B9BFCB; font-size:12.5px; padding:9px 14px; border-radius:9px; font-weight:600; min-height:38px;}
+  #backBtn:hover{color:white; border-color:var(--slate);}
+
+  .wrap{max-width:1100px; margin:0 auto; padding:18px 16px calc(40px + var(--safe-b));}
+  .page-title{font-size:20px; font-weight:700; margin-bottom:4px;}
+  .page-sub{font-size:12.5px; color:var(--slate); margin-bottom:18px;}
+
+  .filters{background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow-sm); display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; align-items:flex-end;}
+  .f-field{display:flex; flex-direction:column; gap:6px; flex:1; min-width:150px;}
+  .f-field label{font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--slate);}
+  .f-field input, .f-field select{border:1.5px solid #DEDBCF; border-radius:10px; padding:10px 12px; font-size:13.5px; background:#FBFAF6; font-family:'Inter'; min-height:40px;}
+  .f-field input:focus, .f-field select:focus{outline:2px solid var(--orange); outline-offset:1px; border-color:var(--orange);}
+  .clear-btn{background:transparent; border:1.5px solid #DEDBCF; border-radius:10px; padding:10px 14px; font-size:12.5px; font-weight:600; color:var(--navy); min-height:40px; white-space:nowrap;}
+  .clear-btn:hover{border-color:var(--slate);}
+
+  .result-count{font-size:12px; color:var(--slate); font-weight:600; margin-bottom:12px;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px;}
+  .pcard{background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column;}
+  .pcard .thumb-wrap{position:relative; width:100%; aspect-ratio:4/3; background:#EFEDE4; overflow:hidden;}
+  .pcard .thumb-wrap img{width:100%; height:100%; object-fit:cover; display:block; cursor:pointer; opacity:0; transition:opacity .25s ease;}
+  .pcard .thumb-wrap img.loaded{opacity:1;}
+  .pcard .thumb-wrap .img-skel{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;}
+  .pcard .body{padding:11px 12px 12px; display:flex; flex-direction:column; gap:4px; flex:1;}
+  .pcard .cust{font-weight:700; font-size:13.5px;}
+  .pcard .addr{font-size:11.5px; color:var(--slate); line-height:1.4; min-height:15px;}
+  .pcard .meta{font-size:11px; color:#5B6178; display:flex; flex-direction:column; gap:2px; margin-top:2px;}
+  .pcard .meta b{color:var(--navy);}
+  .pcard .row-btns{display:flex; gap:7px; margin-top:9px;}
+  .pcard .row-btns button, .pcard .row-btns a{flex:1; text-align:center; border-radius:8px; padding:8px 6px; font-size:11.5px; font-weight:700; border:none; text-decoration:none;}
+  .pcard .open-btn{background:#F5F4EF; color:var(--navy); border:1px solid #DEDBCF !important;}
+  .pcard .del-btn{background:transparent; color:var(--danger); border:1px solid #F3D3D3 !important;}
+  .pcard .del-btn:hover{background:#FFF2F3;}
+
+  .empty-state, .loading-state{text-align:center; color:var(--slate); font-size:13px; font-weight:600; padding:60px 16px;}
+
+  @keyframes rb-spin{to{transform:rotate(360deg);}}
+  .rb-spinner{width:22px; height:22px; border-radius:50%; border:2.5px solid rgba(16,25,46,.15); border-top-color:var(--orange); display:inline-block; animation:rb-spin .7s linear infinite;}
+  .rb-spinner.sm{width:14px; height:14px; border-width:2px;}
+  .loading-state{display:flex; flex-direction:column; align-items:center; gap:12px;}
+
+  .lightbox{position:fixed; inset:0; background:rgba(6,10,20,.92); z-index:3000; display:none; align-items:center; justify-content:center; padding:24px; padding-top:calc(24px + var(--safe-t)); padding-bottom:calc(24px + var(--safe-b));}
+  .lightbox.show{display:flex;}
+  .lightbox img{max-width:100%; max-height:80vh; border-radius:10px; box-shadow:0 20px 60px rgba(0,0,0,.5);}
+  .lightbox .lb-close{position:absolute; top:calc(16px + var(--safe-t)); right:16px; background:rgba(255,255,255,.12); color:white; border:none; width:38px; height:38px; border-radius:50%; font-size:18px;}
+  .lightbox .lb-cap{color:#D8DBE0; font-size:12.5px; margin-top:12px; text-align:center;}
+
+  @media (max-width:520px){
+    .filters{flex-direction:column; align-items:stretch;}
+    .f-field{min-width:0;}
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand"><span class="dot"></span>Anadi</div>
+  <button id="backBtn">← Back to Admin</button>
+</div>
+
+<div class="wrap">
+  <div class="page-title">📷 Delivery Photos</div>
+  <div class="page-sub">Har delivery proof photo — kisne deliver ki, kiske yaha, kab click hui — sab yaha milega.</div>
+
+  <div class="filters">
+    <div class="f-field">
+      <label>Search</label>
+      <input type="text" id="searchInput" placeholder="Customer ya delivery boy ka naam...">
+    </div>
+    <div class="f-field">
+      <label>Month</label>
+      <input type="month" id="monthInput">
+    </div>
+    <div class="f-field">
+      <label>From date</label>
+      <input type="date" id="fromInput">
+    </div>
+    <div class="f-field">
+      <label>To date</label>
+      <input type="date" id="toInput">
+    </div>
+    <div class="f-field" style="flex:0 0 auto; min-width:0;">
+      <label>&nbsp;</label>
+      <button class="clear-btn" id="clearFiltersBtn">Clear filters</button>
+    </div>
+  </div>
+
+  <div id="resultCount" class="result-count"></div>
+  <div id="loadingState" class="loading-state"><span class="rb-spinner"></span>Loading photos…</div>
+  <div id="emptyState" class="empty-state" style="display:none;">No photos match these filters.</div>
+  <div id="grid" class="grid"></div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lbClose">✕</button>
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <img id="lbImg" src="">
+    <div class="lb-cap" id="lbCap"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getDatabase, ref, onValue, remove
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA4q2qD7K7o5yN5v9H9jSIvWsTPWlAvurY",
+  authDomain: "delivry-tracking-system.firebaseapp.com",
+  databaseURL: "https://delivry-tracking-system-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "delivry-tracking-system",
+  storageBucket: "delivry-tracking-system.firebasestorage.app",
+  messagingSenderId: "181704924735",
+  appId: "1:181704924735:web:7c57448137e91b745ca28a",
+  measurementId: "G-43WG6FFZVC"
+};
+
+// ---- admin-only gate (same session mechanism as the main app) ----
+function getSession(){
+  try{ const raw = localStorage.getItem('rb_session'); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+const session = getSession();
+if (!session || session.role !== 'admin'){
+  window.location.href = './index.html';
+  throw new Error('not admin — redirecting');
+}
+
+document.getElementById('backBtn').onclick = ()=>{ window.location.href = './index.html'; };
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function fmtDateTime(ts){
+  if (!ts) return '—';
+  return new Date(ts).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+let allPhotos = [];   // full list from Firebase, newest first
+let firstLoad = true;
+
+onValue(ref(db, 'deliveryPhotos'), (snap)=>{
+  const val = snap.val() || {};
+  allPhotos = Object.keys(val)
+    .map(id => ({ id, ...val[id] }))
+    .sort((a,b) => (b.ts||0) - (a.ts||0));
+  document.getElementById('loadingState').style.display = 'none';
+  firstLoad = false;
+  render();
+});
+
+function matchesFilters(p){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (q){
+    const hay = ((p.custName||'') + ' ' + (p.boyName||'') + ' ' + (p.custAddress||'')).toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  const month = document.getElementById('monthInput').value; // "YYYY-MM"
+  if (month && p.ts){
+    const d = new Date(p.ts);
+    const pm = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    if (pm !== month) return false;
+  }
+  const from = document.getElementById('fromInput').value;
+  if (from && p.ts && new Date(p.ts) < new Date(from + 'T00:00:00')) return false;
+  const to = document.getElementById('toInput').value;
+  if (to && p.ts && new Date(p.ts) > new Date(to + 'T23:59:59')) return false;
+  return true;
+}
+
+function render(){
+  const filtered = allPhotos.filter(matchesFilters);
+  const grid = document.getElementById('grid');
+  const emptyState = document.getElementById('emptyState');
+  const resultCount = document.getElementById('resultCount');
+
+  resultCount.textContent = firstLoad ? '' : `${filtered.length} photo${filtered.length===1?'':'s'}`;
+
+  if (!filtered.length){
+    grid.innerHTML = '';
+    emptyState.style.display = firstLoad ? 'none' : 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  // Lazy-loaded images + a lightweight skeleton per card keep this smooth
+  // even with a large photo history — nothing blocks the main thread.
+  grid.innerHTML = filtered.map(p => `
+    <div class="pcard" data-id="${p.id}">
+      <div class="thumb-wrap">
+        <div class="img-skel"><span class="rb-spinner sm"></span></div>
+        <img src="${escapeHtml(p.url)}" loading="lazy" onload="this.classList.add('loaded')" data-open="${p.id}">
+      </div>
+      <div class="body">
+        <div class="cust">${escapeHtml(p.custName || 'Unknown customer')}</div>
+        <div class="addr">${escapeHtml(p.custAddress || '')}</div>
+        <div class="meta">
+          <span>Delivered by: <b>${escapeHtml(p.boyName || 'Unknown')}</b></span>
+          <span>${fmtDateTime(p.ts)}</span>
+        </div>
+        <div class="row-btns">
+          <a href="${escapeHtml(p.url)}" target="_blank" class="open-btn">🔍 Full size</a>
+          <button class="del-btn" data-del="${p.id}">🗑 Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('img[data-open]').forEach(img=>{
+    img.onclick = ()=>{
+      const p = filtered.find(x=>x.id===img.dataset.open);
+      if (!p) return;
+      document.getElementById('lbImg').src = p.url;
+      document.getElementById('lbCap').textContent = `${p.custName || ''} · delivered by ${p.boyName || 'Unknown'} · ${fmtDateTime(p.ts)}`;
+      document.getElementById('lightbox').classList.add('show');
+    };
+  });
+
+  grid.querySelectorAll('button[data-del]').forEach(btn=>{
+    btn.onclick = ()=> deletePhoto(btn.dataset.del, btn);
+  });
+}
+
+async function deletePhoto(id, btn){
+  if (!confirm('Ye photo record delete kar dein? Ye undo nahi ho sakta.')) return;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="rb-spinner sm"></span>';
+  btn.disabled = true;
+  try{
+    // This removes the record (and the gallery entry) from the app.
+    // Note: the actual image file stays on Cloudinary's CDN — deleting it
+    // there requires a signed server-side request (Cloudinary's API secret
+    // can't be safely used from this in-browser app), so this only removes
+    // it from this photo log/gallery, not from Cloudinary itself.
+    await remove(ref(db, 'deliveryPhotos/' + id));
+  }catch(err){
+    console.error(err);
+    alert('Delete fail ho gaya — internet check karke dobara try karo.');
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('lbClose').onclick = ()=> document.getElementById('lightbox').classList.remove('show');
+document.getElementById('lightbox').onclick = (e)=>{ if (e.target.id==='lightbox') document.getElementById('lightbox').classList.remove('show'); };
+
+let debounceTimer = null;
+function scheduleRender(){ clearTimeout(debounceTimer); debounceTimer = setTimeout(render, 150); }
+document.getElementById('searchInput').addEventListener('input', scheduleRender);
+document.getElementById('monthInput').addEventListener('change', render);
+document.getElementById('fromInput').addEventListener('change', render);
+document.getElementById('toInput').addEventListener('change', render);
+document.getElementById('clearFiltersBtn').onclick = ()=>{
+  document.getElementById('searchInput').value = '';
+  document.getElementById('monthInput').value = '';
+  document.getElementById('fromInput').value = '';
+  document.getElementById('toInput').value = '';
+  render();
+};
+</script>
+</body>
+</html>
