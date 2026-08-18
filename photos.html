@@ -17,6 +17,7 @@
     --radius-sm:8px; --radius:14px; --radius-lg:20px;
     --shadow-sm:0 2px 8px rgba(16,25,46,.07);
     --shadow-md:0 8px 22px rgba(16,25,46,.10);
+    --shadow-lg:0 16px 40px rgba(16,25,46,.14);
     --safe-b:env(safe-area-inset-bottom,0px);
     --safe-t:env(safe-area-inset-top,0px);
   }
@@ -27,25 +28,46 @@
   button{font-family:inherit; cursor:pointer;}
   ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:#DEDBCF; border-radius:4px;}
 
-  #topbar{min-height:56px; background:var(--navy); display:flex; align-items:center; gap:12px; padding:10px 14px; padding-top:calc(10px + var(--safe-t)); color:white; flex-wrap:wrap;}
+  /* ---------- topbar ---------- */
+  #topbar{min-height:56px; background:var(--navy); display:flex; align-items:center; gap:12px; padding:10px 14px; padding-top:calc(10px + var(--safe-t)); color:white; flex-wrap:wrap; position:sticky; top:0; z-index:200;}
   #topbar .brand{display:flex; align-items:center; gap:9px; font-family:'Space Grotesk'; font-weight:700; font-size:16px;}
   #topbar .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 4px rgba(255,90,54,.2);}
+  .live-pill{display:flex; align-items:center; gap:6px; background:rgba(0,200,150,.14); border:1px solid rgba(0,200,150,.35); color:#5FE9C9; font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:5px 10px; border-radius:20px;}
+  .live-pill .pulse{width:7px; height:7px; border-radius:50%; background:var(--mint); box-shadow:0 0 0 0 rgba(0,200,150,.7); animation:livepulse 1.8s infinite;}
+  @keyframes livepulse{0%{box-shadow:0 0 0 0 rgba(0,200,150,.55);}70%{box-shadow:0 0 0 7px rgba(0,200,150,0);}100%{box-shadow:0 0 0 0 rgba(0,200,150,0);}}
   #backBtn{margin-left:auto; background:transparent; border:1px solid #26314E; color:#B9BFCB; font-size:12.5px; padding:9px 14px; border-radius:9px; font-weight:600; min-height:38px;}
   #backBtn:hover{color:white; border-color:var(--slate);}
 
-  .wrap{max-width:1100px; margin:0 auto; padding:18px 16px calc(40px + var(--safe-b));}
-  .page-title{font-size:20px; font-weight:700; margin-bottom:4px;}
+  .wrap{max-width:1180px; margin:0 auto; padding:18px 16px calc(48px + var(--safe-b));}
+  .page-title{font-size:21px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:9px;}
   .page-sub{font-size:12.5px; color:var(--slate); margin-bottom:18px;}
 
-  .filters{background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow-sm); display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; align-items:flex-end;}
+  /* ---------- stat strip ---------- */
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:16px;}
+  .stat-card{background:var(--card); border-radius:12px; padding:13px 14px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:3px; border:1px solid var(--line);}
+  .stat-card .n{font-family:'Space Grotesk'; font-size:22px; font-weight:700;}
+  .stat-card .l{font-size:11px; color:var(--slate); font-weight:600; text-transform:uppercase; letter-spacing:.03em;}
+  .stat-card.accent .n{color:var(--orange);}
+  .stat-card.mint .n{color:var(--mint-dark);}
+
+  /* ---------- filters ---------- */
+  .filters{background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow-sm); margin-bottom:14px; border:1px solid var(--line);}
+  .filters-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .filters-head .ft{font-size:12px; font-weight:700; color:var(--navy); display:flex; align-items:center; gap:6px;}
+  .active-badge{background:var(--orange); color:white; font-size:10px; font-weight:700; padding:1px 7px; border-radius:20px; display:none;}
+  .filters-row{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;}
   .f-field{display:flex; flex-direction:column; gap:6px; flex:1; min-width:150px;}
   .f-field label{font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--slate);}
-  .f-field input, .f-field select{border:1.5px solid #DEDBCF; border-radius:10px; padding:10px 12px; font-size:13.5px; background:#FBFAF6; font-family:'Inter'; min-height:40px;}
+  .f-field input, .f-field select{border:1.5px solid #DEDBCF; border-radius:10px; padding:10px 12px; font-size:13.5px; background:#FBFAF6; font-family:'Inter'; min-height:40px; width:100%; color:var(--navy);}
+  .f-field select{appearance:none; background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238891A3' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat:no-repeat; background-position:right 10px center; background-size:16px; padding-right:32px;}
   .f-field input:focus, .f-field select:focus{outline:2px solid var(--orange); outline-offset:1px; border-color:var(--orange);}
   .clear-btn{background:transparent; border:1.5px solid #DEDBCF; border-radius:10px; padding:10px 14px; font-size:12.5px; font-weight:600; color:var(--navy); min-height:40px; white-space:nowrap;}
-  .clear-btn:hover{border-color:var(--slate);}
+  .clear-btn:hover{border-color:var(--slate); background:#F5F4EF;}
 
-  .result-count{font-size:12px; color:var(--slate); font-weight:600; margin-bottom:12px;}
+  .result-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;}
+  .result-count{font-size:12.5px; color:var(--slate); font-weight:600;}
+  .result-count b{color:var(--navy);}
+  .sort-hint{font-size:11px; color:var(--slate-light); font-weight:500;}
 
   .import-bar{background:#FFF8EE; border:1.5px solid #F5E2B8; border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap; margin-bottom:16px;}
   .import-title{font-weight:700; font-size:13px; margin-bottom:3px;}
@@ -54,39 +76,68 @@
   .btn-import:hover{filter:brightness(1.1);}
   .btn-import:disabled{opacity:.6; pointer-events:none;}
 
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px;}
-  .pcard{background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column;}
+  /* ---------- grid / cards ---------- */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px;}
+  .pcard{background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; border:1px solid var(--line); transition:box-shadow .18s ease, transform .18s ease;}
+  .pcard:hover{box-shadow:var(--shadow-md); transform:translateY(-2px);}
+  .pcard.is-new{animation:newglow 2.4s ease;}
+  @keyframes newglow{0%{box-shadow:0 0 0 3px rgba(0,200,150,.55), var(--shadow-md);}100%{box-shadow:var(--shadow-sm);}}
   .pcard .thumb-wrap{position:relative; width:100%; aspect-ratio:4/3; background:#EFEDE4; overflow:hidden;}
-  .pcard .thumb-wrap img{width:100%; height:100%; object-fit:cover; display:block; cursor:pointer; opacity:0; transition:opacity .25s ease;}
+  .pcard .thumb-wrap img{width:100%; height:100%; object-fit:cover; display:block; cursor:pointer; opacity:0; transition:opacity .25s ease, transform .3s ease;}
   .pcard .thumb-wrap img.loaded{opacity:1;}
+  .pcard .thumb-wrap:hover img.loaded{transform:scale(1.04);}
   .pcard .thumb-wrap .img-skel{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;}
+  .pcard .time-chip{position:absolute; top:8px; left:8px; background:rgba(14,21,38,.72); backdrop-filter:blur(3px); color:#fff; font-size:10.5px; font-weight:600; padding:4px 9px; border-radius:20px; display:flex; align-items:center; gap:4px; pointer-events:none;}
+  .pcard .new-chip{position:absolute; top:8px; right:8px; background:var(--mint); color:#fff; font-size:9.5px; font-weight:700; padding:3px 8px; border-radius:20px; letter-spacing:.03em; text-transform:uppercase; pointer-events:none;}
   .pcard .body{padding:11px 12px 12px; display:flex; flex-direction:column; gap:4px; flex:1;}
   .pcard .cust{font-weight:700; font-size:13.5px;}
-  .pcard .addr{font-size:11.5px; color:var(--slate); line-height:1.4; min-height:15px;}
+  .pcard .addr{font-size:11.5px; color:var(--slate); line-height:1.4; min-height:15px; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
   .pcard .meta{font-size:11px; color:#5B6178; display:flex; flex-direction:column; gap:2px; margin-top:2px;}
   .pcard .meta b{color:var(--navy);}
+  .pcard .meta .date-full{font-family:'JetBrains Mono'; font-size:10.5px; color:var(--slate);}
   .pcard .row-btns{display:flex; gap:7px; margin-top:9px;}
   .pcard .row-btns button, .pcard .row-btns a{flex:1; text-align:center; border-radius:8px; padding:8px 6px; font-size:11.5px; font-weight:700; border:none; text-decoration:none;}
   .pcard .open-btn{background:#F5F4EF; color:var(--navy); border:1px solid #DEDBCF !important;}
+  .pcard .open-btn:hover{background:#EDEBE2;}
   .pcard .del-btn{background:transparent; color:var(--danger); border:1px solid #F3D3D3 !important;}
   .pcard .del-btn:hover{background:#FFF2F3;}
 
   .empty-state, .loading-state{text-align:center; color:var(--slate); font-size:13px; font-weight:600; padding:60px 16px;}
+  .empty-state .ico{font-size:34px; margin-bottom:10px; display:block;}
 
   @keyframes rb-spin{to{transform:rotate(360deg);}}
   .rb-spinner{width:22px; height:22px; border-radius:50%; border:2.5px solid rgba(16,25,46,.15); border-top-color:var(--orange); display:inline-block; animation:rb-spin .7s linear infinite;}
   .rb-spinner.sm{width:14px; height:14px; border-width:2px;}
   .loading-state{display:flex; flex-direction:column; align-items:center; gap:12px;}
 
+  /* ---------- load more / pagination ---------- */
+  #loadMoreWrap{display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:22px;}
+  .load-more-btn{background:var(--card); border:1.5px solid var(--line); color:var(--navy); font-weight:700; font-size:13px; padding:11px 22px; border-radius:12px; box-shadow:var(--shadow-sm); display:flex; align-items:center; gap:8px;}
+  .load-more-btn:hover{border-color:var(--orange); color:var(--orange-dark);}
+  .load-more-hint{font-size:11px; color:var(--slate-light);}
+  #sentinel{height:1px;}
+
+  /* ---------- lightbox ---------- */
   .lightbox{position:fixed; inset:0; background:rgba(6,10,20,.92); z-index:3000; display:none; align-items:center; justify-content:center; padding:24px; padding-top:calc(24px + var(--safe-t)); padding-bottom:calc(24px + var(--safe-b));}
   .lightbox.show{display:flex;}
   .lightbox img{max-width:100%; max-height:80vh; border-radius:10px; box-shadow:0 20px 60px rgba(0,0,0,.5);}
   .lightbox .lb-close{position:absolute; top:calc(16px + var(--safe-t)); right:16px; background:rgba(255,255,255,.12); color:white; border:none; width:38px; height:38px; border-radius:50%; font-size:18px;}
   .lightbox .lb-cap{color:#D8DBE0; font-size:12.5px; margin-top:12px; text-align:center;}
+  .lightbox .lb-time{color:#8FE9CE; font-size:11.5px; margin-top:4px; text-align:center; font-family:'JetBrains Mono';}
+
+  /* ---------- toast ---------- */
+  #toastStack{position:fixed; top:calc(70px + var(--safe-t)); right:16px; z-index:4000; display:flex; flex-direction:column; gap:8px; align-items:flex-end;}
+  .toast{background:var(--navy); color:#fff; padding:11px 16px; border-radius:12px; box-shadow:var(--shadow-lg); font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:9px; max-width:300px; animation:toastin .25s ease;}
+  .toast .tdot{width:8px; height:8px; border-radius:50%; background:var(--mint); flex-shrink:0;}
+  @keyframes toastin{from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);}}
+  .toast.leaving{animation:toastout .25s ease forwards;}
+  @keyframes toastout{to{opacity:0; transform:translateX(20px);}}
 
   @media (max-width:520px){
-    .filters{flex-direction:column; align-items:stretch;}
+    .filters-row{flex-direction:column; align-items:stretch;}
     .f-field{min-width:0;}
+    #toastStack{left:12px; right:12px; align-items:stretch;}
+    .toast{max-width:none;}
   }
 </style>
 </head>
@@ -94,33 +145,56 @@
 
 <div id="topbar">
   <div class="brand"><span class="dot"></span>Anadi</div>
+  <div class="live-pill"><span class="pulse"></span>Live</div>
   <button id="backBtn">← Back to Admin</button>
 </div>
 
+<div id="toastStack"></div>
+
 <div class="wrap">
   <div class="page-title">📷 Delivery Photos</div>
-  <div class="page-sub">Har delivery proof photo — kisne deliver ki, kiske yaha, kab click hui — sab yaha milega.</div>
+  <div class="page-sub">Har delivery proof photo — kisne deliver ki, kiske yaha, kab click hui — sab yaha realtime milega.</div>
+
+  <div class="stats" id="statsRow">
+    <div class="stat-card"><div class="n" id="statTotal">—</div><div class="l">Total Photos</div></div>
+    <div class="stat-card accent"><div class="n" id="statToday">—</div><div class="l">Today</div></div>
+    <div class="stat-card mint"><div class="n" id="statWeek">—</div><div class="l">This Week</div></div>
+    <div class="stat-card"><div class="n" id="statBoys">—</div><div class="l">Delivery Boys</div></div>
+  </div>
 
   <div class="filters">
-    <div class="f-field">
-      <label>Search</label>
-      <input type="text" id="searchInput" placeholder="Customer ya delivery boy ka naam...">
+    <div class="filters-head">
+      <div class="ft">🔍 Filters <span class="active-badge" id="activeBadge">0</span></div>
     </div>
-    <div class="f-field">
-      <label>Month</label>
-      <input type="month" id="monthInput">
-    </div>
-    <div class="f-field">
-      <label>From date</label>
-      <input type="date" id="fromInput">
-    </div>
-    <div class="f-field">
-      <label>To date</label>
-      <input type="date" id="toInput">
-    </div>
-    <div class="f-field" style="flex:0 0 auto; min-width:0;">
-      <label>&nbsp;</label>
-      <button class="clear-btn" id="clearFiltersBtn">Clear filters</button>
+    <div class="filters-row">
+      <div class="f-field" style="flex:1.4; min-width:180px;">
+        <label>Search</label>
+        <input type="text" id="searchInput" placeholder="Naam ya address se search karo...">
+      </div>
+      <div class="f-field">
+        <label>Customer</label>
+        <select id="customerSelect"><option value="">Sab customers</option></select>
+      </div>
+      <div class="f-field">
+        <label>Delivery Boy</label>
+        <select id="boySelect"><option value="">Sab delivery boys</option></select>
+      </div>
+      <div class="f-field">
+        <label>Month</label>
+        <input type="month" id="monthInput">
+      </div>
+      <div class="f-field">
+        <label>From date</label>
+        <input type="date" id="fromInput">
+      </div>
+      <div class="f-field">
+        <label>To date</label>
+        <input type="date" id="toInput">
+      </div>
+      <div class="f-field" style="flex:0 0 auto; min-width:0;">
+        <label>&nbsp;</label>
+        <button class="clear-btn" id="clearFiltersBtn">✕ Clear filters</button>
+      </div>
     </div>
   </div>
 
@@ -132,10 +206,18 @@
     <button class="btn-import" id="importBtn">🔄 Import existing photos</button>
   </div>
 
-  <div id="resultCount" class="result-count"></div>
+  <div class="result-bar">
+    <div id="resultCount" class="result-count"></div>
+    <div class="sort-hint">Newest first</div>
+  </div>
   <div id="loadingState" class="loading-state"><span class="rb-spinner"></span>Loading photos…</div>
-  <div id="emptyState" class="empty-state" style="display:none;">No photos match these filters.</div>
+  <div id="emptyState" class="empty-state" style="display:none;"><span class="ico">🗂️</span>No photos match these filters.</div>
   <div id="grid" class="grid"></div>
+  <div id="loadMoreWrap" style="display:none;">
+    <button class="load-more-btn" id="loadMoreBtn">Load 50 more photos ↓</button>
+    <div class="load-more-hint" id="loadMoreHint"></div>
+  </div>
+  <div id="sentinel"></div>
 </div>
 
 <div class="lightbox" id="lightbox">
@@ -143,6 +225,7 @@
   <div style="display:flex; flex-direction:column; align-items:center;">
     <img id="lbImg" src="">
     <div class="lb-cap" id="lbCap"></div>
+    <div class="lb-time" id="lbTime"></div>
   </div>
 </div>
 
@@ -183,20 +266,89 @@ function fmtDateTime(ts){
   if (!ts) return '—';
   return new Date(ts).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
+function fmtTime(ts){
+  if (!ts) return '—';
+  return new Date(ts).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+}
+function fmtDate(ts){
+  if (!ts) return '';
+  return new Date(ts).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+function isToday(ts){
+  if (!ts) return false;
+  const d = new Date(ts), n = new Date();
+  return d.getDate()===n.getDate() && d.getMonth()===n.getMonth() && d.getFullYear()===n.getFullYear();
+}
+function isThisWeek(ts){
+  if (!ts) return false;
+  const now = Date.now();
+  return (now - ts) <= 7*24*60*60*1000;
+}
 
-let allPhotos = [];   // full list from Firebase, newest first
+const PAGE_SIZE = 50;
+let allPhotos = [];        // full list from Firebase, newest first
 let firstLoad = true;
+let knownIds = new Set();  // ids we've already rendered once (to detect genuinely new realtime arrivals)
+let visibleLimit = PAGE_SIZE;
 
 onValue(ref(db, 'deliveryPhotos'), (snap)=>{
   const val = snap.val() || {};
-  allPhotos = Object.keys(val)
-    .map(id => ({ id, ...val[id] }))
-    .sort((a,b) => (b.ts||0) - (a.ts||0));
+  const fresh = Object.keys(val).map(id => ({ id, ...val[id] })).sort((a,b) => (b.ts||0) - (a.ts||0));
+
+  if (!firstLoad){
+    // Detect newly-arrived photos (real deliveries clicked just now) to toast about.
+    const newlyArrived = fresh.filter(p => !knownIds.has(p.id) && !p.importedFromCustomerRecord);
+    if (newlyArrived.length === 1){
+      showToast(`📸 New photo — ${newlyArrived[0].custName || 'customer'} (${newlyArrived[0].boyName || 'delivery boy'})`);
+    } else if (newlyArrived.length > 1){
+      showToast(`📸 ${newlyArrived.length} new delivery photos aayi hain`);
+    }
+    newlyArrived.forEach(p => recentlyAdded.add(p.id));
+  }
+
+  allPhotos = fresh;
+  knownIds = new Set(fresh.map(p => p.id));
   document.getElementById('loadingState').style.display = 'none';
   firstLoad = false;
+  populateFilterOptions();
+  updateStats();
   render();
   updateImportBarVisibility();
 });
+
+const recentlyAdded = new Set(); // ids to flag with a "NEW" chip / glow for this session
+
+function updateStats(){
+  document.getElementById('statTotal').textContent = allPhotos.length;
+  document.getElementById('statToday').textContent = allPhotos.filter(p => isToday(p.ts)).length;
+  document.getElementById('statWeek').textContent = allPhotos.filter(p => isThisWeek(p.ts)).length;
+  const boys = new Set(allPhotos.filter(p=>p.boyId).map(p=>p.boyId));
+  document.getElementById('statBoys').textContent = boys.size;
+}
+
+function populateFilterOptions(){
+  const custSel = document.getElementById('customerSelect');
+  const boySel = document.getElementById('boySelect');
+  const prevCust = custSel.value, prevBoy = boySel.value;
+
+  const custMap = new Map(); // custId -> name
+  const boyMap = new Map();  // boyId -> name
+  allPhotos.forEach(p=>{
+    if (p.custId && !custMap.has(p.custId)) custMap.set(p.custId, p.custName || 'Unknown');
+    if (p.boyId && !boyMap.has(p.boyId)) boyMap.set(p.boyId, p.boyName || 'Unknown');
+  });
+
+  const custOptions = [...custMap.entries()].sort((a,b)=> a[1].localeCompare(b[1]));
+  const boyOptions = [...boyMap.entries()].sort((a,b)=> a[1].localeCompare(b[1]));
+
+  custSel.innerHTML = '<option value="">Sab customers</option>' +
+    custOptions.map(([id,name]) => `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`).join('');
+  boySel.innerHTML = '<option value="">Sab delivery boys</option>' +
+    boyOptions.map(([id,name]) => `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`).join('');
+
+  if ([...custMap.keys()].includes(prevCust)) custSel.value = prevCust;
+  if ([...boyMap.keys()].includes(prevBoy)) boySel.value = prevBoy;
+}
 
 // The photo log (deliveryPhotos) only started being written to from this
 // update onward. Older deliveries still have their one saved photo sitting
@@ -264,12 +416,43 @@ function showBanner(msg, isErr){
   setTimeout(()=>{ sub.textContent = orig; sub.style.color = ''; }, 4000);
 }
 
+// ---------- toast ----------
+function showToast(msg){
+  const stack = document.getElementById('toastStack');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<span class="tdot"></span><span>${escapeHtml(msg)}</span>`;
+  stack.appendChild(el);
+  setTimeout(()=>{
+    el.classList.add('leaving');
+    setTimeout(()=> el.remove(), 260);
+  }, 4200);
+}
+
+// ---------- filtering ----------
+function countActiveFilters(){
+  let n = 0;
+  if (document.getElementById('searchInput').value.trim()) n++;
+  if (document.getElementById('customerSelect').value) n++;
+  if (document.getElementById('boySelect').value) n++;
+  if (document.getElementById('monthInput').value) n++;
+  if (document.getElementById('fromInput').value) n++;
+  if (document.getElementById('toInput').value) n++;
+  return n;
+}
+
 function matchesFilters(p){
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
   if (q){
     const hay = ((p.custName||'') + ' ' + (p.boyName||'') + ' ' + (p.custAddress||'')).toLowerCase();
     if (!hay.includes(q)) return false;
   }
+  const custId = document.getElementById('customerSelect').value;
+  if (custId && p.custId !== custId) return false;
+
+  const boyId = document.getElementById('boySelect').value;
+  if (boyId && p.boyId !== boyId) return false;
+
   const month = document.getElementById('monthInput').value; // "YYYY-MM"
   if (month && p.ts){
     const d = new Date(p.ts);
@@ -284,26 +467,40 @@ function matchesFilters(p){
 }
 
 function render(){
+  const badge = document.getElementById('activeBadge');
+  const activeN = countActiveFilters();
+  badge.textContent = activeN;
+  badge.style.display = activeN ? 'inline-block' : 'none';
+
   const filtered = allPhotos.filter(matchesFilters);
   const grid = document.getElementById('grid');
   const emptyState = document.getElementById('emptyState');
   const resultCount = document.getElementById('resultCount');
+  const loadMoreWrap = document.getElementById('loadMoreWrap');
+  const loadMoreHint = document.getElementById('loadMoreHint');
 
-  resultCount.textContent = firstLoad ? '' : `${filtered.length} photo${filtered.length===1?'':'s'}`;
+  resultCount.innerHTML = firstLoad ? '' : `<b>${filtered.length}</b> photo${filtered.length===1?'':'s'} found`;
 
   if (!filtered.length){
     grid.innerHTML = '';
+    loadMoreWrap.style.display = 'none';
     emptyState.style.display = firstLoad ? 'none' : 'block';
     return;
   }
   emptyState.style.display = 'none';
 
+  // Only render up to visibleLimit — 50 photos load karte hain at a time so the
+  // browser never has to decode/paint hundreds of images at once.
+  const slice = filtered.slice(0, visibleLimit);
+
   // Lazy-loaded images + a lightweight skeleton per card keep this smooth
   // even with a large photo history — nothing blocks the main thread.
-  grid.innerHTML = filtered.map(p => `
-    <div class="pcard" data-id="${p.id}">
+  grid.innerHTML = slice.map(p => `
+    <div class="pcard ${recentlyAdded.has(p.id) ? 'is-new' : ''}" data-id="${p.id}">
       <div class="thumb-wrap">
         <div class="img-skel"><span class="rb-spinner sm"></span></div>
+        <span class="time-chip">🕒 ${fmtTime(p.ts)}</span>
+        ${recentlyAdded.has(p.id) ? '<span class="new-chip">New</span>' : ''}
         <img src="${escapeHtml(p.url)}" loading="lazy" onload="this.classList.add('loaded')" data-open="${p.id}">
       </div>
       <div class="body">
@@ -311,7 +508,7 @@ function render(){
         <div class="addr">${escapeHtml(p.custAddress || '')}</div>
         <div class="meta">
           <span>Delivered by: <b>${escapeHtml(p.boyName || 'Unknown')}</b></span>
-          <span>${fmtDateTime(p.ts)}</span>
+          <span class="date-full">${fmtDate(p.ts)} · ${fmtTime(p.ts)}</span>
         </div>
         <div class="row-btns">
           <a href="${escapeHtml(p.url)}" target="_blank" class="open-btn">🔍 Full size</a>
@@ -326,7 +523,8 @@ function render(){
       const p = filtered.find(x=>x.id===img.dataset.open);
       if (!p) return;
       document.getElementById('lbImg').src = p.url;
-      document.getElementById('lbCap').textContent = `${p.custName || ''} · delivered by ${p.boyName || 'Unknown'} · ${fmtDateTime(p.ts)}`;
+      document.getElementById('lbCap').textContent = `${p.custName || 'Unknown customer'} · delivered by ${p.boyName || 'Unknown'}`;
+      document.getElementById('lbTime').textContent = `🕒 ${fmtDateTime(p.ts)}`;
       document.getElementById('lightbox').classList.add('show');
     };
   });
@@ -334,7 +532,44 @@ function render(){
   grid.querySelectorAll('button[data-del]').forEach(btn=>{
     btn.onclick = ()=> deletePhoto(btn.dataset.del, btn);
   });
+
+  // pagination controls
+  const remaining = filtered.length - slice.length;
+  if (remaining > 0){
+    loadMoreWrap.style.display = 'flex';
+    loadMoreHint.textContent = `Showing ${slice.length} of ${filtered.length} — ${remaining} more available`;
+  } else {
+    loadMoreWrap.style.display = filtered.length > PAGE_SIZE ? 'flex' : 'none';
+    if (filtered.length > PAGE_SIZE){
+      loadMoreHint.textContent = `Showing all ${filtered.length} photos`;
+      document.getElementById('loadMoreBtn').style.display = 'none';
+    } else {
+      document.getElementById('loadMoreBtn').style.display = '';
+    }
+  }
 }
+
+document.getElementById('loadMoreBtn').onclick = ()=>{
+  visibleLimit += PAGE_SIZE;
+  render();
+};
+
+// Infinite-scroll assist: also load more automatically when the sentinel
+// at the bottom of the page comes into view (Load More button stays as a
+// manual/explicit option too).
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if (e.isIntersecting){
+      const wrap = document.getElementById('loadMoreWrap');
+      const btn = document.getElementById('loadMoreBtn');
+      if (wrap.style.display === 'flex' && btn.style.display !== 'none'){
+        visibleLimit += PAGE_SIZE;
+        render();
+      }
+    }
+  });
+}, { rootMargin: '400px' });
+io.observe(document.getElementById('sentinel'));
 
 async function deletePhoto(id, btn){
   if (!confirm('Ye photo record delete kar dein? Ye undo nahi ho sakta.')) return;
@@ -358,19 +593,26 @@ async function deletePhoto(id, btn){
 
 document.getElementById('lbClose').onclick = ()=> document.getElementById('lightbox').classList.remove('show');
 document.getElementById('lightbox').onclick = (e)=>{ if (e.target.id==='lightbox') document.getElementById('lightbox').classList.remove('show'); };
+document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('show'); });
 
 let debounceTimer = null;
-function scheduleRender(){ clearTimeout(debounceTimer); debounceTimer = setTimeout(render, 150); }
+function scheduleRender(){ clearTimeout(debounceTimer); debounceTimer = setTimeout(()=>{ visibleLimit = PAGE_SIZE; render(); }, 150); }
+function resetAndRender(){ visibleLimit = PAGE_SIZE; render(); }
+
 document.getElementById('searchInput').addEventListener('input', scheduleRender);
-document.getElementById('monthInput').addEventListener('change', render);
-document.getElementById('fromInput').addEventListener('change', render);
-document.getElementById('toInput').addEventListener('change', render);
+document.getElementById('customerSelect').addEventListener('change', resetAndRender);
+document.getElementById('boySelect').addEventListener('change', resetAndRender);
+document.getElementById('monthInput').addEventListener('change', resetAndRender);
+document.getElementById('fromInput').addEventListener('change', resetAndRender);
+document.getElementById('toInput').addEventListener('change', resetAndRender);
 document.getElementById('clearFiltersBtn').onclick = ()=>{
   document.getElementById('searchInput').value = '';
+  document.getElementById('customerSelect').value = '';
+  document.getElementById('boySelect').value = '';
   document.getElementById('monthInput').value = '';
   document.getElementById('fromInput').value = '';
   document.getElementById('toInput').value = '';
-  render();
+  resetAndRender();
 };
 </script>
 </body>
