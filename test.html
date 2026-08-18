@@ -1,727 +1,2601 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shaswat Mishra — UI/UX & Product Designer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0E1526">
+<!-- Manifest Link -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f172a">
 
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+<!-- Service Worker Register Script -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker Registered!', reg))
+        .catch(err => console.log('Service Worker Failed!', err));
+    });
+  }
+</script>
+<title>Anadi — Delivery Tracking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0E1526; --navy-2:#141D33; --paper:#F6F5F0; --card:#FFFFFF;
+    --orange:#FF5A36; --orange-dark:#E64A28;
+    --mint:#00C896; --mint-dark:#00A67D;
+    --slate:#8891A3; --slate-light:#B9BFCB; --line:#EAE7DC; --line-dark:#26314E;
+    --danger:#FF4D5E;
+    --morning:#FFAB2E; --evening:#7C6FF0;
+    --radius-sm:8px; --radius:14px; --radius-lg:20px;
+    --shadow-sm:0 2px 8px rgba(16,25,46,.07);
+    --shadow-md:0 8px 22px rgba(16,25,46,.10);
+    --shadow-lg:0 20px 50px rgba(16,25,46,.24);
+    --safe-b:env(safe-area-inset-bottom,0px);
+    --safe-t:env(safe-area-inset-top,0px);
+    --toggle-h:66px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:'Inter', sans-serif; background:var(--paper); color:var(--navy); height:100vh; overflow:hidden; display:flex; flex-direction:column; font-size:14.5px; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Space Grotesk', sans-serif;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  button{font-family:inherit;}
+  a{color:inherit;}
+  ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:#DEDBCF; border-radius:4px;}
+  :focus-visible{outline:2px solid var(--orange); outline-offset:2px; border-radius:4px;}
+  @media (hover:hover){
+    .btn:hover{filter:brightness(1.04);}
+    .boy-card:hover, .stop:hover{background:#FBFAF6;}
+  }
 
-    :root {
-      --gold: #c9a84c;
-      --gold-light: #e8c97a;
-      --gold-dim: #8a6b2a;
-      --gold-glow: rgba(201,168,76,0.18);
-      --bg: #09090b;
-      --bg2: #0e0e11;
-      --bg3: #131318;
-      --surface: #1a1a22;
-      --border: rgba(201,168,76,0.18);
-      --border-soft: rgba(201,168,76,0.08);
-      --text: #e2ddd6;
-      --muted: #6a6560;
-      --white: #f5f0e8;
-      --font-display: 'Cormorant Garamond', serif;
-      --font-body: 'DM Sans', sans-serif;
-      --font-mono: 'Space Mono', monospace;
-    }
+  /* ================= LOGIN SCREEN ================= */
+  #loginScreen{position:fixed; inset:0; background:radial-gradient(circle at 20% 15%, #1A2745 0%, var(--navy) 55%, #070B14 100%); z-index:2000; display:flex; align-items:center; justify-content:center; padding:20px; padding-top:calc(20px + var(--safe-t)); padding-bottom:calc(20px + var(--safe-b));}
+  .login-card{background:var(--card); width:100%; max-width:400px; border-radius:22px; padding:30px 26px 28px; box-shadow:0 30px 70px rgba(0,0,0,.45);}
+  .login-brand{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk'; font-weight:700; font-size:21px; margin-bottom:5px;}
+  .login-brand .dot{width:11px; height:11px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 5px rgba(255,90,54,.18);}
+  .login-sub{font-size:13px; color:var(--slate); margin-bottom:24px;}
+  .role-grid{display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:20px;}
+  .role-opt{border:2px solid #EEECE2; background:#FBFAF6; border-radius:16px; padding:20px 12px; text-align:center; cursor:pointer; transition:border-color .12s ease, background .12s ease, transform .1s ease;}
+  .role-opt:active{transform:scale(.97);}
+  .role-opt:hover{border-color:#DEDBCF;}
+  .role-opt.selected{border-color:var(--orange); background:#FDECE5;}
+  .role-opt .ic{font-size:30px; display:block; margin-bottom:9px;}
+  .role-opt .lbl{font-weight:700; font-size:14px;}
+  .role-opt .sub2{font-size:11px; color:var(--slate); margin-top:3px; line-height:1.4;}
+  .login-step{display:none;}
+  .login-step.show{display:block;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--slate); margin-bottom:7px;}
+  .field input, .field select{width:100%; border:1.5px solid #DEDBCF; border-radius:11px; padding:13px 14px; font-size:16px; background:#FBFAF6; font-family:'Inter'; -webkit-appearance:none;}
+  .field input:focus, .field select:focus{outline:2px solid var(--orange); outline-offset:1px; border-color:var(--orange);}
+  .login-err{font-size:12.5px; color:var(--danger); font-weight:600; margin:-6px 0 12px; display:none;}
+  .login-err.show{display:block;}
+  .btn{border:none; border-radius:11px; padding:14px 16px; font-weight:700; font-size:14.5px; cursor:pointer; transition:transform .1s ease, opacity .15s ease, filter .12s ease; min-height:46px;}
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--orange); color:white; width:100%; box-shadow:0 8px 20px rgba(255,90,54,.28);}
+  .btn-ghost{background:transparent; color:var(--navy); border:1.5px solid #DEDBCF;}
+  .btn-mint{background:var(--mint); color:white;}
+  .btn-danger{background:transparent; color:var(--danger); border:1.5px solid #F3D3D3;}
+  .btn-sm{padding:9px 13px; font-size:12.5px; min-height:38px;}
+  .back-link{font-size:12.5px; color:var(--slate); font-weight:600; cursor:pointer; margin-bottom:16px; display:inline-block; padding:4px 0;}
+  .back-link:hover{color:var(--navy);}
+  .hint{font-size:12px; color:var(--slate); margin-top:8px; line-height:1.5;}
 
-    html { scroll-behavior: smooth; overflow-x: hidden; }
-    body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: 300; overflow-x: hidden; cursor: none; }
+  /* ---------------- TOPBAR ---------------- */
+  #topbar{min-height:56px; background:var(--navy); display:flex; align-items:center; justify-content:space-between; padding:10px 14px; padding-top:calc(10px + var(--safe-t)); color:white; gap:12px; flex-shrink:0;}
+  #topbar .brand{display:flex; align-items:center; gap:9px; font-family:'Space Grotesk'; font-weight:700; font-size:16px; flex-shrink:0;}
+  #topbar .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 4px rgba(255,90,54,.2);}
+  #whoami{display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--slate); margin-left:auto;}
+  #whoami .badge-color{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  #whoami b{color:white; font-weight:600;}
+  #whoami button{background:transparent; border:1px solid var(--line-dark); color:var(--slate); font-size:11.5px; padding:8px 12px; border-radius:9px; cursor:pointer; font-weight:600; white-space:nowrap; min-height:36px;}
+  #whoami button:hover{color:white; border-color:var(--slate);}
+  .live-dot{width:8px; height:8px; border-radius:50%; background:var(--mint); flex-shrink:0; animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,200,150,.5);} 70%{box-shadow:0 0 0 7px rgba(0,200,150,0);} 100%{box-shadow:0 0 0 0 rgba(0,200,150,0);}}
 
-    /* ─── CURSOR ─── */
-    #cursor { position: fixed; top:0; left:0; z-index:9999; width:10px; height:10px; background:var(--gold); border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); transition:width .2s,height .2s; mix-blend-mode:normal; }
-    #cursor-ring { position:fixed; top:0; left:0; z-index:9998; width:34px; height:34px; border:1px solid rgba(201,168,76,0.5); border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); transition:width .3s,height .3s,border-color .3s; }
-    @media(max-width:900px){ #cursor,#cursor-ring{display:none} body{cursor:auto} }
+  /* ---------------- LAYOUT ---------------- */
+  #app{display:flex; flex:1; min-height:0; overflow:hidden;}
+  #sidebar{width:400px; min-width:400px; background:var(--card); border-right:1px solid #E4E1D6; display:flex; flex-direction:column; overflow:hidden;}
+  #mapWrap{flex:1; position:relative; min-width:0;}
+  #map{width:100%; height:100%;}
+  @media(min-width:1200px){ #sidebar{width:440px; min-width:440px;} }
 
-    /* ─── NOISE ─── */
-    body::before { content:''; position:fixed; inset:0; z-index:9997; pointer-events:none; opacity:.25;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E"); }
+  .tabbar{display:flex; gap:4px; padding:10px 12px 0 12px; border-bottom:1px solid #EEECE2; overflow-x:auto; flex-shrink:0;}
+  .tabbar button{flex:1; border:none; background:transparent; color:var(--slate); font-weight:700; font-size:12px; padding:11px 4px; border-radius:9px 9px 0 0; cursor:pointer; white-space:nowrap; min-height:42px;}
+  .tabbar button.active{color:var(--navy); box-shadow:0 -2.5px 0 var(--orange) inset;}
+  .scroll-area{flex:1; overflow-y:auto; padding:16px 16px calc(16px + var(--safe-b)); -webkit-overflow-scrolling:touch;}
 
-    ::-webkit-scrollbar { width:3px; }
-    ::-webkit-scrollbar-track { background:var(--bg); }
-    ::-webkit-scrollbar-thumb { background:var(--gold); border-radius:2px; }
+  .section-title{font-size:11.5px; font-weight:700; color:var(--slate); text-transform:uppercase; letter-spacing:.06em; margin:4px 0 10px;}
 
-    /* ─── LOADER ─── */
-    #loader { position:fixed; inset:0; z-index:9000; background:var(--bg); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:28px; transition:opacity .8s,visibility .8s; }
-    #loader.hide { opacity:0; visibility:hidden; }
-    .loader-name { font-family:var(--font-display); font-size:clamp(52px,9vw,110px); font-weight:300; color:var(--white); letter-spacing:.08em; overflow:hidden; display:flex; gap:.04em; }
-    .loader-name span { display:inline-block; transform:translateY(110%); animation:lSlide .9s cubic-bezier(.16,1,.3,1) forwards; }
-    .loader-name .g { color:var(--gold); }
-    .loader-name span:nth-child(1){animation-delay:.05s}
-    .loader-name span:nth-child(2){animation-delay:.12s}
-    .loader-name span:nth-child(3){animation-delay:.19s}
-    .loader-name span:nth-child(4){animation-delay:.26s}
-    .loader-name span:nth-child(5){animation-delay:.33s}
-    .loader-name span:nth-child(6){animation-delay:.40s}
-    .loader-name span:nth-child(7){animation-delay:.47s}
-    @keyframes lSlide { to { transform:translateY(0) } }
-    .loader-rule { width:160px; height:1px; background:var(--surface); overflow:hidden; border-radius:1px; }
-    .loader-fill { height:100%; background:linear-gradient(to right,var(--gold-dim),var(--gold)); width:0%; animation:lFill 2s cubic-bezier(.4,0,.2,1) forwards .3s; }
-    @keyframes lFill { to { width:100% } }
-    .loader-pct { font-family:var(--font-mono); font-size:10px; color:var(--muted); letter-spacing:.18em; }
+  .field-row{display:flex; gap:8px;}
+  .field-row .field{flex:1; min-width:0;}
 
-    /* ─── NAV ─── */
-    nav { position:fixed; top:0; left:0; right:0; z-index:100; padding:22px 5vw; display:flex; align-items:center; justify-content:space-between; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); background:rgba(9,9,11,.7); border-bottom:1px solid transparent; transition:border-color .3s; }
-    nav.scrolled { border-color:var(--border); }
-    .nav-logo { font-family:var(--font-display); font-size:20px; font-weight:300; letter-spacing:.18em; color:var(--white); text-decoration:none; display:flex; align-items:center; gap:10px; }
-    .nav-dot { width:7px; height:7px; background:var(--gold); border-radius:50%; box-shadow:0 0 12px var(--gold); animation:goldPulse 2.5s ease-in-out infinite; }
-    @keyframes goldPulse { 0%,100%{box-shadow:0 0 6px var(--gold)} 50%{box-shadow:0 0 18px var(--gold),0 0 32px rgba(201,168,76,.3)} }
-    .nav-links { display:flex; align-items:center; gap:36px; list-style:none; }
-    .nav-links a { font-size:11px; font-weight:400; letter-spacing:.14em; color:var(--muted); text-decoration:none; text-transform:uppercase; position:relative; transition:color .3s; }
-    .nav-links a::after { content:''; position:absolute; bottom:-4px; left:0; width:0; height:1px; background:var(--gold); transition:width .4s ease; }
-    .nav-links a:hover { color:var(--gold); }
-    .nav-links a:hover::after { width:100%; }
-    .nav-cta { padding:9px 22px; border:1px solid var(--border) !important; color:var(--gold) !important; border-radius:2px; font-family:var(--font-mono) !important; }
-    .nav-cta:hover { background:rgba(201,168,76,.1) !important; }
-    .nav-cta::after { display:none !important; }
+  .loc-mode-tabs{display:flex; gap:6px; margin-bottom:10px;}
+  .loc-mode-tabs button{flex:1; border:1.5px solid #DEDBCF; background:#FBFAF6; color:var(--slate); font-weight:700; font-size:11.5px; padding:10px 6px; border-radius:10px; cursor:pointer; min-height:40px;}
+  .loc-mode-tabs button.active{background:var(--navy); color:white; border-color:var(--navy);}
 
-    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; z-index:200; }
-    .hamburger span { display:block; width:24px; height:1px; background:var(--text); transition:all .3s; }
-    .hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
-    .hamburger.open span:nth-child(2){opacity:0}
-    .hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
-    .mobile-menu { display:none; position:fixed; inset:0; z-index:150; background:var(--bg); flex-direction:column; align-items:center; justify-content:center; gap:48px; }
-    .mobile-menu.open { display:flex; }
-    .mobile-menu a { font-family:var(--font-display); font-size:52px; font-weight:300; letter-spacing:.1em; color:var(--white); text-decoration:none; transition:color .3s; }
-    .mobile-menu a:hover { color:var(--gold); }
+  .shift-tabs{display:flex; gap:8px; margin-bottom:14px;}
+  .shift-tabs button{flex:1; border:2px solid #EEECE2; background:#FBFAF6; color:var(--slate); font-weight:700; font-size:13px; padding:12px 6px; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; min-height:46px;}
+  .shift-tabs button .sw{width:8px; height:8px; border-radius:50%;}
+  .shift-tabs button.active.morning{background:#FEF3E2; border-color:var(--morning); color:#8A5A0E;}
+  .shift-tabs button.active.evening{background:#ECEBFB; border-color:var(--evening); color:#3F3AA3;}
 
-    /* ─── 3D CANVAS ─── */
-    #three-hero { position:absolute; inset:0; z-index:0; pointer-events:none; }
-    #three-about { position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.7; }
-    #three-contact { position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.5; }
+  .stats-row{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:14px;}
+  .stat-card{background:var(--navy); color:white; border-radius:var(--radius); padding:13px 14px;}
+  .stat-card .num{font-family:'JetBrains Mono'; font-size:22px; font-weight:600;}
+  .stat-card .label{font-size:10.5px; color:var(--slate); text-transform:uppercase; letter-spacing:.05em; margin-top:3px;}
 
-    /* ─── HERO ─── */
-    #hero { min-height:100vh; display:flex; flex-direction:column; justify-content:flex-end; padding:0 5vw 8vh; position:relative; overflow:hidden; }
-    .hero-radial { position:absolute; inset:0; z-index:0;
-      background:radial-gradient(ellipse 70% 55% at 75% 45%, rgba(201,168,76,.06) 0%, transparent 65%),
-                 radial-gradient(ellipse 40% 40% at 15% 75%, rgba(201,168,76,.03) 0%, transparent 55%); }
-    .hero-eyebrow { font-family:var(--font-mono); font-size:10px; color:var(--gold); letter-spacing:.24em; text-transform:uppercase; margin-bottom:24px; display:flex; align-items:center; gap:14px; position:relative; z-index:1; opacity:0; transform:translateY(18px); animation:fadeUp .8s 2s cubic-bezier(.16,1,.3,1) forwards; }
-    .hero-eyebrow::before { content:''; display:inline-block; width:36px; height:1px; background:var(--gold); }
+  /* --- Start Route CTA (delivery boy signature action) --- */
+  .start-route-btn{display:flex; align-items:center; justify-content:center; gap:9px; width:100%; background:linear-gradient(135deg,var(--orange),#FF7D53); color:white; border:none; border-radius:16px; padding:17px; font-size:15px; font-weight:700; cursor:pointer; box-shadow:0 10px 26px rgba(255,90,54,.35); margin-bottom:16px; min-height:56px;}
+  .start-route-btn:active{transform:scale(.97);}
+  .start-route-btn .pulse-ic{width:9px; height:9px; border-radius:50%; background:white; animation:pulse 1.4s infinite; box-shadow:0 0 0 0 rgba(255,255,255,.6);}
 
-    .hero-name { font-family:var(--font-display); font-size:clamp(80px,14vw,220px); line-height:.88; letter-spacing:-.01em; font-weight:300; color:var(--white); position:relative; z-index:1; }
-    .hero-name .ln { overflow:hidden; display:block; }
-    .hero-name .li { display:block; transform:translateY(110%); animation:slideUp .95s cubic-bezier(.16,1,.3,1) forwards; }
-    .hero-name .ln:nth-child(1) .li { animation-delay:2.1s }
-    .hero-name .ln:nth-child(2) .li { animation-delay:2.25s }
-    .hero-name .acc { color:var(--gold); font-style:italic; }
+  .boy-card{background:#FBFAF6; border:1px solid #EEECE2; border-radius:14px; padding:14px; margin-bottom:10px; cursor:pointer; transition:border-color .12s ease, background .12s ease;}
+  .boy-card:active{transform:scale(.99);}
+  .boy-card:hover{border-color:var(--orange);}
+  .boy-card .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; gap:6px;}
+  .boy-name{display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px;}
+  .boy-swatch{width:11px; height:11px; border-radius:50%; flex-shrink:0;}
+  .online-pill{font-size:10px; font-weight:700; padding:4px 9px; border-radius:999px; font-family:'JetBrains Mono'; white-space:nowrap;}
+  .online-pill.on{background:#E4F8F3; color:#1D9E86;}
+  .online-pill.off{background:#F0EEE4; color:var(--slate);}
+  .boy-mini-stats{display:flex; gap:13px; font-size:11.5px; color:var(--slate); flex-wrap:wrap; margin-bottom:7px;}
+  .boy-mini-stats b{color:var(--navy); font-family:'JetBrains Mono';}
+  .shift-mini-row{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:7px;}
+  .shift-mini{font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:999px; font-family:'JetBrains Mono';}
+  .shift-mini.morning{background:#FEF3E2; color:#8A5A0E;}
+  .shift-mini.evening{background:#ECEBFB; color:#3F3AA3;}
+  .heading-to{font-size:11.5px; background:#FDECE5; color:var(--orange-dark); padding:6px 10px; border-radius:9px; font-weight:700; margin-top:7px;}
+  .boy-card-actions{display:flex; gap:7px; margin-top:10px; flex-wrap:wrap;}
+  .boy-card-actions .btn{flex:1 1 auto; min-width:100px;}
 
-    .hero-foot { margin-top:36px; display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:24px; position:relative; z-index:1; }
-    .hero-desc { max-width:400px; font-size:14px; line-height:1.8; color:var(--muted); opacity:0; transform:translateY(22px); animation:fadeUp .8s 2.5s cubic-bezier(.16,1,.3,1) forwards; }
-    .hero-desc strong { color:var(--text); font-weight:400; }
-    .hero-btns { display:flex; gap:14px; flex-wrap:wrap; opacity:0; transform:translateY(22px); animation:fadeUp .8s 2.65s cubic-bezier(.16,1,.3,1) forwards; }
+  .zone-tag{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EFEFF5; color:#5B6178;}
+  .zone-tag .sw{width:7px; height:7px; border-radius:50%;}
 
-    .btn-gold { padding:14px 34px; background:var(--gold); color:#09090b; font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; text-decoration:none; border:none; cursor:none; border-radius:2px; transition:background .3s,transform .3s,box-shadow .3s; display:inline-flex; align-items:center; gap:10px; }
-    .btn-gold:hover { background:var(--gold-light); transform:translateY(-2px); box-shadow:0 16px 40px rgba(201,168,76,.25); }
-    .btn-ghost { padding:14px 34px; background:transparent; color:var(--text); font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; text-decoration:none; border:1px solid var(--border); border-radius:2px; transition:border-color .3s,color .3s,transform .3s; display:inline-flex; align-items:center; gap:10px; }
-    .btn-ghost:hover { border-color:var(--gold); color:var(--gold); transform:translateY(-2px); }
+  .shift-badge{display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:4px 10px; border-radius:999px; font-family:'JetBrains Mono';}
+  .shift-badge.morning{background:#FEF3E2; color:#8A5A0E;}
+  .shift-badge.evening{background:#ECEBFB; color:#3F3AA3;}
 
-    .scroll-hint { position:absolute; bottom:44px; right:5vw; display:flex; flex-direction:column; align-items:center; gap:10px; z-index:1; opacity:0; animation:fadeUp .8s 2.9s cubic-bezier(.16,1,.3,1) forwards; }
-    .scroll-line { width:1px; height:64px; background:linear-gradient(to bottom,var(--gold),transparent); animation:scrollAnim 2.2s ease-in-out infinite; }
-    @keyframes scrollAnim { 0%,100%{opacity:1;transform:scaleY(1) translateY(0)} 50%{opacity:.3;transform:scaleY(.55) translateY(12px)} }
-    .scroll-txt { font-family:var(--font-mono); font-size:8px; color:var(--muted); letter-spacing:.22em; writing-mode:vertical-rl; }
+  .stop{display:flex; gap:11px; padding:13px 0; border-bottom:1px solid #F0EEE4; position:relative; border-radius:10px;}
+  .stop:last-child{border-bottom:none;}
+  .stop.nearest{border-left:3px solid var(--orange); padding-left:9px; margin-left:-3px;}
+  .stop .idx{width:30px; height:30px; border-radius:50%; background:#F0EEE4; color:var(--navy); font-family:'JetBrains Mono'; font-size:11.5px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;}
+  .stop.done .idx{background:var(--mint); color:white;}
+  .stop.nearest .idx{background:var(--orange); color:white;}
+  .stop-body{flex:1; min-width:0;}
+  .stop-body .name{font-size:14.5px; font-weight:700;}
+  .stop-body .addr{font-size:12.5px; color:var(--slate); margin-top:2px; line-height:1.4;}
+  .stop-body .phn{font-size:12px; color:var(--navy); margin-top:4px; font-family:'JetBrains Mono';}
+  .stop-meta{display:flex; align-items:center; gap:6px; margin-top:8px; flex-wrap:wrap;}
+  .badge{font-size:10.5px; font-family:'JetBrains Mono'; padding:4px 9px; border-radius:6px; font-weight:600;}
+  .badge.pending{background:#FDECE5; color:var(--orange-dark);}
+  .badge.done{background:#E4F8F3; color:#1D9E86;}
+  .badge.dist{background:#EFEFF5; color:#5B6178;}
+  .badge.eta{background:#FBF3E0; color:#A8791E;}
+  .badge.unassigned{background:#FBEFEF; color:var(--danger);}
+  .badge.new{background:#FFE8E0; color:#E64A28; animation:newPulse 1.8s infinite;}
+  @keyframes newPulse{0%{box-shadow:0 0 0 0 rgba(255,90,54,.35);} 70%{box-shadow:0 0 0 5px rgba(255,90,54,0);} 100%{box-shadow:0 0 0 0 rgba(255,90,54,0);}}
+  .stop-actions{display:flex; gap:7px; margin-top:10px; flex-wrap:wrap;}
+  .stop-actions .btn{flex:1 1 auto; min-width:88px; text-align:center;}
+  .new-toggle-label{display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--slate); background:#FBFAF6; border:1.5px solid #DEDBCF; border-radius:9px; padding:8px 11px; cursor:pointer; user-select:none; min-height:38px;}
+  .new-toggle-label input{width:15px; height:15px; accent-color:var(--orange); cursor:pointer;}
+  .new-toggle-label.active{background:#FFE8E0; border-color:var(--orange); color:var(--orange-dark);}
+  .empty-state{text-align:center; color:var(--slate); font-size:13px; padding:38px 14px; line-height:1.7;}
 
-    @keyframes slideUp { to { transform:translateY(0) } }
-    @keyframes fadeUp { to { opacity:1; transform:translateY(0) } }
+  .filter-row{display:flex; gap:7px; margin-bottom:13px; flex-wrap:wrap;}
+  .filter-row select{flex:1; border:1.5px solid #DEDBCF; border-radius:10px; padding:9px 8px; font-size:12.5px; background:#FBFAF6; min-width:110px; min-height:40px;}
 
-    /* ─── MARQUEE ─── */
-    .marquee-wrap { border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:16px 0; overflow:hidden; background:var(--bg2); }
-    .marquee-track { display:flex; animation:marq 22s linear infinite; white-space:nowrap; }
-    .marquee-track:hover { animation-play-state:paused; }
-    .mi { display:inline-flex; align-items:center; gap:22px; padding:0 44px; font-family:var(--font-mono); font-size:10px; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; }
-    .mi .sep { color:var(--gold); font-size:14px; }
-    @keyframes marq { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .search-row{position:relative; margin-bottom:12px;}
+  .search-row .search-ic{position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:14px; opacity:.55; pointer-events:none;}
+  .search-row input{width:100%; border:1.5px solid #DEDBCF; border-radius:11px; padding:12px 14px 12px 36px; font-size:14px; background:#FBFAF6; font-family:'Inter';}
+  .search-row input:focus{outline:2px solid var(--orange); outline-offset:1px; border-color:var(--orange);}
+  .search-row .search-clear{position:absolute; right:8px; top:50%; transform:translateY(-50%); border:none; background:#EEECE2; color:var(--slate); width:22px; height:22px; border-radius:50%; font-size:12px; cursor:pointer; display:none; align-items:center; justify-content:center; line-height:1;}
+  .search-row .search-clear.show{display:flex;}
 
-    /* ─── SECTIONS ─── */
-    section { padding:120px 5vw; }
-    .s-tag { font-family:var(--font-mono); font-size:9px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); display:flex; align-items:center; gap:12px; margin-bottom:22px; }
-    .s-tag::before { content:''; display:block; width:28px; height:1px; background:var(--gold); }
-    .s-title { font-family:var(--font-display); font-size:clamp(52px,7.5vw,100px); line-height:.92; color:var(--white); font-weight:300; letter-spacing:.01em; }
-    .s-title .g { color:var(--gold); font-style:italic; }
+  .track-banner{display:flex; align-items:center; gap:10px; background:#0F2A24; color:white; border-radius:14px; padding:14px 15px; margin-bottom:14px;}
+  .track-banner.off{background:#F0EEE4; color:var(--navy);}
+  .track-banner .txt{font-size:13px; font-weight:700;}
+  .track-banner .sub{font-size:11.5px; opacity:.75; margin-top:2px;}
+  .track-banner.warn{background:#4A2A12;}
 
-    /* ─── STATS ─── */
-    #stats { padding-top:100px; padding-bottom:100px; }
-    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:3px; overflow:hidden; margin-top:72px; }
-    .stat-card { background:var(--bg); padding:52px 36px; transition:background .35s; }
-    .stat-card:hover { background:var(--bg3); }
-    .stat-num { font-family:var(--font-display); font-size:clamp(56px,6vw,82px); color:var(--gold); line-height:1; letter-spacing:-.02em; font-weight:300; }
-    .stat-lbl { font-size:12px; color:var(--muted); margin-top:10px; line-height:1.6; }
+  .track-switch{position:relative; display:inline-block; width:46px; height:27px; flex-shrink:0;}
+  .track-switch input{opacity:0; width:0; height:0; position:absolute;}
+  .track-switch-slider{position:absolute; inset:0; background:rgba(255,255,255,.22); border-radius:999px; cursor:pointer; transition:background .18s ease;}
+  .track-banner.off .track-switch-slider{background:#D8D4C8;}
+  .track-switch-slider:before{content:""; position:absolute; height:21px; width:21px; left:3px; top:3px; background:white; border-radius:50%; transition:transform .18s ease; box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .track-switch input:checked + .track-switch-slider{background:var(--mint);}
+  .track-switch input:checked + .track-switch-slider:before{transform:translateX(19px);}
+  .track-switch input:disabled + .track-switch-slider{opacity:.5; cursor:not-allowed;}
 
-    /* ─── ABOUT ─── */
-    #about { background:var(--bg2); position:relative; overflow:hidden; }
-    .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:start; margin-top:80px; }
-    .about-text p { font-size:15px; line-height:1.85; color:var(--muted); margin-bottom:20px; }
-    .about-text p strong { color:var(--text); font-weight:400; }
-    .chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:32px; }
-    .chip { padding:7px 16px; border:1px solid var(--border-soft); border-radius:100px; font-family:var(--font-mono); font-size:10px; color:var(--muted); transition:all .3s; }
-    .chip:hover { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,.05); }
-    .about-card { background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:32px; position:relative; overflow:hidden; }
-    .about-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(to right,var(--gold),transparent); }
-    .ac-title { font-family:var(--font-mono); font-size:9px; color:var(--gold); letter-spacing:.22em; text-transform:uppercase; margin-bottom:26px; }
-    .tool-list { list-style:none; display:flex; flex-direction:column; gap:16px; }
-    .tool-list li { display:flex; align-items:center; justify-content:space-between; font-size:13px; color:var(--text); }
-    .tool-bar { flex:1; height:1px; background:var(--surface); margin-left:16px; overflow:hidden; }
-    .tool-fill { height:100%; background:linear-gradient(to right,var(--gold-dim),var(--gold)); transform:scaleX(0); transform-origin:left; transition:transform 1.2s cubic-bezier(.16,1,.3,1); }
-    .tool-fill.on { transform:scaleX(1); }
+  .track-gate{display:none; flex-direction:column; align-items:center; text-align:center; background:var(--navy); color:white; border-radius:var(--radius-lg); padding:30px 22px; margin-bottom:14px;}
+  .track-gate-ic{font-size:34px; margin-bottom:10px;}
+  .track-gate-title{font-family:'Space Grotesk'; font-weight:700; font-size:18px; margin-bottom:8px;}
+  .track-gate-sub{font-size:12.5px; color:var(--slate-light); line-height:1.6; margin-bottom:18px; max-width:280px;}
+  .track-gate-err{font-size:12px; color:var(--danger); font-weight:600; margin-top:12px; display:none;}
+  .track-gate-err.show{display:block;}
 
-    /* ─── HSCROLL SKILLS ─── */
-    .hscroll-wrap { overflow:hidden; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:var(--bg2); }
-    .hscroll-head { display:flex; gap:12px; justify-content:flex-end; padding:20px 32px 0; }
-    .hsc-btn { width:42px; height:42px; border:1px solid var(--border); border-radius:50%; background:transparent; color:var(--muted); font-size:16px; cursor:none; display:flex; align-items:center; justify-content:center; transition:all .3s; }
-    .hsc-btn:hover { border-color:var(--gold); color:var(--gold); }
-    .hscroll-inner { display:flex; gap:1px; background:var(--border); transition:transform .5s cubic-bezier(.16,1,.3,1); }
-    .hsc-card { flex:0 0 300px; min-width:300px; background:var(--bg2); padding:44px 28px; }
-    .hsc-icon { font-size:24px; margin-bottom:18px; }
-    .hsc-title { font-family:var(--font-display); font-size:24px; font-weight:300; color:var(--white); margin-bottom:10px; letter-spacing:.04em; }
-    .hsc-desc { font-size:12px; color:var(--muted); line-height:1.75; }
+  .all-done-card{background:linear-gradient(135deg,var(--mint),#00A67D); color:white; border-radius:18px; padding:26px 20px; text-align:center; margin-bottom:16px;}
+  .all-done-card .big{font-size:38px; margin-bottom:7px;}
+  .all-done-card .t1{font-family:'Space Grotesk'; font-weight:700; font-size:17px;}
+  .all-done-card .t2{font-size:12.5px; opacity:.9; margin-top:5px;}
 
-    /* ─── EXPERIENCE ─── */
-    .exp-list { margin-top:80px; }
-    .exp-item { border-top:1px solid var(--border-soft); padding:44px 0; display:grid; grid-template-columns:180px 1fr auto; gap:40px; align-items:start; position:relative; transition:padding-left .3s; }
-    .exp-item:hover { padding-left:12px; }
-    .exp-date { font-family:var(--font-mono); font-size:10px; color:var(--muted); letter-spacing:.12em; padding-top:5px; }
-    .exp-co { font-family:var(--font-display); font-size:30px; font-weight:300; color:var(--white); letter-spacing:.05em; margin-bottom:6px; }
-    .exp-role { font-size:12px; color:var(--gold); font-family:var(--font-mono); margin-bottom:14px; letter-spacing:.1em; }
-    .exp-desc { font-size:13px; color:var(--muted); line-height:1.75; max-width:580px; }
-    .exp-pts { display:flex; flex-direction:column; gap:8px; margin-top:16px; }
-    .exp-pt { display:flex; align-items:flex-start; gap:10px; font-size:12px; color:var(--muted); }
-    .exp-pt::before { content:'→'; color:var(--gold); flex-shrink:0; font-family:var(--font-mono); }
-    .exp-badge { padding:6px 14px; border:1px solid var(--border-soft); border-radius:2px; font-family:var(--font-mono); font-size:9px; color:var(--muted); white-space:nowrap; align-self:flex-start; }
+  .modal-backdrop{position:fixed; inset:0; background:rgba(14,21,38,.55); z-index:2100; display:none; align-items:center; justify-content:center; padding:16px;}
+  .modal-backdrop.show{display:flex;}
+  .modal{background:white; border-radius:18px; padding:24px; width:360px; max-width:100%; box-shadow:var(--shadow-lg); max-height:88vh; overflow-y:auto;}
+  .modal.wide{width:440px;}
+  .modal h3{font-size:16px; margin-bottom:15px;}
+  .modal .btn-row{display:flex; gap:9px; margin-top:18px;}
+  .modal .btn-row .btn{flex:1;}
+  .modal p.sub{font-size:12.5px; color:var(--slate); margin-bottom:14px; margin-top:-8px;}
 
-    /* ─── PROJECTS ─── */
-    #projects { background:var(--bg2); }
-    .proj-grid { margin-top:80px; display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:4px; overflow:hidden; }
-    .proj-card { background:var(--bg2); padding:48px 40px; position:relative; overflow:hidden; transition:background .4s; }
-    .proj-card:hover { background:var(--bg3); }
-    .proj-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); opacity:0; transition:opacity .4s; }
-    .proj-card:hover::after { opacity:1; }
-    .proj-num { font-family:var(--font-mono); font-size:9px; color:var(--gold); letter-spacing:.22em; margin-bottom:22px; }
-    .proj-title { font-family:var(--font-display); font-size:clamp(26px,3vw,38px); color:var(--white); font-weight:300; letter-spacing:.04em; margin-bottom:10px; line-height:1.1; }
-    .proj-sub { font-size:11px; color:var(--gold); font-family:var(--font-mono); margin-bottom:18px; letter-spacing:.1em; }
-    .proj-desc { font-size:13px; color:var(--muted); line-height:1.75; margin-bottom:28px; }
-    .proj-tags { display:flex; flex-wrap:wrap; gap:7px; }
-    .proj-tag { padding:4px 11px; background:var(--surface); border-radius:2px; font-size:9px; font-family:var(--font-mono); color:var(--muted); letter-spacing:.09em; }
-    .proj-arrow { position:absolute; top:36px; right:36px; width:38px; height:38px; border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:14px; text-decoration:none; transition:all .3s; }
-    .proj-arrow:hover { border-color:var(--gold); color:var(--gold); transform:rotate(45deg); }
-    .proj-card.featured { grid-column:1/-1; }
-    .proj-card.featured .proj-title { font-size:clamp(40px,5.5vw,68px); }
+  /* boy detail modal */
+  .boy-modal-header{display:flex; align-items:center; gap:11px; margin-bottom:5px;}
+  .boy-modal-header .swatch-lg{width:16px; height:16px; border-radius:50%; flex-shrink:0;}
+  .boy-modal-header .nm{font-family:'Space Grotesk'; font-weight:700; font-size:18px; flex:1;}
+  .boy-modal-sub{font-size:12px; color:var(--slate); margin-bottom:15px;}
+  .boy-modal-stats{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px; margin-bottom:15px;}
+  .boy-modal-stats .mstat{background:#FBFAF6; border:1px solid #EEECE2; border-radius:11px; padding:11px 6px; text-align:center;}
+  .boy-modal-stats .mstat .n{font-family:'JetBrains Mono'; font-size:19px; font-weight:700;}
+  .boy-modal-stats .mstat .l{font-size:9px; color:var(--slate); text-transform:uppercase; letter-spacing:.04em; margin-top:3px;}
+  .boy-modal-actions{display:flex; gap:8px; margin-bottom:6px; flex-wrap:wrap;}
+  .boy-modal-actions .btn{flex:1; min-width:130px;}
+  .boy-modal-list-title{font-size:11px; font-weight:700; color:var(--slate); text-transform:uppercase; letter-spacing:.05em; margin:15px 0 7px;}
+  .boy-modal-list{max-height:190px; overflow-y:auto;}
+  .mini-stop{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 0; border-bottom:1px solid #F0EEE4; font-size:12.5px;}
+  .mini-stop:last-child{border-bottom:none;}
+  .mini-stop .mn{font-weight:600;}
+  .mini-stop .md{color:var(--slate); font-size:11px; white-space:nowrap; flex-shrink:0;}
 
-    /* ─── ACHIEVEMENTS ─── */
-    .ach-list { margin-top:80px; }
-    .ach-item { border-top:1px solid var(--border-soft); padding:36px 0; display:flex; align-items:flex-start; gap:32px; transition:padding-left .3s; }
-    .ach-item:hover { padding-left:12px; }
-    .ach-n { font-family:var(--font-mono); font-size:9px; color:var(--gold); width:28px; flex-shrink:0; padding-top:3px; }
-    .ach-title { font-size:17px; color:var(--white); font-weight:400; margin-bottom:8px; }
-    .ach-desc { font-size:13px; color:var(--muted); line-height:1.7; }
+  .toast{position:fixed; bottom:calc(24px + var(--safe-b)); left:50%; transform:translateX(-50%); background:var(--navy); color:white; padding:12px 20px; border-radius:11px; font-size:13.5px; font-weight:600; z-index:2200; box-shadow:var(--shadow-lg); display:none; max-width:88vw; text-align:center;}
+  .toast.show{display:block;}
 
-    /* ─── CONTACT ─── */
-    #contact { background:var(--bg); min-height:72vh; display:flex; flex-direction:column; justify-content:center; position:relative; overflow:hidden; }
-    .contact-title { font-family:var(--font-display); font-size:clamp(68px,11vw,150px); line-height:.9; color:var(--white); font-weight:300; margin-bottom:52px; }
-    .contact-title .outline { -webkit-text-stroke:1px rgba(201,168,76,.2); color:transparent; font-style:italic; }
-    .contact-links { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:56px; }
-    .c-link { display:flex; align-items:center; gap:10px; padding:13px 26px; border:1px solid var(--border); border-radius:2px; color:var(--muted); text-decoration:none; font-size:12px; transition:all .3s; }
-    .c-link:hover { border-color:var(--gold); color:var(--gold); transform:translateY(-2px); }
-    .c-link svg { width:15px; height:15px; }
-    .contact-meta { font-family:var(--font-mono); font-size:11px; color:var(--muted); display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-    .contact-meta a { color:var(--gold); text-decoration:none; transition:opacity .3s; }
-    .contact-meta a:hover { opacity:.65; }
-    .contact-meta .div { color:var(--border); }
+  /* ---------------- delivery proof photo ---------------- */
+  .photo-capture-btn{width:100%; background:#FBFAF6; border:2px dashed #DEDBCF; border-radius:14px; padding:26px 16px; text-align:center; cursor:pointer; color:var(--navy); font-weight:700; font-size:14px; display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .photo-capture-btn:active{transform:scale(.98);}
+  .photo-capture-btn .ic{font-size:30px;}
+  .photo-preview{width:100%; border-radius:14px; margin-top:12px; max-height:220px; object-fit:cover; display:none;}
+  .photo-status{text-align:center; font-size:12.5px; color:var(--slate); font-weight:600; margin-top:10px; display:none;}
+  .photo-status.show{display:block;}
+  .photo-thumb-link{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:var(--mint-dark); background:#E4F8F3; padding:5px 10px; border-radius:999px; text-decoration:none; margin-top:6px;}
+  .photo-thumb-link img{width:20px; height:20px; border-radius:5px; object-fit:cover;}
+  .mini-stop-photo{width:26px; height:26px; border-radius:6px; object-fit:cover; flex-shrink:0;}
 
-    /* ─── FOOTER ─── */
-    footer { padding:28px 5vw; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
-    .fc { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:.12em; }
-    .fc span { color:var(--gold); }
+  .zone-row{display:flex; align-items:center; justify-content:space-between; background:#FBFAF6; border:1px solid #EEECE2; border-radius:12px; padding:11px 13px; margin-bottom:9px;}
+  .zone-row .left{display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:600;}
+  .zone-row .sw{width:12px; height:12px; border-radius:50%;}
+  .zone-row .count{font-size:11px; color:var(--slate); font-family:'JetBrains Mono';}
 
-    /* ─── REVEAL ─── */
-    .reveal { opacity:0; transform:translateY(36px); transition:opacity .85s cubic-bezier(.16,1,.3,1),transform .85s cubic-bezier(.16,1,.3,1); }
-    .reveal.on { opacity:1; transform:translateY(0); }
-    .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+  .map-toolbar{position:absolute; top:12px; right:12px; z-index:500; display:flex; flex-direction:column; gap:7px;}
+  .map-toolbar button{background:white; border:1px solid #E4E1D6; box-shadow:var(--shadow-md); border-radius:11px; padding:10px 13px; font-size:12px; font-weight:700; cursor:pointer; color:var(--navy); min-height:40px;}
+  .map-toolbar button.active{background:var(--navy); color:white; border-color:var(--navy);}
+  .map-loading{position:absolute; inset:0; background:var(--paper); display:flex; align-items:center; justify-content:center; font-size:13.5px; color:var(--slate); font-weight:600; z-index:400;}
 
-    /* ─── RESPONSIVE ─── */
-    @media(max-width:900px){
-      .nav-links{display:none} .hamburger{display:flex}
-      .about-grid{grid-template-columns:1fr;gap:40px}
-      .proj-grid{grid-template-columns:1fr}
-      .proj-card.featured{grid-column:auto}
-      .exp-item{grid-template-columns:1fr;gap:10px}
-      .exp-badge{display:none}
-    }
-    @media(max-width:600px){
-      section{padding:80px 5vw}
-      .hero-foot{flex-direction:column;align-items:flex-start}
-      footer{flex-direction:column;align-items:flex-start}
-    }
-  </style>
+  /* ---------------- NAVIGATION MODE (delivery boy "start route") ---------------- */
+  body.nav-mode #sidebar{display:none !important;}
+  body.nav-mode #mobileToggle{display:none !important;}
+  body.nav-mode #mapWrap{display:flex !important; flex:1;}
+
+  /* Top turn-by-turn instruction banner, shown only in Navigation Mode */
+  .nav-turn-banner{position:absolute; top:calc(14px + var(--safe-t)); left:14px; right:14px; z-index:610; background:var(--navy); color:white; border-radius:16px; padding:13px 15px; display:none; align-items:center; gap:13px; box-shadow:var(--shadow-lg);}
+  .nav-turn-arrow{width:42px; height:42px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.14); border-radius:12px;}
+  .nav-turn-arrow svg{width:24px; height:24px;}
+  .nav-turn-text{min-width:0; flex:1;}
+  .nav-turn-dist{font-family:'JetBrains Mono'; font-size:12.5px; font-weight:700; color:var(--mint); margin-bottom:2px;}
+  .nav-turn-instr{font-size:15px; font-weight:700; line-height:1.25; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
+
+  /* Floating re-centre button, sits above the bottom sheet */
+  .nav-recenter-btn{position:absolute; z-index:610; right:14px; bottom:315px; background:white; color:var(--navy); border:none; border-radius:999px; width:46px; height:46px; box-shadow:var(--shadow-md); display:none; align-items:center; justify-content:center; cursor:pointer; font-size:19px;}
+  .nav-recenter-btn.following{background:var(--navy); color:white;}
+  @media(min-width:641px){ .nav-recenter-btn{bottom:238px; right:calc(50% - 200px + 14px);} }
+
+  .nav-sheet{position:absolute; left:0; right:0; bottom:2px; background:var(--card); z-index:600; box-shadow:var(--shadow-lg); border-radius:22px 22px 0 0; padding:10px 20px calc(18px + var(--safe-b)); animation:navSlideUp .25s ease;}
+  @keyframes navSlideUp{from{transform:translateY(40px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+  .nav-sheet-handle{width:38px; height:4px; background:#E4E1D6; border-radius:99px; margin:0 auto 12px;}
+  .nav-sheet-top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:0px;}
+  .nav-progress{flex:1; min-width:0;}
+  .nav-progress-bar{height:6px; background:#EEECE2; border-radius:99px; overflow:hidden; margin-bottom:6px;}
+  .nav-progress-fill{height:100%; background:linear-gradient(90deg,var(--orange),var(--mint)); border-radius:99px; transition:width .4s ease;}
+  .nav-progress-txt{font-size:11.5px; font-weight:700; color:var(--slate); font-family:'JetBrains Mono';}
+  .nav-exit-btn{border:1.5px solid #EEECE2; background:#FBFAF6; color:var(--navy); font-weight:700; font-size:12.5px; padding:9px 13px; border-radius:11px; cursor:pointer; white-space:nowrap; min-height:38px; flex-shrink:0;}
+  .nav-eta-row{display:flex; align-items:baseline; gap:9px; margin-bottom:0px; flex-wrap:wrap;}
+  .nav-eta-big{font-family:'Space Grotesk'; font-weight:700; font-size:27px; color:var(--mint-dark);}
+  .nav-eta-sub{font-size:12.5px; color:var(--slate); font-weight:600;}
+  .nav-stop-info{margin-bottom:14px;}
+  .nav-stop-eyebrow{font-size:11px; font-weight:700; color:var(--orange-dark); text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px;}
+  .nav-stop-name{font-family:'Space Grotesk'; font-weight:700; font-size:20px; line-height:1.22;}
+  .nav-stop-addr{font-size:13px; color:var(--slate); margin-top:5px; line-height:1.5;}
+  .nav-actions{display:flex; flex-direction:column; gap:9px;}
+  .nav-btn-primary{background:var(--mint); color:white; border:none; border-radius:15px; padding:1px; font-size:16px; font-weight:700; cursor:pointer; box-shadow:0 10px 24px rgba(0,200,150,.35); min-height:43px;}
+  .nav-btn-primary:active{transform:scale(.97);}
+  .nav-actions-row{display:flex; gap:9px;}
+  .nav-btn-secondary{flex:1; background:var(--navy); color:white; text-align:center; border-radius:13px; padding:3px; font-size:13.5px; font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px; min-height:33px;}
+  .nav-btn-secondary:active{transform:scale(.96);}
+
+  .nav-complete{position:absolute; inset:0; background:rgba(14,21,38,.55); display:flex; align-items:center; justify-content:center; z-index:650; padding:22px;}
+  .nav-complete-card{background:white; border-radius:22px; padding:34px 28px; text-align:center; max-width:320px; box-shadow:var(--shadow-lg);}
+  .nc-emoji{font-size:46px; margin-bottom:10px;}
+  .nc-title{font-family:'Space Grotesk'; font-weight:700; font-size:19px;}
+  .nc-sub{font-size:13px; color:var(--slate); margin:7px 0 20px; line-height:1.5;}
+
+  @media(min-width:641px){
+    .nav-sheet{left:50%; right:auto; transform:translateX(-50%); bottom:22px; max-width:400px; width:calc(100% - 40px); border-radius:20px;}
+  }
+
+  /* mobile toggle for sidebar / map */
+  #mobileToggle{display:none;}
+
+  @media (max-width:860px){
+    #app{flex-direction:column;}
+    #sidebar{width:100%; min-width:0; flex:1; order:2; height:auto;}
+    #mapWrap{flex:1; order:1; min-height:36vh;}
+    #mobileToggle{display:flex; position:fixed; bottom:calc(14px + var(--safe-b)); left:50%; transform:translateX(-50%); z-index:950; background:var(--navy); border-radius:999px; padding:5px; gap:3px; box-shadow:var(--shadow-lg);}
+    #mobileToggle button{border:none; background:transparent; color:var(--slate); font-weight:700; font-size:12.5px; padding:11px 20px; border-radius:999px; cursor:pointer; min-height:42px;}
+    #mobileToggle button.active{background:var(--orange); color:white;}
+    body.show-map-mobile #sidebar{display:none;}
+    body.show-map-mobile #mapWrap{flex:1;}
+    body.show-list-mobile #mapWrap{display:none;}
+    body.show-list-mobile #sidebar{flex:1;}
+    /* Reserve room at the bottom of every scroll list so the floating pill
+       toggle never overlaps the last card's content/action buttons. */
+    body.show-list-mobile .scroll-area{padding-bottom:calc(var(--toggle-h) + 24px + var(--safe-b)) !important;}
+    /* Hide the floating toggle while any modal is open so it never sits on
+       top of a modal's own bottom buttons. */
+    body.modal-open #mobileToggle{display:none !important;}
+    #whoami span.hide-mobile{display:none;}
+    .login-card{max-width:360px;}
+    .modal-backdrop{align-items:flex-end; padding:0;}
+    .modal{width:100%; max-width:100%; border-radius:20px 20px 0 0; padding-bottom:calc(22px + var(--safe-b));}
+  }
+  @media (max-width:640px){
+    input, select{font-size:16px !important;}
+    .stat-card .num{font-size:20px;}
+  }
+</style>
 </head>
 <body>
 
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand"><span class="dot"></span> RouteBoy</div>
+    <div class="login-sub">Delivery tracking, sign in to continue</div>
 
-<!-- LOADER -->
-<div id="loader">
-  <div class="loader-name">
-    <span>S</span><span>H</span><span>A</span><span>S</span><span class="g">W</span><span class="g">A</span><span class="g">T</span>
-  </div>
-  <div class="loader-rule"><div class="loader-fill"></div></div>
-  <div class="loader-pct" id="lpct">0%</div>
-</div>
-
-<!-- NAV -->
-<nav id="nav">
-  <a href="#hero" class="nav-logo"><div class="nav-dot"></div> SM</a>
-  <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#experience">Work</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#contact" class="nav-cta">Hire Me</a></li>
-  </ul>
-  <div class="hamburger" id="hbg"><span></span><span></span><span></span></div>
-</nav>
-
-<!-- MOBILE MENU -->
-<div class="mobile-menu" id="mmenu">
-  <a href="#about" class="mcl">About</a>
-  <a href="#experience" class="mcl">Work</a>
-  <a href="#projects" class="mcl">Projects</a>
-  <a href="#contact" class="mcl">Contact</a>
-</div>
-
-<!-- ══ HERO ══ -->
-<section id="hero">
-  <canvas id="three-hero"></canvas>
-  <div class="hero-radial"></div>
-  <div class="hero-eyebrow">UI/UX &amp; Product Designer — New Delhi, India</div>
-  <h1 class="hero-name">
-    <span class="ln"><span class="li">SHASWAT</span></span>
-    <span class="ln"><span class="li"><span class="acc">MISHRA.</span></span></span>
-  </h1>
-  <div class="hero-foot">
-    <p class="hero-desc">Designing products that process <strong>₹8 Lakhs/month</strong> in transactions. End-to-end ownership — research, systems, Figma, code.</p>
-    <div class="hero-btns">
-      <a href="#projects" class="btn-gold">View Work ↓</a>
-      <a href="mailto:shaswatmishra17@gmail.com" class="btn-ghost">Get In Touch</a>
-    </div>
-  </div>
-  <div class="scroll-hint"><div class="scroll-line"></div><div class="scroll-txt">scroll</div></div>
-</section>
-
-<!-- MARQUEE -->
-<div class="marquee-wrap">
-  <div class="marquee-track">
-    <div class="mi">UI/UX Design <span class="sep">✦</span></div>
-    <div class="mi">Product Design <span class="sep">✦</span></div>
-    <div class="mi">Design Systems <span class="sep">✦</span></div>
-    <div class="mi">Figma <span class="sep">✦</span></div>
-    <div class="mi">React.js <span class="sep">✦</span></div>
-    <div class="mi">User Research <span class="sep">✦</span></div>
-    <div class="mi">Interaction Design <span class="sep">✦</span></div>
-    <div class="mi">Frontend Dev <span class="sep">✦</span></div>
-    <div class="mi">UI/UX Design <span class="sep">✦</span></div>
-    <div class="mi">Product Design <span class="sep">✦</span></div>
-    <div class="mi">Design Systems <span class="sep">✦</span></div>
-    <div class="mi">Figma <span class="sep">✦</span></div>
-    <div class="mi">React.js <span class="sep">✦</span></div>
-    <div class="mi">User Research <span class="sep">✦</span></div>
-    <div class="mi">Interaction Design <span class="sep">✦</span></div>
-    <div class="mi">Frontend Dev <span class="sep">✦</span></div>
-  </div>
-</div>
-
-<!-- STATS -->
-<section id="stats" style="padding-top:96px;padding-bottom:96px;">
-  <div class="s-tag reveal">Impact by numbers</div>
-  <div class="stats-grid reveal d1">
-    <div class="stat-card"><div class="stat-num"><span class="counter" data-t="8">0</span>L+</div><div class="stat-lbl">Monthly gross transactions processed via platform I designed</div></div>
-    <div class="stat-card"><div class="stat-num"><span class="counter" data-t="95">0</span>%</div><div class="stat-lbl">Reduction in client billing time through UX redesign</div></div>
-    <div class="stat-card"><div class="stat-num"><span class="counter" data-t="200">0</span>+</div><div class="stat-lbl">Active users on the live commercial platform</div></div>
-    <div class="stat-card"><div class="stat-num"><span class="counter" data-t="1200">0</span>+</div><div class="stat-lbl">LinkedIn network of designers, PMs &amp; recruiters</div></div>
-  </div>
-</section>
-
-<!-- ABOUT -->
-<section id="about">
-  <canvas id="three-about"></canvas>
-  <div class="s-tag reveal">About Me</div>
-  <h2 class="s-title reveal d1">I DESIGN<br><span class="g">SYSTEMS</span><br>THAT SHIP.</h2>
-  <div class="about-grid">
-    <div class="about-text reveal d2">
-      <p>I'm a <strong>UI/UX &amp; Product Designer</strong> based in New Delhi, with a CS background and a conviction that great design is invisible — it just works.</p>
-      <p>As the <strong>sole designer on a live commercial platform</strong> at Anadi Industries, I own every pixel from user research to production deployment. I don't just hand off files — I ship code.</p>
-      <p>My work bridges <strong>design thinking and frontend engineering</strong> — I prototype in Figma and ship in React. I've led design for 18+ community events, mentored 10+ designers, and built products that handle real money.</p>
-      <div class="chips">
-        <span class="chip">Figma</span><span class="chip">Design Systems</span><span class="chip">User Research</span><span class="chip">React.js</span><span class="chip">Firebase</span><span class="chip">Interaction Design</span><span class="chip">WCAG 2.1</span><span class="chip">Mobile UI</span><span class="chip">Info Architecture</span>
-      </div>
-    </div>
-    <div class="reveal d3">
-      <div class="about-card">
-        <div class="ac-title">// Tool Proficiency</div>
-        <ul class="tool-list">
-          <li>Figma <div class="tool-bar"><div class="tool-fill" style="--w:.97"></div></div></li>
-          <li>React.js <div class="tool-bar"><div class="tool-fill" style="--w:.80"></div></div></li>
-          <li>Adobe Suite <div class="tool-bar"><div class="tool-fill" style="--w:.75"></div></div></li>
-          <li>Firebase <div class="tool-bar"><div class="tool-fill" style="--w:.72"></div></div></li>
-          <li>Prototyping <div class="tool-bar"><div class="tool-fill" style="--w:.95"></div></div></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SKILLS HSCROLL -->
-<div class="hscroll-wrap">
-  <div class="hscroll-head">
-    <button class="hsc-btn" id="hprev">←</button>
-    <button class="hsc-btn" id="hnext">→</button>
-  </div>
-  <div class="hscroll-inner" id="hinner">
-    <div class="hsc-card"><div class="hsc-icon">🔍</div><div class="hsc-title">User Research</div><div class="hsc-desc">Field interviews, journey mapping &amp; pain point analysis that directly inform design decisions.</div></div>
-    <div class="hsc-card"><div class="hsc-icon">🏗️</div><div class="hsc-title">Information Architecture</div><div class="hsc-desc">Structuring complex systems into intuitive navigation flows and task hierarchies.</div></div>
-    <div class="hsc-card"><div class="hsc-icon">⚡</div><div class="hsc-title">Rapid Prototyping</div><div class="hsc-desc">High-fidelity Figma prototypes with realistic interactions before writing a single line of code.</div></div>
-    <div class="hsc-card"><div class="hsc-icon">🎨</div><div class="hsc-title">Design Systems</div><div class="hsc-desc">Token-based component libraries, typography scales, and adaptive data visualization charts.</div></div>
-    <div class="hsc-card"><div class="hsc-icon">📱</div><div class="hsc-title">Responsive UI</div><div class="hsc-desc">Mobile-first interfaces with fluid layouts that adapt elegantly across all device sizes.</div></div>
-    <div class="hsc-card"><div class="hsc-icon">💻</div><div class="hsc-title">Frontend Dev</div><div class="hsc-desc">React.js + Firebase production code that matches design specs at 100% fidelity.</div></div>
-  </div>
-</div>
-
-<!-- EXPERIENCE -->
-<section id="experience">
-  <div class="s-tag reveal">Experience</div>
-  <h2 class="s-title reveal d1">WHERE I'VE<br><span class="g">WORKED.</span></h2>
-  <div class="exp-list">
-    <div class="exp-item reveal">
-      <div class="exp-date">Jun 2025 — Present</div>
-      <div>
-        <div class="exp-co">ANADI INDUSTRIES</div>
-        <div class="exp-role">UI/UX Designer &amp; Product Designer · Full-Time · New Delhi</div>
-        <div class="exp-desc">Sole designer on a multi-modular Billing &amp; Inventory Management platform now processing ₹8L/month for 200+ users.</div>
-        <div class="exp-pts">
-          <div class="exp-pt">Checkout time: ~20 min → under 1 min (95% reduction, zero error)</div>
-          <div class="exp-pt">Phone-number-based self-service portal — eliminated manual onboarding</div>
-          <div class="exp-pt">Figma design system across 6 product modules</div>
-          <div class="exp-pt">Figma prototypes → production-ready React.js + Firebase components</div>
+    <!-- STEP 0: choose role -->
+    <div class="login-step show" id="loginStep0">
+      <div class="role-grid">
+        <div class="role-opt" id="chooseAdmin">
+          <span class="ic">🛡️</span>
+          <div class="lbl">Admin</div>
+          <div class="sub2">Manage &amp; track team</div>
+        </div>
+        <div class="role-opt" id="chooseDelivery">
+          <span class="ic">🛵</span>
+          <div class="lbl">Delivery Boy</div>
+          <div class="sub2">See my deliveries</div>
         </div>
       </div>
-      <div class="exp-badge">Current</div>
+      <div class="hint">Choose how you want to sign in.</div>
     </div>
-    <div class="exp-item reveal d1">
-      <div class="exp-date">Jun 2024 — May 2025</div>
-      <div>
-        <div class="exp-co">FREELANCE</div>
-        <div class="exp-role">UI/UX Designer · Independent</div>
-        <div class="exp-desc">Custom web and mobile interfaces for local businesses and independent clients.</div>
-        <div class="exp-pts">
-          <div class="exp-pt">Wireframing, high-fidelity prototyping &amp; user journey optimization</div>
-          <div class="exp-pt">End-to-end ownership from discovery to delivery</div>
+
+    <!-- STEP 1a: admin password -->
+    <div class="login-step" id="loginStepAdmin">
+      <span class="back-link" data-back="0">&larr; Back</span>
+      <div class="field"><label>Admin password</label><input id="adminPass" type="password" placeholder="Enter admin password"></div>
+      <div class="login-err" id="adminErr">Incorrect password. Try again.</div>
+      <button class="btn btn-primary" id="adminLoginBtn">Login as Admin</button>
+    </div>
+
+    <!-- STEP 1b: delivery password -->
+    <div class="login-step" id="loginStepDeliveryPass">
+      <span class="back-link" data-back="0">&larr; Back</span>
+      <div class="field"><label>Delivery boy password</label><input id="deliveryPass" type="password" placeholder="Enter password"></div>
+      <div class="login-err" id="deliveryPassErr">Incorrect password. Try again.</div>
+      <button class="btn btn-primary" id="deliveryPassBtn">Continue</button>
+    </div>
+
+    <!-- STEP 2: delivery name pick -->
+    <div class="login-step" id="loginStepDeliveryName">
+      <span class="back-link" data-back="deliveryPass">&larr; Back</span>
+      <div class="field">
+        <label>Select your name</label>
+        <select id="deliveryNameSelect"><option value="">Select your name…</option></select>
+      </div>
+      <div class="hint" id="noBoysHint" style="display:none; color:var(--orange); font-weight:600;">No delivery boys added yet. Ask your admin to add you first, then refresh.</div>
+      <button class="btn btn-primary" id="deliveryNameBtn">Login &amp; start GPS</button>
+      <div class="hint">Signing in will turn on your live location so admin and customers' deliveries can be tracked in real time. Keep this app open in the foreground/background (don't fully close it) so your location keeps updating.</div>
+    </div>
+  </div>
+</div>
+
+<div id="topbar">
+  <div class="brand"><span class="dot"></span> RouteBoy</div>
+  <div id="whoami"></div>
+</div>
+
+<div id="app">
+  <div id="sidebar">
+
+    <!-- ---------- ADMIN VIEW ---------- -->
+    <div id="adminView" style="display:none; flex-direction:column; height:100%;">
+      <div class="tabbar">
+        <button class="tabbtn active" data-tab="overview">📊 Overview</button>
+        <button class="tabbtn" data-tab="customers">👥 Customers</button>
+        <button class="tabbtn" data-tab="boys">🛵 Team</button>
+        <button class="tabbtn" data-tab="zones">📍 Zones</button>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div id="tab-overview" class="tab-pane scroll-area">
+        <div class="stats-row">
+          <div class="stat-card"><div class="num" id="ovDone">0</div><div class="label">Delivered today</div></div>
+          <div class="stat-card"><div class="num" id="ovPending">0</div><div class="label">Pending</div></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="num" id="ovOnline">0/0</div><div class="label">Boys online</div></div>
+          <div class="stat-card"><div class="num" id="ovUnassigned">0</div><div class="label">Unassigned</div></div>
+        </div>
+        <div class="section-title">Team status — tap a boy for full status</div>
+        <div id="overviewBoyList"></div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div id="tab-customers" class="tab-pane scroll-area" style="display:none;">
+        <div class="section-title">Add new customer</div>
+        <div class="field"><label>Customer name</label><input id="custName" type="text" placeholder="e.g. Rohit Sharma"></div>
+        <div class="field-row">
+          <div class="field"><label>Phone (optional)</label><input id="custPhone" type="text" placeholder="98xxxxxxxx"></div>
+          <div class="field"><label>Assign to</label><select id="custAssign"><option value="">Unassigned</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Address / note</label><input id="custAddr" type="text" placeholder="e.g. B-12, Lajpat Nagar"></div>
+          <div class="field"><label>Zone</label><select id="custZone"><option value="">No zone</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Delivery shift</label>
+            <select id="custShift">
+              <option value="morning">🌅 Morning</option>
+              <option value="evening">🌆 Evening</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="loc-mode-tabs">
+          <button type="button" class="locmode-btn active" data-mode="map">Pick on map</button>
+          <button type="button" class="locmode-btn" data-mode="link">Paste Google Maps link</button>
+        </div>
+
+        <div id="locModeMap">
+          <div class="hint">Tap anywhere on the map to drop this customer's exact location.</div>
+          <button class="btn btn-ghost btn-sm" id="useMyLocBtn" style="width:100%; margin-top:9px;">📍 Use my current location</button>
+        </div>
+        <div id="locModeLink" style="display:none;">
+          <div class="field"><label>Google Maps link</label><input id="custMapLink" type="text" placeholder="Paste full Google Maps link here"></div>
+          <button class="btn btn-ghost btn-sm" id="parseLinkBtn" style="width:100%;">Set location from link</button>
+          <div class="hint">Works with coordinate links, shortened share links (goo.gl/maps.app.goo.gl), and plain shared-location / place links — open Google Maps → find the spot → Share → Copy link, then paste it here.</div>
+        </div>
+
+        <div id="pendingPinNote" class="hint" style="display:none; color:var(--orange-dark); font-weight:700; margin-top:9px;">📍 Location set — tap "Save customer" to confirm.</div>
+        <button class="btn btn-primary btn-sm" id="saveCustBtn" style="width:100%; margin-top:11px;">Save customer</button>
+
+        <div style="height:1px; background:#EEECE2; margin:20px 0;"></div>
+
+        <div class="section-title">All customers</div>
+        <div class="search-row">
+          <span class="search-ic">🔍</span>
+          <input id="custSearchInput" type="text" placeholder="Search customers by name, phone or address…">
+          <button class="search-clear" id="custSearchClear">✕</button>
+        </div>
+        <div class="filter-row">
+          <select id="filterBoy"><option value="all">All delivery boys</option></select>
+          <select id="filterZone"><option value="all">All zones</option></select>
+          <select id="filterShift">
+            <option value="all">Morning + Evening</option>
+            <option value="morning">🌅 Morning only</option>
+            <option value="evening">🌆 Evening only</option>
+          </select>
+          <select id="filterStatus">
+            <option value="all">All status</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Delivered</option>
+          </select>
+        </div>
+        <div class="filter-row">
+          <button class="btn btn-ghost btn-sm" id="downloadFilteredPdfBtn" style="flex:1;">⬇️ PDF of filtered list</button>
+          <button class="btn btn-ghost btn-sm" id="downloadAllPdfBtn" style="flex:1;">⬇️ PDF of ALL customers</button>
+        </div>
+        <div id="adminCustList"></div>
+      </div>
+
+      <!-- TEAM -->
+      <div id="tab-boys" class="tab-pane scroll-area" style="display:none;">
+        <div class="section-title">Add delivery boy</div>
+        <div class="field-row">
+          <div class="field"><label>Name</label><input id="boyName" type="text" placeholder="e.g. Amit Kumar"></div>
+          <div class="field"><label>Primary zone</label><select id="boyZone"><option value="">No zone</option></select></div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="addBoyBtn" style="width:100%;">Add to team</button>
+        <div class="hint">They'll log in with password <b>123</b> and pick their name from the login screen.</div>
+
+        <div style="height:1px; background:#EEECE2; margin:20px 0;"></div>
+        <div class="section-title">Your team (<span id="boyCount">0</span>)</div>
+        <div id="teamList"></div>
+      </div>
+
+      <!-- ZONES -->
+      <div id="tab-zones" class="tab-pane scroll-area" style="display:none;">
+        <div class="section-title">Add area / zone</div>
+        <div class="field-row">
+          <div class="field"><label>Zone name</label><input id="zoneName" type="text" placeholder="e.g. Lajpat Nagar"></div>
+          <div class="field" style="max-width:96px;"><label>Color</label><input id="zoneColor" type="color" value="#FF5A36" style="padding:2px; height:46px;"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="addZoneBtn" style="width:100%;">Add zone</button>
+
+        <div style="height:1px; background:#EEECE2; margin:20px 0;"></div>
+        <div class="section-title">All zones (<span id="zoneCount">0</span>)</div>
+        <div id="zonesList"></div>
+      </div>
+    </div>
+
+    <!-- ---------- DELIVERY BOY VIEW ---------- -->
+    <div id="deliveryView" style="display:none; flex-direction:column; height:100%;">
+      <div class="scroll-area">
+        <div class="track-banner" id="trackBanner">
+          <span class="live-dot" id="trackDot"></span>
+          <div style="flex:1; min-width:0;"><div class="txt" id="trackTxt">Live location sharing</div><div class="sub" id="trackSubtext">Turn on to start your shift</div></div>
+          <label class="track-switch">
+            <input type="checkbox" id="trackToggle">
+            <span class="track-switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="track-gate" id="trackGate">
+          <div class="track-gate-ic">📍</div>
+          <div class="track-gate-title">Turn on your location</div>
+          <div class="track-gate-sub">Turn this on to go online, share your live location with admin, and see your delivery stops. It stays live until you turn it off.</div>
+          <button type="button" class="btn btn-primary" id="trackGateBtn" style="width:auto; padding:12px 24px;">Turn on location</button>
+          <div class="track-gate-err" id="trackGateErr"></div>
+        </div>
+
+        <div id="allDoneWrap"></div>
+
+        <div id="deliveryMainWrap">
+        <div class="shift-tabs" id="shiftTabs">
+          <button type="button" class="shift-tab-btn morning" data-shift="morning"><span class="sw" style="background:var(--morning)"></span> 🌅 Morning</button>
+          <button type="button" class="shift-tab-btn evening" data-shift="evening"><span class="sw" style="background:var(--evening)"></span> 🌆 Evening</button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card"><div class="num" id="dbStatDone">0</div><div class="label">Delivered</div></div>
+          <div class="stat-card"><div class="num" id="dbStatPending">0</div><div class="label">Remaining</div></div>
+        </div>
+
+        <button type="button" class="start-route-btn" id="startRouteBtn" style="display:none;">
+          <span class="pulse-ic"></span> Start Route
+        </button>
+
+        <div class="search-row">
+          <span class="search-ic">🔍</span>
+          <input id="dbSearchInput" type="text" placeholder="Search your stops by name or address…">
+          <button class="search-clear" id="dbSearchClear">✕</button>
+        </div>
+
+        <div class="section-title" id="deliveryListTitle">Your stops — nearest first</div>
+        <div id="deliveryCustList"></div>
         </div>
       </div>
-      <div class="exp-badge">1 yr</div>
     </div>
-    <div class="exp-item reveal d2">
-      <div class="exp-date">Aug 2022 — May 2024</div>
-      <div>
-        <div class="exp-co">GDSC</div>
-        <div class="exp-role">Lead UI/UX Designer · Google Developer Student Club</div>
-        <div class="exp-desc">Led design for 18 community events reaching 400+ student participants.</div>
-        <div class="exp-pts">
-          <div class="exp-pt">UI design workshop series — 120+ students across two semesters</div>
-          <div class="exp-pt">Mentored 10+ designers; 3 secured product design internships in 6 months</div>
+
+  </div>
+
+  <div id="mapWrap">
+    <div id="map"></div>
+    <div class="map-loading" id="mapLoading">Loading Google Maps…</div>
+    <div class="map-toolbar" id="mapToolbar" style="display:none;">
+      <button id="clearRouteBtn">✕ Clear route</button>
+    </div>
+    <div class="map-toolbar" id="deliveryMapToolbar" style="display:none; top:auto; bottom:12px;">
+      <button id="recenterBtn">📍 Recenter on me</button>
+    </div>
+
+    <!-- Turn-by-turn instruction banner shown during Navigation Mode -->
+    <div class="nav-turn-banner" id="navTurnBanner">
+      <div class="nav-turn-arrow" id="navTurnArrowIcon"></div>
+      <div class="nav-turn-text">
+        <div class="nav-turn-dist" id="navTurnDist">—</div>
+        <div class="nav-turn-instr" id="navTurnInstr">Head towards your first stop</div>
+      </div>
+    </div>
+
+    <!-- Follow-me re-centre button, shown during Navigation Mode -->
+    <button type="button" class="nav-recenter-btn following" id="navRecenterBtn" title="Re-centre on me">🧭</button>
+
+    <!-- Navigation-mode bottom sheet: shown while a delivery boy has an active route -->
+    <div class="nav-sheet" id="navSheet" style="display:none;">
+      <div class="nav-sheet-handle"></div>
+      <div class="nav-sheet-top">
+        <div class="nav-progress">
+          <div class="nav-progress-bar"><div class="nav-progress-fill" id="navProgressFill" style="width:0%;"></div></div>
+          <div class="nav-progress-txt" id="navProgressTxt">Stop 1 of 1</div>
+        </div>
+        <button class="nav-exit-btn" id="navExitBtn">✕ End route</button>
+      </div>
+      <div class="nav-eta-row">
+        <div class="nav-eta-big" id="navEtaBig">— min</div>
+        <div class="nav-eta-sub" id="navEtaSub">—</div>
+      </div>
+      <div class="nav-stop-info">
+        <div class="nav-stop-eyebrow">Next stop</div>
+        <div class="nav-stop-name" id="navStopName">—</div>
+        <div class="nav-stop-addr" id="navStopAddr">—</div>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn-primary" id="navDeliveredBtn">✓ Mark Delivered</button>
+        <div class="nav-actions-row">
+          <a class="nav-btn-secondary" id="navCallBtn" href="#">📞 Call</a>
+          <a class="nav-btn-secondary" id="navGmapsBtn" href="#" target="_blank" rel="noopener">🧭 Open in Maps</a>
         </div>
       </div>
-      <div class="exp-badge">2 yrs</div>
+    </div>
+
+    <!-- Shown when every stop on the active route is delivered -->
+    <div class="nav-complete" id="navComplete" style="display:none;">
+      <div class="nav-complete-card">
+        <div class="nc-emoji">🎉</div>
+        <div class="nc-title">Route complete!</div>
+        <div class="nc-sub" id="navCompleteSub">All stops for this shift are delivered.</div>
+        <button class="btn btn-primary" id="navCompleteCloseBtn">Back to list</button>
+      </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- PROJECTS -->
-<section id="projects">
-  <div class="s-tag reveal">Selected Work</div>
-  <h2 class="s-title reveal d1">DESIGN<br><span class="g">PROJECTS.</span></h2>
-  <div class="proj-grid">
-    <div class="proj-card featured reveal">
-      <a class="proj-arrow" href="mailto:shaswatmishra17@gmail.com" title="Request case study">↗</a>
-      <div class="proj-num">01 — Featured</div>
-      <div class="proj-title">BILLING &amp;<br>INVENTORY PLATFORM</div>
-      <div class="proj-sub">Live Commercial Product · Anadi Industries</div>
-      <div class="proj-desc">End-to-end platform from scratch — multi-modular billing, inventory, consumer portal, executive dashboards. ₹8L/month for 200+ users. Sole designer, full ownership wireframe to production.</div>
-      <div class="proj-tags"><span class="proj-tag">Figma</span><span class="proj-tag">Design System</span><span class="proj-tag">React.js</span><span class="proj-tag">Firebase</span><span class="proj-tag">User Research</span></div>
-    </div>
-    <div class="proj-card reveal">
-      <a class="proj-arrow" href="https://linkedin.com/in/shaaswatmishra" target="_blank" rel="noopener">↗</a>
-      <div class="proj-num">02</div>
-      <div class="proj-title">DHUN MAGAN</div>
-      <div class="proj-sub">Music Streaming &amp; Licensing · Web &amp; Mobile</div>
-      <div class="proj-desc">Music discovery &amp; playback with smart filters, dark-mode layouts, waveform visualizations, and 3-step micro-licensing for independent artists.</div>
-      <div class="proj-tags"><span class="proj-tag">Figma</span><span class="proj-tag">Interaction Design</span><span class="proj-tag">Mobile UI</span></div>
-    </div>
-    <div class="proj-card reveal d1">
-      <a class="proj-arrow" href="https://linkedin.com/in/shaaswatmishra" target="_blank" rel="noopener">↗</a>
-      <div class="proj-num">03</div>
-      <div class="proj-title">FINTECH WALLET</div>
-      <div class="proj-sub">High-Retention Onboarding · iOS &amp; Android</div>
-      <div class="proj-desc">Progressive disclosure onboarding targeting 40% drop-off reduction. WCAG 2.1 AA with biometric auth and real-time visual feedback states.</div>
-      <div class="proj-tags"><span class="proj-tag">UX Research</span><span class="proj-tag">WCAG 2.1</span><span class="proj-tag">iOS/Android</span></div>
-    </div>
-    <div class="proj-card reveal">
-      <a class="proj-arrow" href="https://linkedin.com/in/shaaswatmishra" target="_blank" rel="noopener">↗</a>
-      <div class="proj-num">04</div>
-      <div class="proj-title">FOOD DELIVERY ECOSYSTEM</div>
-      <div class="proj-sub">End-to-End Mobile App · Android-first</div>
-      <div class="proj-desc">5 core personas — customer, restaurant, agent, admin, support. Live spatial tracking, micro-interaction cues, contextual push-notification states.</div>
-      <div class="proj-tags"><span class="proj-tag">Journey Mapping</span><span class="proj-tag">Interaction Design</span><span class="proj-tag">Android</span></div>
-    </div>
-    <div class="proj-card reveal d1">
-      <a class="proj-arrow" href="https://shaswatmishra.vercel.app" target="_blank" rel="noopener">↗</a>
-      <div class="proj-num">05</div>
-      <div class="proj-title">AR/VR SHOWCASE</div>
-      <div class="proj-sub">Premium Web Platform · Desktop Immersive</div>
-      <div class="proj-desc">Immersive product web presence with radial grid layouts, cinematic typographic hierarchy, and layered visual sequencing for premium device storytelling.</div>
-      <div class="proj-tags"><span class="proj-tag">Figma</span><span class="proj-tag">Web UI</span><span class="proj-tag">Immersive Design</span></div>
+<div id="mobileToggle">
+  <button class="active" id="mobShowList">📋 List</button>
+  <button id="mobShowMap">🗺️ Map</button>
+</div>
+
+<div class="modal-backdrop" id="boyModal">
+  <div class="modal wide" id="boyModalContent"></div>
+</div>
+
+<div class="modal-backdrop" id="editCustModal">
+  <div class="modal wide" id="editCustModalContent"></div>
+</div>
+
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmText">Are you sure?</h3>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="confirmCancel">Cancel</button>
+      <button class="btn btn-danger" id="confirmOk" style="background:var(--danger); color:white;">Confirm</button>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ACHIEVEMENTS -->
-<section id="achievements" style="background:var(--bg2)">
-  <div class="s-tag reveal">Recognition</div>
-  <h2 class="s-title reveal d1">KEY<br><span class="g">WINS.</span></h2>
-  <div class="ach-list">
-    <div class="ach-item reveal"><div class="ach-n">01</div><div><div class="ach-title">Sole Designer on Live ₹8L/Month Platform</div><div class="ach-desc">Full ownership wireframe to production, 200+ active users, ₹8 Lakhs/month gross transactions.</div></div></div>
-    <div class="ach-item reveal d1"><div class="ach-n">02</div><div><div class="ach-title">95% Reduction in Billing Time</div><div class="ach-desc">End-to-end UX redesign: ~20 minutes checkout → under 1 minute. Directly measurable business impact.</div></div></div>
-    <div class="ach-item reveal d2"><div class="ach-n">03</div><div><div class="ach-title">1,200+ Organic LinkedIn Network</div><div class="ach-desc">14+ UI/UX case challenges published; designers, PMs &amp; recruiters in 12 months organically.</div></div></div>
-    <div class="ach-item reveal d3"><div class="ach-n">04</div><div><div class="ach-title">B.Tech CSE — Echelon Institute of Technology</div><div class="ach-desc">Graduated 2026. CS foundation powers full-stack design-to-deployment workflow.</div></div></div>
-  </div>
-</section>
+<div class="modal-backdrop" id="photoModal">
+  <div class="modal" id="photoModalContent"></div>
+</div>
 
-<!-- CONTACT -->
-<section id="contact">
-  <canvas id="three-contact"></canvas>
-  <div style="position:relative;z-index:1">
-    <div class="s-tag reveal">Let's Connect</div>
-    <div class="contact-title reveal d1">
-      LET'S<br>BUILD<br><span class="outline">SOMETHING.</span>
-    </div>
-    <div class="contact-links reveal d2">
-      <a href="mailto:shaswatmishra17@gmail.com" class="c-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>Email</a>
-      <a href="https://linkedin.com/in/shaaswatmishra" target="_blank" rel="noopener" class="c-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn</a>
-      <a href="https://shaswatmishra.vercel.app" target="_blank" rel="noopener" class="c-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/></svg>Portfolio</a>
-      <a href="tel:+918929083904" class="c-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>+91 89290 83904</a>
-    </div>
-    <div class="contact-meta reveal d3">
-      <span>New Delhi, India</span><span class="div">—</span>
-      <span>Available for full-time &amp; freelance</span><span class="div">—</span>
-      <a href="mailto:shaswatmishra17@gmail.com">Start a conversation →</a>
-    </div>
-  </div>
-</section>
+<div class="toast" id="toast"></div>
 
-<!-- FOOTER -->
-<footer>
-  <div class="fc">© 2025 SHASWAT MISHRA — UI/UX &amp; PRODUCT DESIGNER</div>
-  <div class="fc">Designed &amp; Coded with <span>♥</span> in New Delhi</div>
-</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getDatabase, ref, push, set, update, remove, onValue, onDisconnect, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-<script>
-// ══ LOADER ══
-const loader = document.getElementById('loader');
-const lpct = document.getElementById('lpct');
-let n = 0;
-const lt = setInterval(() => {
-  n += Math.random() > .45 ? 2 : 1;
-  if (n >= 100) { n = 100; clearInterval(lt); setTimeout(() => loader.classList.add('hide'), 350); }
-  lpct.textContent = n + '%';
-}, 18);
+const firebaseConfig = {
+  apiKey: "AIzaSyA4q2qD7K7o5yN5v9H9jSIvWsTPWlAvurY",
+  authDomain: "delivry-tracking-system.firebaseapp.com",
+  databaseURL: "https://delivry-tracking-system-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "delivry-tracking-system",
+  storageBucket: "delivry-tracking-system.firebasestorage.app",
+  messagingSenderId: "181704924735",
+  appId: "1:181704924735:web:7c57448137e91b745ca28a",
+  measurementId: "G-43WG6FFZVC"
+};
 
-// ══ CURSOR ══
-const cur = document.getElementById('cursor'), ring = document.getElementById('cursor-ring');
-let mx = 0, my = 0, rx = 0, ry = 0;
-document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cur.style.left = mx+'px'; cur.style.top = my+'px'; });
-(function raf(){ rx+=(mx-rx)*.11; ry+=(my-ry)*.11; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(raf); })();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-// ══ NAV ══
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
+const COLORS = ['#F2653A','#2AC2A6','#5B7FE0','#E0B23A','#B25BE0','#E0475B','#3AA0E0','#8FA33A'];
+const SHIFT_COLORS = { morning: '#F2A93A', evening: '#6C63E0' };
+const AVG_SPEED_KMH = 25;
+const ADMIN_PASSWORD = 'admin123';
+const DELIVERY_PASSWORD = '123';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCdJWu6gsjXhC1qmz9O6y6U5f7pC3ucC6E';
+const NEW_BADGE_DURATION_MS = 24 * 60 * 60 * 1000; // "new customer" badge stays up for 24 hours
 
-// ══ HAMBURGER ══
-const hbg = document.getElementById('hbg'), mmenu = document.getElementById('mmenu');
-hbg.addEventListener('click', () => { hbg.classList.toggle('open'); mmenu.classList.toggle('open'); });
-document.querySelectorAll('.mcl').forEach(a => a.addEventListener('click', () => { hbg.classList.remove('open'); mmenu.classList.remove('open'); }));
+// Delivery-proof photo storage (Cloudinary — free plan, no card required).
+// Only the resulting photo URL is ever written to Firebase; the actual image
+// bytes live on Cloudinary's CDN, so the Realtime Database itself never gets
+// bloated with large payloads and stays fast no matter how many photos pile up.
+const CLOUDINARY_CLOUD_NAME = 'nj3kuxsl';
+const CLOUDINARY_UPLOAD_PRESET = 'routeboy_delivery';
+const PHOTO_MAX_WIDTH = 900;       // resized on-device before upload
+const PHOTO_JPEG_QUALITY = 0.72;   // keeps proof photos readable at ~80-150KB each
 
-// ══ REVEAL ══
-const revEls = document.querySelectorAll('.reveal');
-new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('on'); } }), {threshold:.1}).observe || null;
-const ro = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('on'); ro.unobserve(e.target); } }), {threshold:.1});
-revEls.forEach(el => ro.observe(el));
+/* ---------------- helpers ---------------- */
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function distanceKm(lat1, lon1, lat2, lon2){
+  // NOTE: this is a straight-line ("as the crow flies") Haversine distance.
+  // It ignores actual roads/turns, so it will always be <= the real driving
+  // distance. Use it only for quick relative sorting/estimates, never as the
+  // "real" distance shown next to an actual routed path — for that, use the
+  // live road distance returned by OSRM / Google Directions (see
+  // estimatedRoadKm() below for the best-effort display value).
+  const R = 6371, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function fmtDist(km){ if(km==null) return '—'; return km<1 ? Math.round(km*1000)+' m' : km.toFixed(1)+' km'; }
+function fmtMinutes(mins){ if(mins==null) return '—'; const m=Math.round(mins); return m<60 ? m+' min' : (m/60).toFixed(1)+' hr'; }
+function fmtEtaMinutes(km){ if(km==null) return '—'; return fmtMinutes((km/AVG_SPEED_KMH)*60); }
+function isNewCustomer(c){ return !!(c && c.newUntil && c.newUntil > Date.now()); }
 
-// ══ COUNTERS ══
-const ctrs = document.querySelectorAll('.counter');
-const co = new IntersectionObserver(es => es.forEach(e => {
-  if(e.isIntersecting){
-    const el = e.target, t = +el.dataset.t, t0 = performance.now();
-    (function u(now){ const p=Math.min((now-t0)/1600,1), ease=1-Math.pow(1-p,3); el.textContent=Math.floor(ease*t); if(p<1) requestAnimationFrame(u); else el.textContent=t; })(t0);
-    co.unobserve(el);
+/* ---------------- road-distance calibration ----------------
+   Every place that previously called distanceKm() straight to the UI was
+   showing straight-line distance, which is always shorter than the real
+   road distance (and different every time it's re-derived from a slightly
+   different GPS fix). Whenever we DO get a real routed distance back from
+   OSRM or Google Directions (see showBoyRoute()), we compare it against the
+   straight-line distance for the same two points and use that ratio to keep
+   a running "road factor". Quick/live estimates elsewhere (delivery boy's
+   stop list, marker popups, nav mini-list) then multiply by this factor
+   instead of showing raw straight-line distance, so they track real road
+   distance much more closely — without firing extra paid API calls on
+   every single GPS tick. */
+let roadFactor = 1.3; // sane default for dense Indian city road networks until we learn a better one
+function updateRoadFactor(straightKm, roadKm){
+  if (!straightKm || straightKm < 0.15 || !roadKm) return; // ignore tiny legs — GPS jitter dominates below ~150m
+  const sample = roadKm / straightKm;
+  if (sample < 1 || sample > 3) return; // ignore bad/outlier samples
+  roadFactor = roadFactor * 0.7 + sample * 0.3; // smooth exponential moving average
+}
+function estimatedRoadKm(lat1, lon1, lat2, lon2){
+  return distanceKm(lat1, lon1, lat2, lon2) * roadFactor;
+}
+function timeAgo(ts){
+  if(!ts) return '—';
+  const ms = typeof ts === 'number' ? ts : Date.now();
+  const s = Math.floor((Date.now()-ms)/1000);
+  if (s<5) return 'just now'; if (s<60) return s+'s ago';
+  if (s<3600) return Math.floor(s/60)+'m ago'; return Math.floor(s/3600)+'h ago';
+}
+function isOnline(b){
+  if(!b) return false;
+  if (b.online === false) return false;
+  if(!b.lastUpdate) return false;
+  const ms = typeof b.lastUpdate === 'number' ? b.lastUpdate : Date.now();
+  return (Date.now()-ms) < 120000;
+}
+function custShift(c){ return c.shift === 'evening' ? 'evening' : 'morning'; }
+function defaultShiftNow(){ return new Date().getHours() < 16 ? 'morning' : 'evening'; }
+function nearestNeighborOrder(startLat, startLng, stops){
+  let remaining = [...stops];
+  let order = [];
+  let cur = { lat:startLat, lng:startLng };
+  while (remaining.length){
+    remaining.sort((a,z)=> distanceKm(cur.lat,cur.lng,a.lat,a.lng) - distanceKm(cur.lat,cur.lng,z.lat,z.lng));
+    const next = remaining.shift();
+    order.push(next);
+    cur = next;
   }
-}),{threshold:.5});
-ctrs.forEach(el=>co.observe(el));
-
-// ══ TOOL BARS ══
-const tfs = document.querySelectorAll('.tool-fill');
-const to = new IntersectionObserver(es=>es.forEach(e=>{
-  if(e.isIntersecting){ e.target.classList.add('on'); e.target.style.transform=`scaleX(${getComputedStyle(e.target).getPropertyValue('--w')||1})`; to.unobserve(e.target); }
-}),{threshold:.5});
-tfs.forEach(el=>to.observe(el));
-
-// ══ HSCROLL ══
-const hinner = document.getElementById('hinner');
-let hi=0; const cw=302;
-document.getElementById('hnext').addEventListener('click',()=>{ const mx2=Math.max(0,hinner.children.length-Math.floor(hinner.parentElement.offsetWidth/cw)); hi=Math.min(hi+1,mx2); hinner.style.transform=`translateX(-${hi*cw}px)`; });
-document.getElementById('hprev').addEventListener('click',()=>{ hi=Math.max(hi-1,0); hinner.style.transform=`translateX(-${hi*cw}px)`; });
-
-// ══ PARALLAX ══
-window.addEventListener('scroll',()=>{
-  const y=scrollY;
-  document.querySelector('.hero-radial').style.transform=`translateY(${y*.25}px)`;
-},{passive:true});
-
-// ══ THREE.JS 3D SCENES ══
-function makeScene(canvasId, objects, scrollFactor, mouseReact) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor(0x000000, 0);
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-  camera.position.z = 5;
-
-  // Gold material
-  const goldMat = new THREE.MeshStandardMaterial({
-    color: 0xc9a84c, metalness: 0.85, roughness: 0.25,
-    emissive: 0x3a2800, emissiveIntensity: 0.15
-  });
-  const wireMat = new THREE.MeshBasicMaterial({ color: 0xc9a84c, wireframe: true, transparent: true, opacity: 0.12 });
-  const dimMat = new THREE.MeshStandardMaterial({ color: 0x8a6b2a, metalness: .9, roughness: .3 });
-
-  // Lights
-  const amb = new THREE.AmbientLight(0xffffff, 0.4);
-  const pt1 = new THREE.PointLight(0xffd070, 2.5, 20);
-  pt1.position.set(4, 4, 4);
-  const pt2 = new THREE.PointLight(0xffffff, 1, 15);
-  pt2.position.set(-3, -2, 3);
-  scene.add(amb, pt1, pt2);
-
-  const meshes = [];
-
-  objects.forEach(obj => {
-    let geo;
-    if(obj.type === 'torus') geo = new THREE.TorusGeometry(obj.r||1, obj.tube||.3, 20, 60);
-    else if(obj.type === 'icosa') geo = new THREE.IcosahedronGeometry(obj.r||1, obj.detail||1);
-    else if(obj.type === 'octa') geo = new THREE.OctahedronGeometry(obj.r||1);
-    else if(obj.type === 'tetra') geo = new THREE.TetrahedronGeometry(obj.r||1);
-    else if(obj.type === 'sphere') geo = new THREE.SphereGeometry(obj.r||1, 32, 32);
-    else if(obj.type === 'torusknot') geo = new THREE.TorusKnotGeometry(obj.r||.7, obj.tube||.2, 120, 16);
-    else if(obj.type === 'box') geo = new THREE.BoxGeometry(obj.s||1, obj.s||1, obj.s||1);
-    else geo = new THREE.IcosahedronGeometry(1, 1);
-
-    const mat = obj.wire ? wireMat.clone() : (obj.dim ? dimMat.clone() : goldMat.clone());
-    if(obj.opacity) { mat.transparent=true; mat.opacity=obj.opacity; }
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(obj.x||0, obj.y||0, obj.z||0);
-    if(obj.rx) mesh.rotation.x = obj.rx;
-    if(obj.ry) mesh.rotation.y = obj.ry;
-    mesh.userData = { speed: obj.speed||0.003, axis: obj.axis||'y', float: obj.float||0.002, floatSpeed: obj.floatSpeed||1, t: Math.random()*100 };
-    scene.add(mesh);
-    meshes.push(mesh);
-  });
-
-  let mox = 0, moy = 0;
-  if(mouseReact) {
-    document.addEventListener('mousemove', e => {
-      mox = (e.clientX / window.innerWidth - .5) * 2;
-      moy = -(e.clientY / window.innerHeight - .5) * 2;
-    });
-  }
-
-  function resize() {
-    const parent = canvas.parentElement;
-    const w = parent.offsetWidth, h = parent.offsetHeight;
-    renderer.setSize(w, h);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  let scrollY2 = 0;
-  window.addEventListener('scroll', () => { scrollY2 = window.scrollY; }, {passive:true});
-
-  function animate() {
-    requestAnimationFrame(animate);
-    const t = performance.now() * 0.001;
-
-    meshes.forEach(m => {
-      const d = m.userData;
-      d.t += 0.016;
-      if(d.axis === 'y') m.rotation.y += d.speed;
-      else if(d.axis === 'x') m.rotation.x += d.speed;
-      else { m.rotation.x += d.speed*.6; m.rotation.y += d.speed; }
-      m.position.y += Math.sin(d.t * d.floatSpeed) * d.float;
-    });
-
-    if(mouseReact && meshes.length > 0) {
-      scene.rotation.y += (mox * .25 - scene.rotation.y) * .04;
-      scene.rotation.x += (moy * .12 - scene.rotation.x) * .04;
+  return order;
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function confirmAction(text, onOk){
+  document.getElementById('confirmText').textContent = text;
+  openModal('confirmModal');
+  const okBtn = document.getElementById('confirmOk');
+  const cancelBtn = document.getElementById('confirmCancel');
+  const cleanup = ()=>{ closeModal('confirmModal'); okBtn.onclick=null; cancelBtn.onclick=null; };
+  okBtn.onclick = ()=>{ cleanup(); onOk(); };
+  cancelBtn.onclick = cleanup;
+}
+let openModalCount = 0;
+function openModal(id){
+  document.getElementById(id).classList.add('show');
+  openModalCount++;
+  document.body.classList.add('modal-open');
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('show');
+  openModalCount = Math.max(0, openModalCount - 1);
+  if (openModalCount === 0) document.body.classList.remove('modal-open');
+}
+function parseGoogleMapsLink(text){
+  if(!text) return null;
+  try{
+    let m = text.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
+    m = text.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
+    m = text.match(/[?&](?:q|ll|query|center|sll|sspn|viewpoint|destination)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+    if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
+    m = text.match(/[?&]daddr=(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+    if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
+    m = text.match(/\/place\/[^\/]*\/(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
+    m = text.match(/(-?\d{1,3}\.\d{3,}),\s*(-?\d{1,3}\.\d{3,})/);
+    if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
+    return null;
+  }catch(e){ return null; }
+}
+function isShortMapsLink(url){
+  return /goo\.gl\/|maps\.app\.goo\.gl/i.test(url);
+}
+// Pull a human place-name / search-query out of a Maps URL (or its resolved
+// HTML) so that, if no raw coordinates are present anywhere, we can fall
+// back to geocoding it into a lat/lng. This is what lets a plain shared
+// "place" link (no @lat,lng, no !3d!4d) — like someone sharing their
+// current location as a named address instead of a coordinate pin — still
+// resolve to an exact point on the map.
+function extractPlaceQuery(text){
+  if(!text) return null;
+  try{
+    let m = text.match(/\/maps\/place\/([^\/@?]+)/);
+    if(m) return decodeURIComponent(m[1].replace(/\+/g,' '));
+    m = text.match(/[?&]q=([^&]+)/);
+    if(m){
+      const val = decodeURIComponent(m[1].replace(/\+/g,' '));
+      if(!/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(val)) return val;
     }
-
-    if(scrollFactor) {
-      scene.position.y = -scrollY2 * scrollFactor;
+    m = text.match(/[?&]query=([^&]+)/);
+    if(m){
+      const val = decodeURIComponent(m[1].replace(/\+/g,' '));
+      if(!/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(val)) return val;
     }
+    m = text.match(/<title>([^<]+)<\/title>/i);
+    if(m){
+      const val = m[1].replace(/\s*-\s*Google\s*Maps\s*$/i,'').trim();
+      if(val && val.toLowerCase() !== 'google maps') return val;
+    }
+    m = text.match(/content="([^"]+)"\s+property="og:title"/i) || text.match(/property="og:title"\s+content="([^"]+)"/i);
+    if(m) return m[1].trim();
+    return null;
+  }catch(e){ return null; }
+}
+// Geocode a free-text place name/address into coordinates using the same
+// Google Maps API key already loaded on the page. Used only as a last
+// resort, after we've tried every pattern-based coordinate extraction.
+async function geocodePlaceName(name){
+  if(!name) return null;
+  try{
+    const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(name)}&key=${GOOGLE_MAPS_API_KEY}`);
+    const data = await res.json();
+    if (data.status === 'OK' && data.results && data.results[0]){
+      const loc = data.results[0].geometry.location;
+      return { lat: loc.lat, lng: loc.lng };
+    }
+  }catch(e){ /* geocoding failed — fall through to null */ }
+  return null;
+}
+async function resolveGoogleMapsLink(url){
+  const direct = parseGoogleMapsLink(url);
+  if (direct) return direct;
 
-    renderer.render(scene, camera);
+  let finalUrl = url;
+  let pageText = '';
+
+  if (isShortMapsLink(url)){
+    const proxies = [
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+      'https://corsproxy.io/?' + encodeURIComponent(url)
+    ];
+    for (const proxyUrl of proxies){
+      try{
+        const res = await fetch(proxyUrl);
+        if (!res.ok) continue;
+        const text = await res.text();
+        pageText = text;
+        const coords = parseGoogleMapsLink(text);
+        if (coords) return coords;
+        const canon = text.match(/<link rel="canonical" href="([^"]+)"/i) || text.match(/property="og:url"\s+content="([^"]+)"/i);
+        if (canon && canon[1]) finalUrl = canon[1];
+        break; // got a page back, no need to try the next proxy
+      }catch(e){ /* try next proxy */ }
+    }
   }
-  animate();
+
+  // The canonical/resolved URL sometimes carries coordinates even when the
+  // raw HTML text didn't match our patterns.
+  if (finalUrl !== url){
+    const fromFinal = parseGoogleMapsLink(finalUrl);
+    if (fromFinal) return fromFinal;
+  }
+
+  // Last resort: no coordinates anywhere — this is a plain shared "place" /
+  // named-location link, so pull out whatever place text we can find and
+  // geocode it directly.
+  const placeName = extractPlaceQuery(finalUrl) || extractPlaceQuery(url) || extractPlaceQuery(pageText);
+  if (placeName){
+    const geocoded = await geocodePlaceName(placeName);
+    if (geocoded) return geocoded;
+  }
+  return null;
 }
 
-// HERO — main big torusknot + orbiting icosahedra
-makeScene('three-hero', [
-  { type:'torusknot', r:.9, tube:.25, x:3.2, y:-.2, z:-1, speed:.006, axis:'xy', float:.003, floatSpeed:.7, opacity:.9 },
-  { type:'icosa', r:.55, detail:1, x:1.4, y:1.8, z:0, speed:.009, axis:'xy', float:.004, floatSpeed:1.1 },
-  { type:'icosa', r:.3, detail:0, x:-.8, y:2.2, z:-.5, speed:.012, axis:'xy', float:.006, floatSpeed:1.4, dim:true },
-  { type:'torus', r:.7, tube:.06, x:-2.8, y:.8, z:-1, speed:.004, axis:'x', float:.002, floatSpeed:.8, wire:true },
-  { type:'octa', r:.4, x:4.5, y:-1.2, z:-2, speed:.007, axis:'xy', float:.003, floatSpeed:.9, dim:true },
-  { type:'sphere', r:.12, x:2.1, y:.6, z:.5, speed:.02, axis:'y', float:.008, floatSpeed:2 },
-  { type:'tetra', r:.25, x:-.4, y:3.1, z:-1, speed:.011, axis:'xy', float:.005, floatSpeed:1.3 },
-], 0.0004, true);
+/* ---------------- state ---------------- */
+let customers = [];
+let deliveryBoys = [];
+let zones = [];
+let role = null;
+let myBoyId = null;
+let currentAdminTab = 'overview';
+let locMode = 'map';
+let routedBoyId = null;
+let activeShift = defaultShiftNow();
+let navMode = false;
+let editingLocationForCustId = null; // set while admin is re-picking a customer's pin on the map
+let boyModalShift = 'morning'; // which shift tab is open inside the boy detail modal
+let custSearchTerm = '';
+let dbSearchTerm = '';
 
-// ABOUT — subtle wireframe + solid shapes
-makeScene('three-about', [
-  { type:'icosa', r:1.1, detail:1, x:-3.5, y:.5, z:-2, speed:.003, axis:'xy', float:.002, floatSpeed:.6, wire:true },
-  { type:'octa', r:.6, x:3.8, y:1.2, z:-1.5, speed:.005, axis:'xy', float:.003, floatSpeed:.8, dim:true },
-  { type:'sphere', r:.18, x:1.2, y:-2, z:0, speed:.015, axis:'y', float:.006, floatSpeed:1.8 },
-], 0, false);
+/* ---------------- session ---------------- */
+function loadSession(){
+  try{
+    const raw = localStorage.getItem('rb_session');
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function saveSession(s){ localStorage.setItem('rb_session', JSON.stringify(s)); }
+function clearSession(){ localStorage.removeItem('rb_session'); }
 
-// CONTACT — moody large shapes
-makeScene('three-contact', [
-  { type:'icosa', r:1.4, detail:2, x:3, y:.8, z:-3, speed:.002, axis:'xy', float:.002, floatSpeed:.5, wire:true },
-  { type:'torus', r:.9, tube:.08, x:-3.2, y:-.5, z:-1, speed:.003, axis:'x', float:.002, floatSpeed:.7 },
-  { type:'octa', r:.5, x:1.5, y:-2.5, z:0, speed:.007, axis:'xy', float:.004, floatSpeed:1.1, dim:true },
-], 0, false);
-
-// ══ TILT ON PROJECT CARDS ══
-document.querySelectorAll('.proj-card,.stat-card').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const r=card.getBoundingClientRect(), x=((e.clientX-r.left)/r.width-.5)*7, y=((e.clientY-r.top)/r.height-.5)*-7;
-    card.style.transform=`perspective(700px) rotateX(${y}deg) rotateY(${x}deg) translateZ(5px)`;
+/* ---------------- Google Maps loader ---------------- */
+function loadGoogleMaps(apiKey){
+  return new Promise((resolve, reject)=>{
+    if (window.google && window.google.maps){ resolve(); return; }
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry`;
+    s.async = true;
+    s.onload = ()=> resolve();
+    s.onerror = ()=> reject(new Error('Google Maps script failed to load'));
+    document.head.appendChild(s);
   });
-  card.addEventListener('mouseleave',()=>{ card.style.transform=''; });
+}
+
+/* ---------------- mobile List/Map toggle helpers ---------------- */
+function setMobileView(mode){
+  const isMap = mode === 'map';
+  document.body.classList.toggle('show-map-mobile', isMap);
+  document.body.classList.toggle('show-list-mobile', !isMap);
+  document.getElementById('mobShowMap').classList.toggle('active', isMap);
+  document.getElementById('mobShowList').classList.toggle('active', !isMap);
+  setTimeout(()=>{ if (map) google.maps.event.trigger(map, 'resize'); }, 150);
+}
+function isMobileLayout(){ return window.matchMedia('(max-width:860px)').matches; }
+function ensureMapVisible(){ if (isMobileLayout()) setMobileView('map'); }
+
+/* ---------------- map ---------------- */
+let map, infoWindow;
+let custMarkers = [];
+let boyMarkers = {};
+let pendingPinLatLng = null;
+let pendingPinMarker = null;
+let routePolyline = null;
+let segmentLabels = [];
+let lastRoutedKey = null;
+let lastRouteFetchTime = 0;
+let deliveryMapCenteredOnce = false;
+let FloatingLabel = null;
+
+let directionsService = null;
+let activeDirectionsResult = null;
+let activeLegSteps = [];
+let currentStepIdx = 0;
+let navFollow = true;
+
+function defineFloatingLabelClass(){
+  FloatingLabel = class extends google.maps.OverlayView {
+    constructor(position, text, color){
+      super();
+      this.position = position;
+      this.text = text;
+      this.color = color;
+      this.div = null;
+    }
+    onAdd(){
+      this.div = document.createElement('div');
+      this.div.style.cssText = `position:absolute; transform:translate(-50%,-50%); background:${this.color}; color:white; font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:999px; box-shadow:0 3px 10px rgba(0,0,0,.28); white-space:nowrap; pointer-events:none; border:1.5px solid white; letter-spacing:.02em;`;
+      this.div.textContent = this.text;
+      this.getPanes().overlayMouseTarget.appendChild(this.div);
+    }
+    draw(){
+      const proj = this.getProjection();
+      if (!proj || !this.div) return;
+      const pos = proj.fromLatLngToDivPixel(this.position);
+      if (pos){ this.div.style.left = pos.x + 'px'; this.div.style.top = pos.y + 'px'; }
+    }
+    onRemove(){
+      if (this.div && this.div.parentNode){ this.div.parentNode.removeChild(this.div); }
+      this.div = null;
+    }
+  };
+}
+function clearSegmentLabels(){
+  segmentLabels.forEach(l=>l.setMap(null));
+  segmentLabels = [];
+}
+function drawSegmentLabels(routePoints, color, legInfo){
+  // legInfo (optional): array aligned with routePoints, one entry per
+  // segment — [{km, min}, ...] — real road distance/time for that leg, as
+  // returned by OSRM or Google Directions in showBoyRoute(). When present we
+  // use it (and feed it back into the road-factor calibration) instead of
+  // falling back to straight-line distance, so the label matches the actual
+  // routed line drawn on the map.
+  clearSegmentLabels();
+  for (let i=0; i<routePoints.length-1; i++){
+    const a = routePoints[i], z = routePoints[i+1];
+    const straightKm = distanceKm(a.lat,a.lng,z.lat,z.lng);
+    let km, etaTxt;
+    if (legInfo && legInfo[i] && legInfo[i].km != null){
+      km = legInfo[i].km;
+      etaTxt = fmtMinutes(legInfo[i].min);
+      updateRoadFactor(straightKm, km);
+    } else {
+      km = straightKm;
+      etaTxt = fmtEtaMinutes(km);
+    }
+    const mid = { lat:(a.lat+z.lat)/2, lng:(a.lng+z.lng)/2 };
+    const label = new FloatingLabel(new google.maps.LatLng(mid.lat, mid.lng), `${fmtDist(km)} · ${etaTxt}`, color);
+    label.setMap(map);
+    segmentLabels.push(label);
+  }
+}
+
+function initMap(){
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: 28.6139, lng: 77.2090 },
+    zoom: 12,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    clickableIcons: false
+  });
+  infoWindow = new google.maps.InfoWindow();
+
+  map.addListener('click', (e)=>{
+    // Admin is re-picking an existing customer's pin from the edit modal
+    if (role === 'admin' && editingLocationForCustId){
+      const id = editingLocationForCustId;
+      const lat = e.latLng.lat(), lng = e.latLng.lng();
+      editingLocationForCustId = null;
+      update(ref(db, 'customers/' + id), { lat, lng }).then(()=>{
+        showToast('Location updated!');
+      });
+      return;
+    }
+    if (role !== 'admin' || currentAdminTab !== 'customers' || locMode !== 'map') return;
+    pendingPinLatLng = { lat: e.latLng.lat(), lng: e.latLng.lng() };
+    if (pendingPinMarker) pendingPinMarker.setMap(null);
+    pendingPinMarker = new google.maps.Marker({ position: pendingPinLatLng, map, icon: makeCustIcon('#10192E','+',false,null,false) });
+    document.getElementById('pendingPinNote').style.display = 'block';
+  });
+
+  map.addListener('dragstart', ()=>{
+    if (navMode && navFollow){ navFollow = false; updateRecenterBtnUI(); }
+  });
+
+  defineFloatingLabelClass();
+  document.getElementById('mapLoading').style.display = 'none';
+}
+
+function makeCustIcon(color, label, done, shift, isNew){
+  const fill = done ? '#2AC2A6' : color;
+  const shiftColor = shift ? (SHIFT_COLORS[shift] || null) : null;
+  const shiftDot = shiftColor ? `<circle cx="24" cy="7" r="6.5" fill="${shiftColor}" stroke="white" stroke-width="1.6"/>` : '';
+  const newBadge = isNew ? `<circle cx="6" cy="7" r="7" fill="#FF5A36" stroke="white" stroke-width="1.6"/><text x="6" y="10" font-family="monospace" font-size="8.5" font-weight="700" fill="white" text-anchor="middle">N</text>` : '';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+    <path d="M15 2C6.7 2 0 8.7 0 17c0 10.7 15 23 15 23s15-12.3 15-23C30 8.7 23.3 2 15 2z" fill="${fill}" stroke="white" stroke-width="2"/>
+    <circle cx="15" cy="17" r="10.5" fill="${fill}" stroke="white" stroke-width="1.2"/>
+    <text x="15" y="21" font-family="monospace" font-size="11" font-weight="700" fill="white" text-anchor="middle">${done?'✓':label}</text>
+    ${shiftDot}
+    ${newBadge}
+  </svg>`;
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(32,40),
+    anchor: new google.maps.Point(15,38)
+  };
+}
+
+function makeBoyIcon(color, initialsTxt, online){
+  const bodyColor = online ? color : '#9AA0AC';
+  const ringColor = online ? '#FFFFFF' : '#D8DBE0';
+  const badgeColor = online ? '#2AC2A6' : '#6B7280';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 46 46">
+    <circle cx="23" cy="23" r="19" fill="${bodyColor}" stroke="${ringColor}" stroke-width="3"/>
+    <g transform="translate(9,13)" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="4.5" cy="15.5" r="4" fill="white" fill-opacity="0.18"/>
+      <circle cx="23.5" cy="15.5" r="4" fill="white" fill-opacity="0.18"/>
+      <path d="M4.5 15.5 L11 9 H17 M11 9 L14 15.5 H23.5 M14 15.5 L17.5 6.5 H21.5 M9.5 5 H15" />
+      <circle cx="17.5" cy="6.5" r="1.4" fill="white" stroke="none"/>
+    </g>
+    ${online ? `<circle cx="38" cy="8" r="6" fill="${badgeColor}" stroke="white" stroke-width="1.6"/>` : `<circle cx="38" cy="8" r="6" fill="${badgeColor}" stroke="white" stroke-width="1.6"/><text x="38" y="11" font-family="monospace" font-size="8" font-weight="700" fill="white" text-anchor="middle">×</text>`}
+  </svg>`;
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(46,46),
+    anchor: new google.maps.Point(23,23)
+  };
+}
+function initials(name){ return (name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+function renderMapMarkers(){
+  if (!map) return;
+  custMarkers.forEach(m=>m.setMap(null));
+  custMarkers = [];
+
+  const boyColorMap = {}; deliveryBoys.forEach(b=> boyColorMap[b.id]=b.color);
+
+  let visibleCustomers = customers;
+  let myBoy = null;
+  let routeOrderMap = null;
+
+  if (role === 'delivery' && myBoyId){
+    visibleCustomers = customers.filter(c=>c.assignedTo === myBoyId && custShift(c) === activeShift);
+    myBoy = deliveryBoys.find(b=>b.id===myBoyId);
+    if (myBoy && myBoy.lat != null){
+      const pendingForOrder = visibleCustomers.filter(c=>c.status!=='completed');
+      const ordered = nearestNeighborOrder(myBoy.lat, myBoy.lng, pendingForOrder);
+      routeOrderMap = {};
+      ordered.forEach((c,idx)=>{ routeOrderMap[c.id] = idx+1; });
+    }
+  }
+
+  visibleCustomers.forEach((c,i)=>{
+    const color = c.assignedTo ? (boyColorMap[c.assignedTo] || '#8A93A6') : '#8A93A6';
+    const label = routeOrderMap ? (routeOrderMap[c.id] || i+1) : (i+1);
+    const marker = new google.maps.Marker({
+      position: { lat:c.lat, lng:c.lng },
+      map,
+      icon: makeCustIcon(color, label, c.status==='completed', custShift(c), isNewCustomer(c)),
+      title: c.name,
+      zIndex: c.status==='completed' ? 50 : 300 - label
+    });
+
+    marker.addListener('click', ()=>{
+      const shiftLbl = custShift(c)==='evening' ? '🌆 Evening' : '🌅 Morning';
+      const newLbl = isNewCustomer(c) ? `<span style="font-size:11px;color:#E64A28;font-weight:700;">🆕 NEW</span> · ` : '';
+      let extra = '';
+      if (role === 'delivery' && c.assignedTo === myBoyId){
+        let distLine = '';
+        if (myBoy && myBoy.lat != null){
+          const d = estimatedRoadKm(myBoy.lat, myBoy.lng, c.lat, c.lng);
+          distLine = `<div style="font-size:11px; color:#5B6178; margin:4px 0 8px;">📍 ${fmtDist(d)} away · ~${fmtEtaMinutes(d)}</div>`;
+        }
+        if (c.status !== 'completed'){
+          extra = `${distLine}<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">
+            <button onclick="deliverFromMap('${c.id}')" style="background:#2AC2A6;color:white;border:none;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:700;cursor:pointer;">✓ Delivered</button>
+            ${c.phone ? `<a href="tel:${escapeHtml(c.phone)}" style="background:#F5F4EF;color:#10192E;border:1px solid #DEDBCF;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:700;text-decoration:none;">📞 Call</a>` : ''}
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}" target="_blank" style="background:#F5F4EF;color:#10192E;border:1px solid #DEDBCF;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:700;text-decoration:none;">🧭 Navigate</a>
+          </div>`;
+        } else {
+          extra = `<div style="font-size:11px; color:#1D9E86; font-weight:700; margin-top:4px;">✓ Delivered</div>`;
+        }
+      }
+      infoWindow.setContent(`<div style="font-family:Inter,sans-serif; min-width:170px;"><b>${escapeHtml(c.name)}</b><br>${escapeHtml(c.address||'')}${c.phone && role!=='delivery'?`<br>${escapeHtml(c.phone)}`:''}<br>${newLbl}<span style="font-size:11px;color:#8A93A6;">${shiftLbl}</span>${extra}</div>`);
+      infoWindow.open(map, marker);
+    });
+    custMarkers.push(marker);
+  });
+
+  const visibleBoys = (role==='delivery' && myBoyId) ? deliveryBoys.filter(b=>b.id===myBoyId) : deliveryBoys;
+
+  Object.keys(boyMarkers).forEach(id=>{
+    if(!visibleBoys.find(b=>b.id===id)){ boyMarkers[id].setMap(null); delete boyMarkers[id]; }
+  });
+
+  visibleBoys.forEach(b=>{
+    if (b.lat == null) return;
+    const online = isOnline(b);
+    if (!boyMarkers[b.id]) {
+      boyMarkers[b.id] = new google.maps.Marker({
+        position: { lat:b.lat, lng:b.lng },
+        map,
+        icon: makeBoyIcon(b.color, initials(b.name), online),
+        zIndex: online ? 1000 : 500,
+        opacity: online ? 1 : 0.7
+      });
+      boyMarkers[b.id].addListener('click', ()=>{
+        infoWindow.setContent(`<div style="font-family:Inter,sans-serif;"><b>${escapeHtml(b.name)}</b><br><span style="font-size:11px;color:${online?'#1D9E86':'#8A93A6'};">${online?'🟢 Online now':'⚫ Offline · last seen ' + timeAgo(b.lastUpdate)}</span></div>`);
+        infoWindow.open(map, boyMarkers[b.id]);
+      });
+    } else {
+      boyMarkers[b.id].setPosition({ lat:b.lat, lng:b.lng });
+      boyMarkers[b.id].setIcon(makeBoyIcon(b.color, initials(b.name), online));
+      boyMarkers[b.id].setOpacity(online ? 1 : 0.7);
+      boyMarkers[b.id].setZIndex(online ? 1000 : 500);
+    }
+  });
+}
+
+/* ---------------- Google Directions (turn-by-turn, Navigation Mode only) ---------------- */
+function getDirectionsService(){
+  if (!directionsService) directionsService = new google.maps.DirectionsService();
+  return directionsService;
+}
+function computeDirections(origin, orderedStops){
+  return new Promise((resolve, reject)=>{
+    if (!orderedStops.length) { reject(new Error('no stops')); return; }
+    const destination = orderedStops[orderedStops.length - 1];
+    const waypoints = orderedStops.slice(0, -1).map(s => ({ location:{lat:s.lat,lng:s.lng}, stopover:true }));
+    getDirectionsService().route({
+      origin,
+      destination: { lat:destination.lat, lng:destination.lng },
+      waypoints,
+      optimizeWaypoints:false,
+      travelMode: google.maps.TravelMode.DRIVING,
+      // Delivery boys ride bikes/two-wheelers — the legacy Directions API has
+      // no dedicated two-wheeler mode, so we bias the driving route away from
+      // highways/expressways and tolls (which two-wheelers usually can't or
+      // shouldn't use in India) to get the most realistic, quickest-by-bike path.
+      avoidHighways: true,
+      avoidFerries: true
+    }, (result, status)=>{
+      if (status === 'OK' && result) resolve(result);
+      else reject(new Error(status || 'DIRECTIONS_FAILED'));
+    });
+  });
+}
+function maneuverArrowSvg(maneuver){
+  const rot = {
+    'turn-left':-90,'turn-right':90,'turn-slight-left':-30,'turn-slight-right':30,
+    'turn-sharp-left':-120,'turn-sharp-right':120,'uturn-left':180,'uturn-right':180,
+    'ramp-left':-40,'ramp-right':40,'fork-left':-25,'fork-right':25,
+    'merge':20,'roundabout-left':-60,'roundabout-right':60,'straight':0
+  }[maneuver] || 0;
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(${rot}deg)"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>`;
+}
+function updateTurnBanner(boyPos){
+  const banner = document.getElementById('navTurnBanner');
+  if (!navMode || !activeLegSteps.length || !boyPos || boyPos.lat == null){
+    if (banner) banner.style.display = 'none';
+    return;
+  }
+  const pos = new google.maps.LatLng(boyPos.lat, boyPos.lng);
+  let idx = currentStepIdx;
+  for (let i = currentStepIdx; i < activeLegSteps.length; i++){
+    const d = google.maps.geometry.spherical.computeDistanceBetween(pos, activeLegSteps[i].end_location);
+    if (d < 35 && i < activeLegSteps.length - 1){ idx = i + 1; continue; }
+    idx = i; break;
+  }
+  currentStepIdx = idx;
+  const step = activeLegSteps[idx];
+  if (!step){ banner.style.display = 'none'; return; }
+  const distToManeuver = google.maps.geometry.spherical.computeDistanceBetween(pos, step.end_location);
+  document.getElementById('navTurnInstr').textContent = (step.instructions || '').replace(/<[^>]*>/g, '').trim();
+  document.getElementById('navTurnDist').textContent = fmtDist(distToManeuver / 1000);
+  document.getElementById('navTurnArrowIcon').innerHTML = maneuverArrowSvg(step.maneuver);
+  banner.style.display = 'flex';
+}
+function updateEtaSummary(result){
+  if (!result || !result.routes || !result.routes[0]) return;
+  const legs = result.routes[0].legs;
+  let totalSec = 0, totalMeters = 0;
+  legs.forEach(l => { totalSec += l.duration.value; totalMeters += l.distance.value; });
+  const mins = Math.max(1, Math.round(totalSec / 60));
+  const arrival = new Date(Date.now() + totalSec * 1000);
+  const h12 = ((arrival.getHours() + 11) % 12) + 1;
+  const ampm = arrival.getHours() >= 12 ? 'PM' : 'AM';
+  const mm = String(arrival.getMinutes()).padStart(2, '0');
+  document.getElementById('navEtaBig').textContent = mins + ' min';
+  document.getElementById('navEtaSub').textContent = `${fmtDist(totalMeters/1000)} · arriving ${h12}:${mm} ${ampm}`;
+}
+function updateRecenterBtnUI(){
+  document.getElementById('navRecenterBtn').classList.toggle('following', navFollow);
+}
+
+async function showBoyRoute(boyId, shiftFilter, opts){
+  opts = opts || {};
+  const auto = !!opts.auto;
+  const useNav = !!opts.nav;
+  const b = deliveryBoys.find(x=>x.id===boyId);
+  if (!b) return;
+  if (b.lat == null) { if(!auto) showToast(b.name + " has no live location yet — ask them to log in and enable GPS"); return; }
+
+  let stops = customers.filter(c=>c.assignedTo===boyId && c.status!=='completed' && (!shiftFilter || shiftFilter==='all' || custShift(c)===shiftFilter));
+  if (!stops.length){
+    if(!auto) showToast("No pending stops for " + b.name + (shiftFilter && shiftFilter!=='all' ? ' in this shift' : ''));
+    clearRoute(); clearSegmentLabels();
+    activeDirectionsResult = null; activeLegSteps = []; currentStepIdx = 0;
+    if (useNav) updateTurnBanner(null);
+    if (auto && !deliveryMapCenteredOnce){
+      map.panTo({lat:b.lat,lng:b.lng}); map.setZoom(15); deliveryMapCenteredOnce = true;
+    } else if (!auto && b.lat != null){
+      map.panTo({lat:b.lat,lng:b.lng}); map.setZoom(14);
+    }
+    return;
+  }
+
+  const ordered = nearestNeighborOrder(b.lat, b.lng, stops);
+  const routeKey = boyId + '|' + (shiftFilter||'all') + '|' + (useNav?'nav':'std') + '|' + ordered.map(s=>s.id).join(',');
+  const now = Date.now();
+  if (auto && routeKey === lastRoutedKey && (now - lastRouteFetchTime) < 20000){
+    if (useNav) updateTurnBanner(b);
+    return;
+  }
+  const isNewStopSet = routeKey !== lastRoutedKey;
+
+  routedBoyId = boyId;
+  if (!auto) document.getElementById('mapToolbar').style.display = 'flex';
+
+  const routePoints = [{lat:b.lat, lng:b.lng}, ...ordered.map(s=>({lat:s.lat, lng:s.lng}))];
+
+  if (useNav){
+    try{
+      const result = await computeDirections({lat:b.lat, lng:b.lng}, ordered);
+      const route = result.routes[0];
+      const overviewPath = route.overview_path.map(p=>[p.lat(), p.lng()]);
+      // route.legs[i] holds the REAL road distance/duration for each stop-to-stop
+      // segment (already paid for in this API call) — use it instead of
+      // recomputing straight-line distance, so the pill on the map matches the
+      // actual routed line drawn and the top ETA summary.
+      const legInfo = route.legs.map(l => ({ km: l.distance.value/1000, min: l.duration.value/60 }));
+      drawRoute(overviewPath, b.color, false, !auto || isNewStopSet);
+      drawSegmentLabels(routePoints, b.color, legInfo);
+      activeDirectionsResult = result;
+      activeLegSteps = route.legs[0] ? route.legs[0].steps : [];
+      currentStepIdx = 0;
+      updateTurnBanner(b);
+      updateEtaSummary(result);
+      lastRoutedKey = routeKey;
+      lastRouteFetchTime = now;
+      return;
+    }catch(e){
+      if(!auto) showToast("Live turn-by-turn unavailable — showing straight-line path (check Directions API is enabled)");
+    }
+    drawRoute(routePoints.map(p=>[p.lat,p.lng]), b.color, true, !auto || isNewStopSet);
+    drawSegmentLabels(routePoints, b.color);
+    activeDirectionsResult = null; activeLegSteps = []; currentStepIdx = 0;
+    updateTurnBanner(null);
+    lastRoutedKey = routeKey;
+    lastRouteFetchTime = now;
+    return;
+  }
+
+  const coordStr = routePoints.map(p=>p.lng+','+p.lat).join(';');
+  let latlngs, dashed = false, legInfo = null;
+  try{
+    const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson`);
+    const data = await res.json();
+    if (data.routes && data.routes[0]){
+      latlngs = data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+      // OSRM already returns real road distance/duration per leg (meters,
+      // seconds) — reuse it for the labels instead of recomputing straight-line
+      // distance, so the number matches the actual road line being drawn.
+      if (data.routes[0].legs){
+        legInfo = data.routes[0].legs.map(l => ({ km: l.distance/1000, min: l.duration/60 }));
+      }
+    } else throw new Error('no route');
+  }catch(e){
+    latlngs = routePoints.map(p=>[p.lat,p.lng]);
+    dashed = true;
+  }
+
+  drawRoute(latlngs, b.color, dashed, !auto || isNewStopSet);
+  drawSegmentLabels(routePoints, b.color, legInfo);
+  lastRoutedKey = routeKey;
+  lastRouteFetchTime = now;
+  if (dashed && !auto) showToast("Live road routing unavailable — showing straight-line path");
+}
+function drawRoute(latlngs, color, dashed, fitBounds){
+  if (routePolyline) routePolyline.setMap(null);
+  const path = latlngs.map(p=>({ lat:p[0], lng:p[1] }));
+  routePolyline = new google.maps.Polyline({
+    path,
+    map,
+    strokeColor: color,
+    strokeOpacity: dashed ? 0 : 0.9,
+    strokeWeight: dashed ? 0 : (navMode ? 7 : 4.5),
+    icons: dashed ? [{ icon: { path:'M 0,-1 0,1', strokeOpacity:1, scale:3 }, offset:'0', repeat:'12px' }] : undefined
+  });
+  if (fitBounds !== false && !navMode){
+    const bounds = new google.maps.LatLngBounds();
+    path.forEach(p=>bounds.extend(p));
+    map.fitBounds(bounds, 60);
+  }
+}
+function clearRoute(){
+  if (routePolyline){ routePolyline.setMap(null); routePolyline = null; }
+  routedBoyId = null;
+  lastRoutedKey = null;
+  document.getElementById('mapToolbar').style.display = 'none';
+}
+document.getElementById('clearRouteBtn').onclick = clearRoute;
+document.getElementById('recenterBtn').onclick = ()=>{
+  const b = deliveryBoys.find(x=>x.id===myBoyId);
+  if (b && b.lat!=null){ map.panTo({lat:b.lat,lng:b.lng}); map.setZoom(15); ensureMapVisible(); }
+  else showToast("Waiting for your GPS location…");
+};
+document.getElementById('navRecenterBtn').onclick = ()=>{
+  navFollow = true; updateRecenterBtnUI();
+  const b = deliveryBoys.find(x=>x.id===myBoyId);
+  if (b && b.lat!=null){ map.panTo({lat:b.lat,lng:b.lng}); map.setZoom(17); }
+};
+
+/* ================= NAVIGATION MODE ================= */
+function getNavPendingStops(){
+  if (!myBoyId) return [];
+  const me = deliveryBoys.find(b=>b.id===myBoyId);
+  let pending = customers.filter(c=>c.assignedTo===myBoyId && custShift(c)===activeShift && c.status!=='completed');
+  if (me && me.lat!=null){
+    pending.forEach(c=> c._d = estimatedRoadKm(me.lat, me.lng, c.lat, c.lng));
+    pending.sort((a,z)=>a._d-z._d);
+  }
+  return pending;
+}
+function enterNavMode(){
+  if (role!=='delivery' || !myBoyId) return;
+  const pending = getNavPendingStops();
+  if (!pending.length){ showToast("No pending stops in this shift"); return; }
+  navMode = true;
+  navFollow = true;
+  lastRoutedKey = null;
+  setMobileView('map');
+  document.body.classList.add('nav-mode');
+  document.getElementById('navComplete').style.display = 'none';
+  document.getElementById('navRecenterBtn').style.display = 'flex';
+  updateRecenterBtnUI();
+  renderMapMarkers();
+  const me = deliveryBoys.find(b=>b.id===myBoyId);
+  if (me && me.lat!=null){ map.panTo({lat:me.lat,lng:me.lng}); map.setZoom(17); }
+  updateNavSheet();
+  setTimeout(()=>{ if(map) google.maps.event.trigger(map,'resize'); }, 200);
+}
+function exitNavMode(){
+  navMode = false;
+  document.body.classList.remove('nav-mode');
+  document.getElementById('navComplete').style.display = 'none';
+  document.getElementById('navSheet').style.display = 'none';
+  document.getElementById('navTurnBanner').style.display = 'none';
+  document.getElementById('navRecenterBtn').style.display = 'none';
+  activeDirectionsResult = null; activeLegSteps = []; currentStepIdx = 0;
+  clearRoute(); clearSegmentLabels();
+  setMobileView('list');
+  renderAll();
+  setTimeout(()=>{ if(map) google.maps.event.trigger(map,'resize'); }, 200);
+}
+function updateNavSheet(){
+  if (!navMode) return;
+  const pending = getNavPendingStops();
+  const totalForShift = customers.filter(c=>c.assignedTo===myBoyId && custShift(c)===activeShift).length;
+  const doneForShift = totalForShift - pending.length;
+
+  if (!pending.length){
+    document.getElementById('navSheet').style.display = 'none';
+    document.getElementById('navTurnBanner').style.display = 'none';
+    document.getElementById('navCompleteSub').textContent = `All ${activeShift} stops are delivered. Nice work!`;
+    document.getElementById('navComplete').style.display = 'flex';
+    clearRoute(); clearSegmentLabels();
+    return;
+  }
+
+  document.getElementById('navSheet').style.display = 'block';
+  document.getElementById('navComplete').style.display = 'none';
+
+  const next = pending[0];
+  document.getElementById('navStopName').textContent = next.name;
+  document.getElementById('navStopAddr').textContent = next.address || 'No address noted';
+  document.getElementById('navProgressTxt').textContent = `Stop ${doneForShift+1} of ${totalForShift}`;
+  document.getElementById('navProgressFill').style.width = totalForShift ? Math.round(doneForShift/totalForShift*100)+'%' : '0%';
+
+  if (activeDirectionsResult){
+    updateEtaSummary(activeDirectionsResult);
+  } else if (next._d != null){
+    document.getElementById('navEtaBig').textContent = fmtEtaMinutes(next._d);
+    document.getElementById('navEtaSub').textContent = fmtDist(next._d) + ' to next stop';
+  }
+
+  const callBtn = document.getElementById('navCallBtn');
+  if (next.phone){ callBtn.href = 'tel:'+next.phone; callBtn.style.display = 'flex'; }
+  else { callBtn.style.display = 'none'; }
+  document.getElementById('navGmapsBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${next.lat},${next.lng}`;
+  document.getElementById('navDeliveredBtn').onclick = ()=> markComplete(next.id);
+
+  const me = deliveryBoys.find(b=>b.id===myBoyId);
+  showBoyRoute(myBoyId, activeShift, { auto: true, nav: true });
+  if (me && me.lat != null) updateTurnBanner(me);
+}
+document.getElementById('navExitBtn').onclick = exitNavMode;
+document.getElementById('navCompleteCloseBtn').onclick = exitNavMode;
+
+/* ================= LOGIN FLOW ================= */
+function showLoginStep(id){
+  document.querySelectorAll('.login-step').forEach(s=>s.classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+}
+document.getElementById('chooseAdmin').onclick = ()=> showLoginStep('loginStepAdmin');
+document.getElementById('chooseDelivery').onclick = ()=> showLoginStep('loginStepDeliveryPass');
+document.querySelectorAll('[data-back]').forEach(el=>{
+  el.onclick = ()=>{
+    const b = el.dataset.back;
+    if (b==='0') showLoginStep('loginStep0');
+    else if (b==='deliveryPass') showLoginStep('loginStepDeliveryPass');
+  };
 });
+
+document.getElementById('adminLoginBtn').onclick = ()=>{
+  const val = document.getElementById('adminPass').value;
+  if (val === ADMIN_PASSWORD){
+    document.getElementById('adminErr').classList.remove('show');
+    saveSession({ role:'admin' });
+    enterApp('admin', null);
+  } else {
+    document.getElementById('adminErr').classList.add('show');
+  }
+};
+document.getElementById('adminPass').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('adminLoginBtn').click(); });
+
+document.getElementById('deliveryPassBtn').onclick = ()=>{
+  const val = document.getElementById('deliveryPass').value;
+  if (val === DELIVERY_PASSWORD){
+    document.getElementById('deliveryPassErr').classList.remove('show');
+    const sel = document.getElementById('deliveryNameSelect');
+    sel.innerHTML = `<option value="">Select your name…</option>` + deliveryBoys.map(b=>`<option value="${b.id}">${escapeHtml(b.name)}</option>`).join('');
+    document.getElementById('noBoysHint').style.display = deliveryBoys.length ? 'none' : 'block';
+    showLoginStep('loginStepDeliveryName');
+  } else {
+    document.getElementById('deliveryPassErr').classList.add('show');
+  }
+};
+document.getElementById('deliveryPass').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('deliveryPassBtn').click(); });
+
+document.getElementById('deliveryNameBtn').onclick = ()=>{
+  const id = document.getElementById('deliveryNameSelect').value;
+  if (!id) return showToast("Please select your name");
+  saveSession({ role:'delivery', boyId:id });
+  enterApp('delivery', id);
+};
+
+function enterApp(r, boyId){
+  role = r; myBoyId = boyId;
+  navMode = false;
+  document.body.classList.remove('nav-mode');
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminView').style.display = role==='admin' ? 'flex' : 'none';
+  document.getElementById('deliveryView').style.display = role==='delivery' ? 'flex' : 'none';
+  setMobileView('list');
+  document.getElementById('deliveryMapToolbar').style.display = role==='delivery' ? 'flex' : 'none';
+  deliveryMapCenteredOnce = false;
+  updateWhoami();
+  if (role === 'delivery') {
+    updateShiftTabsUI();
+    if (loadTrackingPref(boyId)) { startTracking(); } else { tracking = false; renderTrackBanner(); }
+  }
+  renderAll();
+  setTimeout(()=>{ if (map) google.maps.event.trigger(map, 'resize'); }, 250);
+}
+
+function logout(){
+  if (myBoyId) saveTrackingPref(myBoyId, false);
+  stopTracking();
+  clearSession();
+  clearRoute();
+  clearSegmentLabels();
+  navMode = false;
+  document.body.classList.remove('nav-mode');
+  document.getElementById('navSheet').style.display = 'none';
+  document.getElementById('navComplete').style.display = 'none';
+  document.getElementById('navTurnBanner').style.display = 'none';
+  document.getElementById('navRecenterBtn').style.display = 'none';
+  document.getElementById('deliveryMapToolbar').style.display = 'none';
+  role = null; myBoyId = null;
+  document.getElementById('adminPass').value = '';
+  document.getElementById('deliveryPass').value = '';
+  showLoginStep('loginStep0');
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function updateWhoami(){
+  if (role === 'admin'){
+    document.getElementById('whoami').innerHTML = `<span class="hide-mobile"><b>Admin</b></span><button id="logoutBtn">Logout</button>`;
+  } else {
+    const boy = deliveryBoys.find(b=>b.id===myBoyId);
+    const name = boy ? boy.name : '…';
+    const color = boy ? boy.color : '#888';
+    document.getElementById('whoami').innerHTML = `<span class="badge-color" style="background:${color}"></span><b>${escapeHtml(name)}</b><span class="hide-mobile">${tracking?'<span class="live-dot"></span>':''}</span><button id="logoutBtn">Logout</button>`;
+  }
+  document.getElementById('logoutBtn').onclick = ()=> confirmAction("Log out?" + (role==='delivery' ? " This will stop sharing your live location." : ""), logout);
+}
+
+/* ================= FIREBASE REALTIME DATABASE LISTENERS ================= */
+function toArray(val){
+  if (!val) return [];
+  return Object.keys(val).map(id => ({ id, ...val[id] }));
+}
+function startListeners(){
+  onValue(ref(db, 'deliveryBoys'), (snap)=>{
+    deliveryBoys = toArray(snap.val());
+    if (role) { updateWhoami(); renderAll(); }
+  });
+  onValue(ref(db, 'customers'), (snap)=>{
+    customers = toArray(snap.val());
+    if (role) renderAll();
+  });
+  onValue(ref(db, 'zones'), (snap)=>{
+    zones = toArray(snap.val());
+    if (role) renderAll();
+  });
+}
+
+/* ================= ADMIN TABBING ================= */
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentAdminTab = btn.dataset.tab;
+    document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+    document.getElementById('tab-' + currentAdminTab).style.display = 'block';
+    renderAll();
+  };
+});
+
+document.querySelectorAll('.locmode-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.locmode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    locMode = btn.dataset.mode;
+    document.getElementById('locModeMap').style.display = locMode==='map' ? 'block' : 'none';
+    document.getElementById('locModeLink').style.display = locMode==='link' ? 'block' : 'none';
+  };
+});
+
+function updateShiftTabsUI(){
+  document.querySelectorAll('.shift-tab-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.shift === activeShift);
+  });
+  const titleEl = document.getElementById('deliveryListTitle');
+  if (titleEl) titleEl.textContent = (activeShift==='evening' ? '🌆 Evening' : '🌅 Morning') + ' stops — nearest first';
+}
+document.querySelectorAll('.shift-tab-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    activeShift = btn.dataset.shift;
+    if (navMode) exitNavMode();
+    updateShiftTabsUI();
+    renderAll();
+  };
+});
+
+document.getElementById('startRouteBtn').onclick = enterNavMode;
+
+document.getElementById('useMyLocBtn').onclick = ()=>{
+  if (!navigator.geolocation) return showToast("Geolocation not supported on this device");
+  navigator.geolocation.getCurrentPosition(pos=>{
+    pendingPinLatLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    if (pendingPinMarker) pendingPinMarker.setMap(null);
+    pendingPinMarker = new google.maps.Marker({ position: pendingPinLatLng, map, icon: makeCustIcon('#10192E','+',false,null,false) });
+    map.panTo(pendingPinLatLng);
+    ensureMapVisible();
+    document.getElementById('pendingPinNote').style.display = 'block';
+  }, ()=> showToast("Couldn't get your location — allow location access"));
+};
+
+document.getElementById('parseLinkBtn').onclick = async ()=>{
+  const url = document.getElementById('custMapLink').value.trim();
+  if (!url) return showToast("Paste a Google Maps link first");
+  const btn = document.getElementById('parseLinkBtn');
+  const originalTxt = btn.textContent;
+  btn.textContent = 'Resolving link…';
+  btn.disabled = true;
+  try{
+    const coords = await resolveGoogleMapsLink(url);
+    if (!coords){
+      showToast("Couldn't read a location from that link — try opening it once in Google Maps and copying the link again");
+      return;
+    }
+    pendingPinLatLng = coords;
+    if (pendingPinMarker) pendingPinMarker.setMap(null);
+    pendingPinMarker = new google.maps.Marker({ position: coords, map, icon: makeCustIcon('#10192E','+',false,null,false) });
+    map.panTo(coords);
+    map.setZoom(16);
+    ensureMapVisible();
+    document.getElementById('pendingPinNote').style.display = 'block';
+    showToast("Location found — pin dropped on map");
+  } finally {
+    btn.textContent = originalTxt;
+    btn.disabled = false;
+  }
+};
+
+/* ================= ACTIONS ================= */
+document.getElementById('saveCustBtn').onclick = async ()=>{
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const addr = document.getElementById('custAddr').value.trim();
+  const assign = document.getElementById('custAssign').value;
+  const zone = document.getElementById('custZone').value;
+  const shift = document.getElementById('custShift').value === 'evening' ? 'evening' : 'morning';
+  if (!name || !pendingPinLatLng) return showToast("Name and a location are required!");
+
+  const newRef = push(ref(db, 'customers'));
+  await set(newRef, {
+    name, phone, address: addr,
+    lat: pendingPinLatLng.lat, lng: pendingPinLatLng.lng,
+    assignedTo: assign || null,
+    zone: zone || null,
+    shift,
+    status: 'pending',
+    newUntil: Date.now() + NEW_BADGE_DURATION_MS,
+    createdAt: serverTimestamp()
+  });
+
+  document.getElementById('custName').value = '';
+  document.getElementById('custPhone').value = '';
+  document.getElementById('custAddr').value = '';
+  document.getElementById('custMapLink').value = '';
+  document.getElementById('custShift').value = 'morning';
+  if (pendingPinMarker) pendingPinMarker.setMap(null);
+  pendingPinLatLng = null;
+  document.getElementById('pendingPinNote').style.display = 'none';
+  showToast("Customer added!");
+};
+
+document.getElementById('addBoyBtn').onclick = async ()=>{
+  const name = document.getElementById('boyName').value.trim();
+  const zone = document.getElementById('boyZone').value;
+  if (!name) return;
+  const color = COLORS[deliveryBoys.length % COLORS.length];
+  const newRef = push(ref(db, 'deliveryBoys'));
+  await set(newRef, { name, zone: zone || null, color, lat:null, lng:null, lastUpdate:null });
+  document.getElementById('boyName').value = '';
+  showToast("Delivery boy added!");
+};
+
+document.getElementById('addZoneBtn').onclick = async ()=>{
+  const name = document.getElementById('zoneName').value.trim();
+  const color = document.getElementById('zoneColor').value;
+  if (!name) return;
+  const newRef = push(ref(db, 'zones'));
+  await set(newRef, { name, color });
+  document.getElementById('zoneName').value = '';
+  showToast("Zone added!");
+};
+
+/* ---------------- Delivery proof photo capture + upload ---------------- */
+let pendingDeliveryCustId = null;
+
+function compressImageToJpegBlob(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=> reject(new Error('Could not read file'));
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onerror = ()=> reject(new Error('Could not decode image'));
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if (w > PHOTO_MAX_WIDTH){ h = Math.round(h * (PHOTO_MAX_WIDTH / w)); w = PHOTO_MAX_WIDTH; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob=>{
+          if (blob) resolve(blob); else reject(new Error('Compression failed'));
+        }, 'image/jpeg', PHOTO_JPEG_QUALITY);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadDeliveryPhoto(blob, custId){
+  const form = new FormData();
+  form.append('file', blob, 'delivery_' + custId + '_' + Date.now() + '.jpg');
+  form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  // Tag + context make it easy to find/audit all delivery-proof photos from
+  // the Cloudinary dashboard later if ever needed (e.g. for a billing query).
+  form.append('tags', 'delivery_proof');
+  form.append('context', `customer_id=${custId}|uploaded_at=${Date.now()}`);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+    method: 'POST', body: form
+  });
+  if (!res.ok) throw new Error('Cloudinary upload failed: ' + res.status);
+  const data = await res.json();
+  if (!data.secure_url) throw new Error('No URL returned from Cloudinary');
+  return data.secure_url;
+}
+
+async function finalizeDelivery(custId, photoUrl){
+  const updates = { status: 'completed', completedAt: serverTimestamp() };
+  if (photoUrl) { updates.deliveryPhotoUrl = photoUrl; updates.deliveryPhotoAt = Date.now(); }
+  await update(ref(db, 'customers/' + custId), updates);
+  showToast(photoUrl ? "Delivered — proof photo saved!" : "Marked as delivered (no photo)");
+}
+
+function renderPhotoModal(custId){
+  const c = customers.find(x=>x.id===custId);
+  document.getElementById('photoModalContent').innerHTML = `
+    <h3>📷 Delivery proof photo</h3>
+    <p class="sub">${c ? escapeHtml(c.name) : 'Customer'} ke ghar ki photo click karo — ye billing proof ke liye save hogi.</p>
+    <input type="file" accept="image/*" capture="environment" id="photoFileInput" style="display:none;">
+    <div class="photo-capture-btn" id="photoCaptureBtn"><span class="ic">📷</span> Tap to open camera</div>
+    <img id="photoPreviewImg" class="photo-preview">
+    <div class="photo-status" id="photoStatusEl">Preparing…</div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="photoCancelBtn">Cancel</button>
+      <button class="btn btn-danger" id="photoSkipBtn" style="flex:1;">Skip (no photo)</button>
+    </div>
+  `;
+  const fileInput = document.getElementById('photoFileInput');
+  const captureBtn = document.getElementById('photoCaptureBtn');
+  const previewImg = document.getElementById('photoPreviewImg');
+  const statusEl = document.getElementById('photoStatusEl');
+
+  captureBtn.onclick = ()=> fileInput.click();
+
+  fileInput.onchange = async (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    previewImg.src = URL.createObjectURL(file);
+    previewImg.style.display = 'block';
+    statusEl.textContent = 'Compressing photo…';
+    statusEl.classList.add('show');
+    captureBtn.style.pointerEvents = 'none';
+    captureBtn.style.opacity = '.5';
+    try{
+      const blob = await compressImageToJpegBlob(file);
+      statusEl.textContent = 'Uploading…';
+      const url = await uploadDeliveryPhoto(blob, custId);
+      statusEl.textContent = 'Uploaded ✓ marking delivered…';
+      await finalizeDelivery(custId, url);
+      closeModal('photoModal');
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = 'Upload fail ho gaya — internet check karo aur dobara try karo.';
+      captureBtn.style.pointerEvents = 'auto';
+      captureBtn.style.opacity = '1';
+    }
+  };
+
+  document.getElementById('photoCancelBtn').onclick = ()=> closeModal('photoModal');
+  document.getElementById('photoSkipBtn').onclick = ()=>{
+    closeModal('photoModal');
+    confirmAction("Bina photo ke deliver mark karein? Billing proof nahi rahega.", ()=> finalizeDelivery(custId, null));
+  };
+}
+
+window.markComplete = (id) => {
+  pendingDeliveryCustId = id;
+  renderPhotoModal(id);
+  openModal('photoModal');
+};
+window.deliverFromMap = (id) => { infoWindow.close(); markComplete(id); };
+window.reassignCustomer = async (id, bId) => { await update(ref(db, 'customers/' + id), { assignedTo: bId || null }); };
+window.setCustomerShift = async (id, shift) => { await update(ref(db, 'customers/' + id), { shift: shift==='evening'?'evening':'morning' }); };
+window.deleteCustomer = (id) => confirmAction("Delete customer?", async () => await remove(ref(db, 'customers/' + id)));
+window.removeBoy = (id) => confirmAction("Remove delivery boy?", async () => await remove(ref(db, 'deliveryBoys/' + id)));
+window.deleteZone = (id) => confirmAction("Delete zone?", async () => await remove(ref(db, 'zones/' + id)));
+window.toggleNewBadge = async (id, checked) => {
+  await update(ref(db, 'customers/' + id), { newUntil: checked ? (Date.now() + NEW_BADGE_DURATION_MS) : null });
+  showToast(checked ? "Marked as New — badge visible for 24 hours" : "New badge removed");
+};
+window.panToBoy = (id, shift) => {
+  const b = deliveryBoys.find(x=>x.id===id);
+  ensureMapVisible();
+  if(b && b.lat!=null){ map.panTo({lat:b.lat,lng:b.lng}); map.setZoom(15); }
+  showBoyRoute(id, shift||'all');
+};
+window.panToCust = (lat,lng) => { ensureMapVisible(); map.panTo({lat,lng}); map.setZoom(16); };
+
+/* ---- Edit customer modal ---- */
+window.openEditCustModal = (id) => {
+  const c = customers.find(x=>x.id===id);
+  if (!c) return;
+  const sh = custShift(c);
+  document.getElementById('editCustModalContent').innerHTML = `
+    <h3>Edit customer</h3>
+    <div class="field"><label>Customer name</label><input id="ecName" type="text" value="${escapeHtml(c.name||'')}"></div>
+    <div class="field-row">
+      <div class="field"><label>Phone</label><input id="ecPhone" type="text" value="${escapeHtml(c.phone||'')}"></div>
+      <div class="field"><label>Assign to</label><select id="ecAssign">
+        <option value="">Unassigned</option>
+        ${deliveryBoys.map(b=>`<option value="${b.id}" ${c.assignedTo===b.id?'selected':''}>${escapeHtml(b.name)}</option>`).join('')}
+      </select></div>
+    </div>
+    <div class="field"><label>Address / note</label><input id="ecAddr" type="text" value="${escapeHtml(c.address||'')}"></div>
+    <div class="field-row">
+      <div class="field"><label>Zone</label><select id="ecZone">
+        <option value="">No zone</option>
+        ${zones.map(z=>`<option value="${z.id}" ${c.zone===z.id?'selected':''}>${escapeHtml(z.name)}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Shift</label><select id="ecShift">
+        <option value="morning" ${sh==='morning'?'selected':''}>🌅 Morning</option>
+        <option value="evening" ${sh==='evening'?'selected':''}>🌆 Evening</option>
+      </select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Latitude</label><input id="ecLat" type="text" value="${c.lat!=null?c.lat:''}"></div>
+      <div class="field"><label>Longitude</label><input id="ecLng" type="text" value="${c.lng!=null?c.lng:''}"></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="startEditLocation('${c.id}')">📍 Re-pick exact location on map</button>
+    <div class="hint">Or type latitude/longitude directly above, then Save.</div>
+    <label class="new-toggle-label ${isNewCustomer(c)?'active':''}" style="margin-top:12px; width:100%; justify-content:center;">
+      <input type="checkbox" ${isNewCustomer(c)?'checked':''} onchange="toggleNewBadge('${c.id}', this.checked)"> 🆕 Mark as New Customer (shows badge for 24 hrs)
+    </label>
+    ${c.deliveryPhotoUrl ? `
+    <div class="section-title" style="margin-top:16px;">Delivery proof photo</div>
+    <img src="${c.deliveryPhotoUrl}" style="width:100%; border-radius:12px; max-height:220px; object-fit:cover; cursor:pointer;" onclick="window.open('${c.deliveryPhotoUrl}','_blank')">
+    <div class="hint">Delivered: ${c.deliveryPhotoAt ? new Date(c.deliveryPhotoAt).toLocaleString('en-IN') : ''} · tap photo to open full size</div>
+    ` : ''}
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal('editCustModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditCust('${c.id}')">Save changes</button>
+    </div>
+  `;
+  openModal('editCustModal');
+};
+window.closeModal = closeModal;
+window.startEditLocation = (id) => {
+  closeModal('editCustModal');
+  editingLocationForCustId = id;
+  ensureMapVisible();
+  showToast('Tap anywhere on the map to set the new location for this customer');
+};
+window.saveEditCust = async (id) => {
+  const name = document.getElementById('ecName').value.trim();
+  if (!name) return showToast('Name is required');
+  const lat = parseFloat(document.getElementById('ecLat').value);
+  const lng = parseFloat(document.getElementById('ecLng').value);
+  if (isNaN(lat) || isNaN(lng)) return showToast('Latitude/Longitude must be valid numbers');
+  const updates = {
+    name,
+    phone: document.getElementById('ecPhone').value.trim(),
+    address: document.getElementById('ecAddr').value.trim(),
+    assignedTo: document.getElementById('ecAssign').value || null,
+    zone: document.getElementById('ecZone').value || null,
+    shift: document.getElementById('ecShift').value === 'evening' ? 'evening' : 'morning',
+    lat, lng
+  };
+  await update(ref(db, 'customers/' + id), updates);
+  closeModal('editCustModal');
+  showToast('Customer updated!');
+};
+
+/* ---- PDF export helpers ---- */
+function jsPDFReady(){ return !!(window.jspdf && window.jspdf.jsPDF); }
+function customersToPdf(list, title){
+  if (!jsPDFReady()){ showToast('PDF library abhi load ho raha hai — thodi der me dobara try karein'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(15);
+  doc.text(title, 14, 15);
+  doc.setFontSize(9.5);
+  doc.setTextColor(110);
+  doc.text(`Total customers: ${list.length}   ·   Generated: ${new Date().toLocaleString('en-IN')}`, 14, 21);
+  doc.setTextColor(0);
+
+  const rows = list.map((c,i)=>{
+    const boyName = (deliveryBoys.find(b=>b.id===c.assignedTo)||{}).name || 'Unassigned';
+    const zoneName = (zones.find(z=>z.id===c.zone)||{}).name || '-';
+    const mapLink = (c.lat!=null && c.lng!=null) ? `https://www.google.com/maps?q=${c.lat},${c.lng}` : '-';
+    const deliveredOn = c.completedAt && typeof c.completedAt === 'number' ? new Date(c.completedAt).toLocaleDateString('en-IN') : (c.status==='completed' ? 'Yes' : '-');
+    return [
+      i+1,
+      c.name || '',
+      c.phone || '-',
+      c.address || '-',
+      custShift(c)==='evening' ? 'Evening' : 'Morning',
+      c.status==='completed' ? 'Delivered' : 'Pending',
+      boyName,
+      zoneName,
+      mapLink,
+      c.deliveryPhotoUrl || '-'
+    ];
+  });
+
+  doc.autoTable({
+    startY: 26,
+    head: [['#','Name','Phone','Address','Shift','Status','Delivery Boy','Zone','Map Location','Delivery Proof Photo']],
+    body: rows,
+    styles: { fontSize: 7, cellPadding: 2, overflow:'linebreak' },
+    headStyles: { fillColor: [14,21,38] },
+    columnStyles: { 1:{cellWidth:22}, 3:{cellWidth:30}, 8:{cellWidth:32}, 9:{cellWidth:32} }
+  });
+
+  doc.save(title.replace(/[^a-z0-9]+/gi,'_') + '.pdf');
+}
+window.downloadBoyShiftPdf = (boyId, shift) => {
+  const b = deliveryBoys.find(x=>x.id===boyId);
+  if (!b) return;
+  const list = customers.filter(c=>c.assignedTo===boyId && custShift(c)===shift);
+  if (!list.length){ showToast('No customers in this shift for ' + b.name); return; }
+  customersToPdf(list, `${b.name} - ${shift==='evening'?'Evening':'Morning'} Deliveries`);
+};
+
+document.getElementById('downloadFilteredPdfBtn').onclick = ()=>{
+  const bFilter = document.getElementById('filterBoy').value;
+  const zFilter = document.getElementById('filterZone').value;
+  const sFilter = document.getElementById('filterStatus').value;
+  const shiftFilter = document.getElementById('filterShift').value;
+  const filtered = getFilteredAdminCustomers();
+  if (!filtered.length){ showToast('No customers match this filter'); return; }
+  customersToPdf(filtered, 'Filtered Customer List');
+};
+document.getElementById('downloadAllPdfBtn').onclick = ()=>{
+  if (!customers.length){ showToast('No customers yet'); return; }
+  customersToPdf(customers, 'All Customers Biodata');
+};
+
+/* ---- Delivery boy full-status modal (with Morning/Evening tabs) ---- */
+window.openBoyModal = (boyId) => {
+  boyModalShift = activeShiftForModal(boyId);
+  renderBoyModalBody(boyId);
+  openModal('boyModal');
+};
+function activeShiftForModal(boyId){
+  return defaultShiftNow();
+}
+window.switchBoyModalShift = (boyId, shift) => {
+  boyModalShift = shift;
+  renderBoyModalBody(boyId);
+};
+function renderBoyModalBody(boyId){
+  const b = deliveryBoys.find(x=>x.id===boyId);
+  if (!b) return;
+  const mine = customers.filter(c=>c.assignedTo===boyId);
+  const done = mine.filter(c=>c.status==='completed');
+  const pendingAll = mine.filter(c=>c.status!=='completed');
+  const pendingMorning = pendingAll.filter(c=>custShift(c)==='morning').length;
+  const pendingEvening = pendingAll.filter(c=>custShift(c)==='evening').length;
+  const on = isOnline(b);
+
+  const shiftMine = mine.filter(c=>custShift(c)===boyModalShift);
+  let shiftPending = shiftMine.filter(c=>c.status!=='completed');
+  const shiftDone = shiftMine.filter(c=>c.status==='completed');
+  if (b.lat!=null){
+    shiftPending = [...shiftPending].map(c=>({...c, _d: estimatedRoadKm(b.lat,b.lng,c.lat,c.lng)})).sort((a,z)=>a._d-z._d);
+  }
+
+  document.getElementById('boyModalContent').innerHTML = `
+    <div class="boy-modal-header">
+      <span class="swatch-lg" style="background:${b.color}"></span>
+      <span class="nm">${escapeHtml(b.name)}</span>
+      <span class="online-pill ${on?'on':'off'}">${on?'ONLINE':'OFFLINE'}</span>
+    </div>
+    <div class="boy-modal-sub">Last update: ${timeAgo(b.lastUpdate)}${b.zone ? ' · Zone: ' + escapeHtml((zones.find(z=>z.id===b.zone)||{}).name || '') : ''}</div>
+    <div class="boy-modal-stats">
+      <div class="mstat"><div class="n">${mine.length}</div><div class="l">Total</div></div>
+      <div class="mstat"><div class="n">${done.length}</div><div class="l">Delivered</div></div>
+      <div class="mstat"><div class="n">${pendingAll.length}</div><div class="l">Pending</div></div>
+    </div>
+    <div class="boy-modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeBoyModal(); panToBoy('${b.id}','morning')">🌅 Route (Morning)</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeBoyModal(); panToBoy('${b.id}','evening')">🌆 Route (Evening)</button>
+      <button class="btn btn-danger btn-sm" ${!done.length?'disabled style="opacity:.4;cursor:not-allowed;"':''} onclick="resetBoyDeliveries('${b.id}')">🔄 Reset for tomorrow</button>
+    </div>
+
+    <div class="shift-tabs" style="margin-top:14px;">
+      <button type="button" class="shift-tab-btn morning ${boyModalShift==='morning'?'active':''}" onclick="switchBoyModalShift('${b.id}','morning')"><span class="sw" style="background:var(--morning)"></span> 🌅 Morning (${pendingMorning})</button>
+      <button type="button" class="shift-tab-btn evening ${boyModalShift==='evening'?'active':''}" onclick="switchBoyModalShift('${b.id}','evening')"><span class="sw" style="background:var(--evening)"></span> 🌆 Evening (${pendingEvening})</button>
+    </div>
+
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+      <div class="boy-modal-list-title" style="margin:0; flex:1;">${boyModalShift==='evening'?'🌆 Evening':'🌅 Morning'} — ${shiftMine.length} customer${shiftMine.length!==1?'s':''}</div>
+      <button class="btn btn-ghost btn-sm" onclick="downloadBoyShiftPdf('${b.id}','${boyModalShift}')">⬇️ PDF</button>
+    </div>
+
+    ${shiftPending.length ? `<div class="boy-modal-list-title">Pending (${shiftPending.length})</div>
+    <div class="boy-modal-list">${shiftPending.map(c=>`
+      <div class="mini-stop"><div><div class="mn">${isNewCustomer(c)?'🆕 ':''}${escapeHtml(c.name)}</div><div class="md">${escapeHtml(c.address||'')}${c.phone?' · '+escapeHtml(c.phone):''}</div></div><div class="md">${c._d!=null?fmtDist(c._d):''}</div></div>
+    `).join('')}</div>` : ''}
+    ${shiftDone.length ? `<div class="boy-modal-list-title">Delivered (${shiftDone.length})</div>
+    <div class="boy-modal-list">${shiftDone.map(c=>`
+      <div class="mini-stop"><div style="display:flex;align-items:center;gap:8px;">${c.deliveryPhotoUrl?`<img src="${c.deliveryPhotoUrl}" class="mini-stop-photo" onclick="window.open('${c.deliveryPhotoUrl}','_blank')">`:''}<div><div class="mn">${escapeHtml(c.name)}</div><div class="md">${escapeHtml(c.address||'')}</div></div></div><div class="md" style="color:#1D9E86;">✓ Done${c.deliveryPhotoUrl?' · 📷':''}</div></div>
+    `).join('')}</div>` : ''}
+    ${!shiftMine.length ? `<div class="empty-state">Is shift me koi customer assign nahi hai.</div>` : ''}
+    <div class="btn-row"><button class="btn btn-ghost" onclick="closeBoyModal()" style="width:100%;">Close</button></div>
+  `;
+}
+window.closeBoyModal = () => closeModal('boyModal');
+
+window.resetBoyDeliveries = (boyId) => {
+  const b = deliveryBoys.find(x=>x.id===boyId);
+  if (!b) return;
+  const doneList = customers.filter(c=>c.assignedTo===boyId && c.status==='completed');
+  if (!doneList.length){ showToast("Koi delivered order nahi hai reset karne ko"); return; }
+  confirmAction(`${b.name} ke ${doneList.length} delivered order${doneList.length>1?'s':''} wapas PENDING kar dein? Agle din wahi saari locations phir dikhengi.`, async ()=>{
+    const updates = {};
+    doneList.forEach(c=>{
+      updates['customers/'+c.id+'/status'] = 'pending';
+      updates['customers/'+c.id+'/completedAt'] = null;
+    });
+    await update(ref(db), updates);
+    showToast(`${b.name} ready for next day — ${doneList.length} order${doneList.length>1?'s':''} reset ho gaye`);
+    closeBoyModal();
+  });
+};
+
+/* ================= RENDERERS ================= */
+function renderAll(){
+  renderMapMarkers();
+  populateDropdowns();
+  if (role === 'admin') {
+    renderAdminOverview();
+    renderAdminCustList();
+    renderTeamList();
+    renderZonesList();
+    if (routedBoyId) showBoyRoute(routedBoyId);
+    if (document.getElementById('boyModal').classList.contains('show')){
+      // keep the open boy modal's numbers live without resetting its shift tab
+      const openBtn = document.querySelector('#boyModalContent .boy-modal-header .nm');
+    }
+  } else if (role === 'delivery') {
+    renderDeliveryList();
+    if (myBoyId) showBoyRoute(myBoyId, activeShift, { auto: true, nav: navMode });
+    if (navMode) updateNavSheet();
+  }
+}
+
+// Rebuilding a <select>'s options via innerHTML wipes whatever the user had
+// selected (this was causing the admin's "Assigned to" / "Zone" filters on
+// the Customers tab to visibly reset within a second, since renderAll() runs
+// on every Firebase update and a 10s auto-refresh). We now snapshot the
+// current value first and restore it after rebuilding, so filters stay put.
+function setSelectOptionsPreserveValue(id, html){
+  const el = document.getElementById(id);
+  if (!el) return;
+  const prevValue = el.value;
+  if (el.dataset.optionsHtml === html){
+    // Options haven't actually changed — skip touching the DOM entirely,
+    // which is the safest way to guarantee zero flicker/reset.
+    return;
+  }
+  el.dataset.optionsHtml = html;
+  el.innerHTML = html;
+  const stillExists = Array.from(el.options).some(o => o.value === prevValue);
+  if (stillExists) el.value = prevValue;
+}
+
+function populateDropdowns(){
+    const bOpts = `<option value="">Unassigned</option>` + deliveryBoys.map(b=>`<option value="${b.id}">${escapeHtml(b.name)}</option>`).join('');
+    const zOpts = `<option value="">No zone</option>` + zones.map(z=>`<option value="${z.id}">${escapeHtml(z.name)}</option>`).join('');
+
+    setSelectOptionsPreserveValue('custAssign', bOpts);
+    setSelectOptionsPreserveValue('filterBoy', `<option value="all">All delivery boys</option>` + bOpts);
+    setSelectOptionsPreserveValue('custZone', zOpts);
+    setSelectOptionsPreserveValue('filterZone', `<option value="all">All zones</option>` + zOpts);
+    setSelectOptionsPreserveValue('boyZone', zOpts);
+}
+
+function renderAdminOverview(){
+    document.getElementById('ovDone').textContent = customers.filter(c=>c.status==='completed').length;
+    document.getElementById('ovPending').textContent = customers.filter(c=>c.status!=='completed').length;
+    document.getElementById('ovOnline').textContent = `${deliveryBoys.filter(b=>isOnline(b)).length}/${deliveryBoys.length}`;
+    document.getElementById('ovUnassigned').textContent = customers.filter(c=>!c.assignedTo).length;
+
+    document.getElementById('overviewBoyList').innerHTML = deliveryBoys.length ? deliveryBoys.map(b => {
+        const on = isOnline(b);
+        const mine = customers.filter(c=>c.assignedTo===b.id);
+        const doneCount = mine.filter(c=>c.status==='completed').length;
+        let pendingList = mine.filter(c=>c.status!=='completed');
+        const pendingCount = pendingList.length;
+        const pendingMorning = pendingList.filter(c=>custShift(c)==='morning').length;
+        const pendingEvening = pendingList.filter(c=>custShift(c)==='evening').length;
+        let headingTo = null;
+        if (pendingCount && b.lat!=null){
+          pendingList = [...pendingList].map(c=>({...c, _d: estimatedRoadKm(b.lat,b.lng,c.lat,c.lng)})).sort((a,z)=>a._d-z._d);
+          headingTo = `${pendingList[0].name} · ${fmtDist(pendingList[0]._d)} away`;
+        } else if (pendingCount){
+          headingTo = pendingList[0].name;
+        }
+        return `<div class="boy-card" onclick="openBoyModal('${b.id}')">
+            <div class="top">
+                <div class="boy-name"><span class="boy-swatch" style="background:${b.color}"></span>${escapeHtml(b.name)}</div>
+                <span class="online-pill ${on?'on':'off'}">${on?'ONLINE':'OFFLINE'}</span>
+            </div>
+            <div class="boy-mini-stats">
+              <span><b>${doneCount}</b> delivered</span>
+              <span><b>${pendingCount}</b> pending</span>
+              <span>Updated ${timeAgo(b.lastUpdate)}</span>
+            </div>
+            <div class="shift-mini-row">
+              <span class="shift-mini morning">🌅 ${pendingMorning}</span>
+              <span class="shift-mini evening">🌆 ${pendingEvening}</span>
+            </div>
+            ${headingTo ? `<div class="heading-to">🛵 Heading to: ${escapeHtml(headingTo)}</div>` : (mine.length ? '<div class="heading-to" style="background:#E4F8F3;color:#1D9E86;">✓ All deliveries complete</div>' : '')}
+            <div class="boy-card-actions">
+              <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); panToBoy('${b.id}','all')">🗺️ Route</button>
+              ${doneCount ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); resetBoyDeliveries('${b.id}')">🔄 Reset (${doneCount})</button>` : ''}
+            </div>
+        </div>`;
+    }).join('') : '<div class="empty-state">No delivery boys added yet. Go to the Team tab to add one.</div>';
+}
+
+function matchesSearch(c, term){
+  if (!term) return true;
+  const hay = `${c.name||''} ${c.phone||''} ${c.address||''}`.toLowerCase();
+  return hay.includes(term);
+}
+
+function getFilteredAdminCustomers(){
+    const bFilter = document.getElementById('filterBoy').value;
+    const zFilter = document.getElementById('filterZone').value;
+    const sFilter = document.getElementById('filterStatus').value;
+    const shiftFilter = document.getElementById('filterShift').value;
+    const term = custSearchTerm.trim().toLowerCase();
+
+    return customers.filter(c => {
+        if(bFilter !== 'all' && c.assignedTo !== bFilter) return false;
+        if(zFilter !== 'all' && c.zone !== zFilter) return false;
+        if(sFilter !== 'all' && c.status !== sFilter) return false;
+        if(shiftFilter !== 'all' && custShift(c) !== shiftFilter) return false;
+        if(!matchesSearch(c, term)) return false;
+        return true;
+    });
+}
+
+function renderAdminCustList(){
+    const filtered = getFilteredAdminCustomers();
+
+    document.getElementById('adminCustList').innerHTML = filtered.length ? filtered.map(c => {
+      const z = zones.find(zz=>zz.id===c.zone);
+      const sh = custShift(c);
+      const newActive = isNewCustomer(c);
+      return `
+        <div class="stop ${c.status==='completed'?'done':''}">
+            <div class="idx">${c.status==='completed'?'✓':'•'}</div>
+            <div class="stop-body">
+                <div class="name" onclick="panToCust(${c.lat},${c.lng})" style="cursor:pointer;">${escapeHtml(c.name)}</div>
+                <div class="addr">${escapeHtml(c.address || '')}</div>
+                ${c.phone ? `<div class="phn">📞 ${escapeHtml(c.phone)}</div>` : ''}
+                <div class="stop-meta">
+                  <span class="badge ${c.status==='completed'?'done':'pending'}">${c.status==='completed'?'DELIVERED':'PENDING'}</span>
+                  <span class="shift-badge ${sh}">${sh==='evening'?'🌆 Evening':'🌅 Morning'}</span>
+                  ${z ? `<span class="zone-tag"><span class="sw" style="background:${z.color}"></span>${escapeHtml(z.name)}</span>` : ''}
+                  ${!c.assignedTo ? `<span class="badge unassigned">UNASSIGNED</span>` : ''}
+                  ${newActive ? `<span class="badge new">🆕 NEW</span>` : ''}
+                  ${c.deliveryPhotoUrl ? `<a href="${c.deliveryPhotoUrl}" target="_blank" class="photo-thumb-link"><img src="${c.deliveryPhotoUrl}">📷 Proof</a>` : ''}
+                </div>
+                <div class="stop-actions">
+                    <select onchange="reassignCustomer('${c.id}', this.value)" style="font-size:11.5px; padding:8px; border-radius:8px; border:1.5px solid #DEDBCF; min-height:38px;">
+                        <option value="">Unassigned</option>
+                        ${deliveryBoys.map(b=>`<option value="${b.id}" ${c.assignedTo===b.id?'selected':''}>${escapeHtml(b.name)}</option>`).join('')}
+                    </select>
+                    <select onchange="setCustomerShift('${c.id}', this.value)" style="font-size:11.5px; padding:8px; border-radius:8px; border:1.5px solid #DEDBCF; min-height:38px;">
+                        <option value="morning" ${sh==='morning'?'selected':''}>🌅 Morning</option>
+                        <option value="evening" ${sh==='evening'?'selected':''}>🌆 Evening</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" onclick="openEditCustModal('${c.id}')">✏️ Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">Delete</button>
+                </div>
+                <label class="new-toggle-label ${newActive?'active':''}" style="margin-top:8px;">
+                  <input type="checkbox" ${newActive?'checked':''} onchange="toggleNewBadge('${c.id}', this.checked)"> ${newActive?'🆕 New badge active (24 hrs)':'Mark as New Customer'}
+                </label>
+            </div>
+        </div>
+    `;}).join('') : '<div class="empty-state">No customers match this filter.</div>';
+}
+
+function renderTeamList(){
+    document.getElementById('boyCount').innerText = deliveryBoys.length;
+    document.getElementById('teamList').innerHTML = deliveryBoys.length ? deliveryBoys.map(b => {
+      const mine = customers.filter(c=>c.assignedTo===b.id);
+      return `<div class="boy-card" style="cursor:default;">
+            <div class="top">
+              <div class="boy-name"><span class="boy-swatch" style="background:${b.color}"></span>${escapeHtml(b.name)}</div>
+              <button onclick="removeBoy('${b.id}')" class="btn btn-danger btn-sm">Remove</button>
+            </div>
+            <div class="boy-mini-stats"><span><b>${mine.length}</b> assigned customers</span></div>
+        </div>`;
+    }).join('') : '<div class="empty-state">No delivery boys yet.</div>';
+}
+
+function renderZonesList(){
+    document.getElementById('zoneCount').innerText = zones.length;
+    document.getElementById('zonesList').innerHTML = zones.length ? zones.map(z => `
+        <div class="zone-row">
+            <div class="left"><span class="sw" style="background:${z.color}"></span> ${escapeHtml(z.name)}</div>
+            <button onclick="deleteZone('${z.id}')" class="btn btn-danger btn-sm">Delete</button>
+        </div>
+    `).join('') : '<div class="empty-state">No zones yet.</div>';
+}
+
+/* ================= DELIVERY BOY GPS TRACKING ================= */
+let tracking = false;
+let geoWatch = null;
+let wakeLockRef = null;
+let bgWarnShown = false;
+let trackErrorMsg = '';
+
+// Delivery boy's own explicit online/offline choice, remembered per-boy so
+// re-opening the app (without a full OS kill) can resume sharing without
+// asking again — but a fresh "no" always requires an explicit tap first.
+function loadTrackingPref(boyId){
+  try{ return localStorage.getItem('rb_track_' + boyId) === '1'; }catch(e){ return false; }
+}
+function saveTrackingPref(boyId, on){
+  try{ localStorage.setItem('rb_track_' + boyId, on ? '1' : '0'); }catch(e){ /* storage unavailable — ignore */ }
+}
+
+async function requestWakeLock(){
+  try{
+    if ('wakeLock' in navigator){
+      wakeLockRef = await navigator.wakeLock.request('screen');
+      wakeLockRef.addEventListener('release', ()=>{ wakeLockRef = null; });
+    }
+  }catch(e){ /* wake lock not available/allowed — ignore silently */ }
+}
+function releaseWakeLock(){
+  if (wakeLockRef){ try{ wakeLockRef.release(); }catch(e){} wakeLockRef = null; }
+}
+document.addEventListener('visibilitychange', ()=>{
+  if (document.visibilityState === 'visible' && tracking && !wakeLockRef){
+    requestWakeLock();
+  }
+  if (document.visibilityState === 'hidden' && tracking && role==='delivery' && !bgWarnShown){
+    bgWarnShown = true;
+    showToast("App minimized — keep RouteBoy open (don't swipe it closed) to keep sharing your location");
+  }
+  if (document.visibilityState === 'visible') bgWarnShown = false;
+});
+// Some Android/iOS browsers silently release the Wake Lock after a while even
+// with the tab visible (e.g. after certain OS power-saving events). Re-request
+// it periodically so the screen keeps staying on for as long as this delivery
+// boy is toggled on and the app is open in the foreground.
+setInterval(()=>{
+  if (tracking && role==='delivery' && document.visibilityState==='visible' && !wakeLockRef){
+    requestWakeLock();
+  }
+}, 4*60*1000);
+window.addEventListener('beforeunload', (e)=>{
+  if (tracking && role==='delivery'){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+function startTracking(){
+  if (!myBoyId) return;
+  trackErrorMsg = '';
+  if (!navigator.geolocation){
+    trackErrorMsg = 'GPS not supported on this device/browser.';
+    tracking = false; saveTrackingPref(myBoyId, false);
+    renderTrackBanner();
+    return;
+  }
+  tracking = true;
+  requestWakeLock();
+  renderTrackBanner();
+
+  const boyRef = ref(db, 'deliveryBoys/' + myBoyId);
+  onDisconnect(boyRef).update({ online: false });
+
+  geoWatch = navigator.geolocation.watchPosition(pos => {
+      trackErrorMsg = '';
+      update(boyRef, {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          lastUpdate: Date.now(),
+          online: true
+      });
+      renderTrackBanner();
+      renderMapMarkers();
+      if (navMode){
+        if (navFollow && map){ map.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude }); }
+        updateTurnBanner({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        updateNavSheet();
+      }
+  }, (err) => {
+      // Permission denied / GPS unavailable — flip the toggle back off so the
+      // UI never claims to be "sharing live location" when it isn't, and
+      // surface a clear, persistent reason instead of a toast that disappears.
+      trackErrorMsg = err && err.code === 1
+        ? 'Location permission denied — allow location access for this site in your browser/site settings, then try again.'
+        : 'Could not get a GPS fix — make sure device location is turned on, then try again.';
+      tracking = false;
+      if (geoWatch != null){ navigator.geolocation.clearWatch(geoWatch); geoWatch = null; }
+      releaseWakeLock();
+      saveTrackingPref(myBoyId, false);
+      if (myBoyId) update(ref(db, 'deliveryBoys/' + myBoyId), { online: false }).catch(()=>{});
+      renderTrackBanner();
+  }, { enableHighAccuracy: true, maximumAge: 5000 });
+}
+function stopTracking(){
+  tracking = false;
+  trackErrorMsg = '';
+  if (geoWatch != null){ navigator.geolocation.clearWatch(geoWatch); geoWatch = null; }
+  releaseWakeLock();
+  if (myBoyId){
+    update(ref(db, 'deliveryBoys/' + myBoyId), { online: false }).catch(()=>{});
+  }
+  renderTrackBanner();
+}
+
+// Shows/hides the full-screen "Turn on your location" gate and the normal
+// stops-list content. The gate stays up until the toggle is switched on —
+// unless the boy has already finished every stop for the day, in which case
+// the "all done" celebration card (rendered in renderDeliveryList) takes over
+// instead of nagging them to go online again.
+function updateDeliveryGateUI(){
+  if (role !== 'delivery') return;
+  const gate = document.getElementById('trackGate');
+  const mainWrap = document.getElementById('deliveryMainWrap');
+  if (!gate || !mainWrap) return;
+  const hasAnyAssigned = myBoyId ? customers.some(c=>c.assignedTo===myBoyId) : false;
+  const totalPendingAllShifts = myBoyId ? customers.filter(c=>c.assignedTo===myBoyId && c.status!=='completed').length : 0;
+  const allDoneToday = hasAnyAssigned && totalPendingAllShifts === 0;
+  const showGate = !tracking && !allDoneToday;
+  gate.style.display = showGate ? 'flex' : 'none';
+  mainWrap.style.display = showGate ? 'none' : '';
+  const errEl = document.getElementById('trackGateErr');
+  if (errEl){
+    errEl.textContent = trackErrorMsg;
+    errEl.classList.toggle('show', !!trackErrorMsg && showGate);
+  }
+}
+
+function renderTrackBanner(){
+  const el = document.getElementById('trackBanner');
+  if (!el) return;
+  el.classList.toggle('off', !tracking);
+  document.getElementById('trackTxt').textContent = tracking ? 'Live location sharing — ON' : 'Live location sharing — OFF';
+  document.getElementById('trackSubtext').textContent = tracking
+    ? 'Admin can see your position in real time · keep app open to stay live'
+    : (trackErrorMsg || 'Turn on to go online and start your shift');
+  const toggle = document.getElementById('trackToggle');
+  if (toggle) toggle.checked = tracking;
+  updateDeliveryGateUI();
+}
+document.getElementById('trackToggle').addEventListener('change', (e)=>{
+  if (!myBoyId) return;
+  if (e.target.checked){
+    saveTrackingPref(myBoyId, true);
+    startTracking();
+  } else {
+    saveTrackingPref(myBoyId, false);
+    stopTracking();
+  }
+});
+document.getElementById('trackGateBtn').addEventListener('click', ()=>{
+  if (!myBoyId) return;
+  saveTrackingPref(myBoyId, true);
+  startTracking();
+});
+
+function renderDeliveryList(){
+    if(!myBoyId) return;
+    updateShiftTabsUI();
+    const me = deliveryBoys.find(b=>b.id===myBoyId);
+    let myStops = customers.filter(c => c.assignedTo === myBoyId && custShift(c) === activeShift);
+    const term = dbSearchTerm.trim().toLowerCase();
+    if (term) myStops = myStops.filter(c => matchesSearch(c, term));
+    let pending = myStops.filter(c => c.status !== 'completed');
+    let done = myStops.filter(c => c.status === 'completed');
+
+    document.querySelectorAll('.shift-tab-btn').forEach(btn=>{
+      const sh = btn.dataset.shift;
+      const cnt = customers.filter(c=>c.assignedTo===myBoyId && custShift(c)===sh && c.status!=='completed').length;
+      const base = sh==='evening' ? '🌆 Evening' : '🌅 Morning';
+      btn.innerHTML = `<span class="sw" style="background:var(--${sh})"></span> ${base}${cnt?` (${cnt})`:''}`;
+    });
+
+    document.getElementById('dbStatPending').innerText = pending.length;
+    document.getElementById('dbStatDone').innerText = done.length;
+
+    if(me && me.lat!=null){
+        pending.forEach(c => c._dist = estimatedRoadKm(me.lat, me.lng, c.lat, c.lng));
+        pending.sort((a,b) => a._dist - b._dist);
+    }
+
+    const totalPendingAllShifts = customers.filter(c=>c.assignedTo===myBoyId && c.status!=='completed').length;
+    const allDoneWrap = document.getElementById('allDoneWrap');
+    if (totalPendingAllShifts === 0 && customers.some(c=>c.assignedTo===myBoyId)){
+      allDoneWrap.innerHTML = `<div class="all-done-card"><div class="big">🎉</div><div class="t1">All deliveries done for today!</div><div class="t2">Your live location has been turned off.</div></div>`;
+      if (tracking) stopTracking();
+      if (navMode) exitNavMode();
+    } else {
+      allDoneWrap.innerHTML = '';
+    }
+    updateDeliveryGateUI();
+
+    const startBtn = document.getElementById('startRouteBtn');
+    if (startBtn){
+      if (pending.length && !navMode){
+        startBtn.style.display = 'flex';
+        startBtn.innerHTML = `<span class="pulse-ic"></span> Start Route · ${pending.length} stop${pending.length>1?'s':''}`;
+      } else {
+        startBtn.style.display = 'none';
+      }
+    }
+
+    let html = pending.map((c, i) => `
+        <div class="stop ${i===0?'nearest':''}">
+            <div class="idx">${i+1}</div>
+            <div class="stop-body">
+                <div class="name">${escapeHtml(c.name)}${i===0?' · Next stop':''} <span class="shift-badge ${activeShift}" style="padding:1px 7px; font-size:9.5px;">${activeShift==='evening'?'🌆':'🌅'}</span>${isNewCustomer(c) ? ' <span class="badge new">🆕 NEW</span>' : ''}</div>
+                <div class="addr">${escapeHtml(c.address || '')}</div>
+                ${c.phone ? `<div class="phn">📞 ${escapeHtml(c.phone)}</div>` : ''}
+                <div class="stop-meta">
+                    <span class="badge dist">${c._dist!=null ? fmtDist(c._dist) : 'Turn on GPS'}</span>
+                    ${c._dist!=null ? `<span class="badge eta">~${fmtEtaMinutes(c._dist)}</span>` : ''}
+                </div>
+                <div class="stop-actions">
+                    <button class="btn btn-mint btn-sm" onclick="markComplete('${c.id}')">✓ Delivered</button>
+                    ${c.phone ? `<a href="tel:${escapeHtml(c.phone)}" class="btn btn-ghost btn-sm" style="text-decoration:none">Call</a>` : ''}
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">Navigate</a>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    html += done.map(c => `
+        <div class="stop done"><div class="idx">✓</div><div class="stop-body"><div class="name">${escapeHtml(c.name)}</div><div class="addr">${escapeHtml(c.address||'')}</div></div></div>
+    `).join('');
+
+    document.getElementById('deliveryCustList').innerHTML = html || `<div class="empty-state">${term ? 'No stops match your search.' : `No ${activeShift} tasks assigned yet. Check back soon.`}</div>`;
+}
+
+/* ================= SEARCH ================= */
+const custSearchInputEl = document.getElementById('custSearchInput');
+const custSearchClearEl = document.getElementById('custSearchClear');
+custSearchInputEl.addEventListener('input', (e)=>{
+  custSearchTerm = e.target.value;
+  custSearchClearEl.classList.toggle('show', !!custSearchTerm);
+  renderAdminCustList();
+});
+custSearchClearEl.addEventListener('click', ()=>{
+  custSearchTerm = '';
+  custSearchInputEl.value = '';
+  custSearchClearEl.classList.remove('show');
+  renderAdminCustList();
+});
+
+const dbSearchInputEl = document.getElementById('dbSearchInput');
+const dbSearchClearEl = document.getElementById('dbSearchClear');
+dbSearchInputEl.addEventListener('input', (e)=>{
+  dbSearchTerm = e.target.value;
+  dbSearchClearEl.classList.toggle('show', !!dbSearchTerm);
+  renderDeliveryList();
+});
+dbSearchClearEl.addEventListener('click', ()=>{
+  dbSearchTerm = '';
+  dbSearchInputEl.value = '';
+  dbSearchClearEl.classList.remove('show');
+  renderDeliveryList();
+});
+
+/* ================= MOBILE TOGGLE ================= */
+document.getElementById('mobShowList').onclick = ()=> setMobileView('list');
+document.getElementById('mobShowMap').onclick = ()=> setMobileView('map');
+
+['filterBoy','filterZone','filterStatus','filterShift'].forEach(id=>{
+  document.addEventListener('change', (e)=>{ if(e.target && e.target.id===id) renderAdminCustList(); });
+});
+
+/* ================= BOOT ================= */
+(async function boot(){
+  try{
+    await loadGoogleMaps(GOOGLE_MAPS_API_KEY);
+    initMap();
+  }catch(e){
+    document.getElementById('mapLoading').textContent = "Google Maps load nahi ho paya — API key / billing check karo";
+    console.error(e);
+  }
+
+  startListeners();
+  const sess = loadSession();
+  if (sess && sess.role === 'admin'){
+    enterApp('admin', null);
+  } else if (sess && sess.role === 'delivery' && sess.boyId){
+    enterApp('delivery', sess.boyId);
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+  setInterval(()=>{ if(role) renderAll(); }, 10000);
+})();
 </script>
 </body>
 </html>
