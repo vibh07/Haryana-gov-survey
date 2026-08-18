@@ -1932,14 +1932,17 @@ async function uploadDeliveryPhoto(blob, custId){
   if (!res.ok) throw new Error('Cloudinary upload failed: ' + res.status);
   const data = await res.json();
   if (!data.secure_url) throw new Error('No URL returned from Cloudinary');
-  return data.secure_url;
+  // data.bytes = final uploaded file size — logged alongside the photo so
+  // the admin's storage dashboard (photos.html) can show real usage instead
+  // of just a photo count.
+  return { url: data.secure_url, bytes: data.bytes || blob.size || null };
 }
 
-async function finalizeDelivery(custId, photoUrl){
+async function finalizeDelivery(custId, photoUrl, photoBytes){
   const now = Date.now();
   const updates = { status: 'completed', completedAt: serverTimestamp() };
   if (photoUrl) { updates.deliveryPhotoUrl = photoUrl; updates.deliveryPhotoAt = now; }
-  await update(ref(db, 'customers/' + custId), updates);
+  const tasks = [ update(ref(db, 'customers/' + custId), updates) ];
   if (photoUrl){
     // customers/{id}.deliveryPhotoUrl only ever holds the LATEST photo — it
     // gets overwritten the next time this same customer is delivered to
@@ -1949,18 +1952,89 @@ async function finalizeDelivery(custId, photoUrl){
     const c = customers.find(x=>x.id===custId);
     const boy = myBoyId ? deliveryBoys.find(b=>b.id===myBoyId) : null;
     const logRef = push(ref(db, 'deliveryPhotos'));
-    await set(logRef, {
+    tasks.push(set(logRef, {
       custId,
       custName: c ? c.name : '',
       custAddress: c ? (c.address || '') : '',
       boyId: myBoyId || null,
       boyName: boy ? boy.name : '',
       url: photoUrl,
+      bytes: photoBytes || null,
       ts: now
-    });
+    }));
   }
-  showToast(photoUrl ? "Delivered — proof photo saved!" : "Marked as delivered (no photo)");
+  // Both writes fired together instead of one-after-another — shaves a
+  // network round-trip off every single delivery.
+  await Promise.all(tasks);
 }
+
+/* ---------------- Background photo upload queue ----------------
+   The delivery boy should NEVER sit and watch a spinner. As soon as a photo
+   is picked, the stop is marked delivered immediately (optimistic) and the
+   compress+upload+log work continues silently in the background. A small
+   floating badge shows how many photos are still finishing up, and failed
+   uploads auto-retry (and can be retried by hand) without losing the photo. */
+const bgUploadQueue = []; // {id, custId, custName, file, status: 'pending'|'uploading'|'failed'|'done', error}
+let bgUploadIdSeq = 1;
+
+function bgQueueBadgeEl(){ return document.getElementById('bgUploadBadge'); }
+
+function renderBgUploadBadge(){
+  const active = bgUploadQueue.filter(t => t.status !== 'done');
+  let badge = bgQueueBadgeEl();
+  if (!active.length){
+    if (badge) badge.remove();
+    return;
+  }
+  const failed = active.filter(t => t.status === 'failed').length;
+  const busy = active.length - failed;
+  if (!badge){
+    badge = document.createElement('div');
+    badge.id = 'bgUploadBadge';
+    badge.style.cssText = 'position:fixed; left:14px; bottom:calc(14px + var(--safe-b)); z-index:1500; background:var(--navy); color:#fff; border-radius:14px; padding:10px 14px; font-size:12.5px; font-weight:700; box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:9px; max-width:280px; cursor:pointer;';
+    document.body.appendChild(badge);
+    badge.onclick = ()=>{
+      const retryable = bgUploadQueue.filter(t=>t.status==='failed');
+      if (retryable.length){ retryable.forEach(t => processBgUpload(t)); showToast('Retrying failed uploads…'); }
+    };
+  }
+  badge.innerHTML = busy
+    ? `<span class="rb-spinner"></span> Uploading ${busy} photo${busy>1?'s':''}…${failed?` <span style="color:#FFB4BC;">(${failed} failed — tap to retry)</span>`:''}`
+    : `⚠️ ${failed} photo${failed>1?'s':''} failed to upload — tap to retry`;
+}
+
+async function processBgUpload(task){
+  task.status = 'uploading';
+  renderBgUploadBadge();
+  try{
+    const blob = await compressImageToJpegBlob(task.file);
+    const { url, bytes } = await uploadDeliveryPhoto(blob, task.custId);
+    await finalizeDelivery(task.custId, url, bytes);
+    task.status = 'done';
+    showToast(`📷 Proof photo saved — ${task.custName}`);
+  }catch(err){
+    console.error('Background photo upload failed:', err);
+    task.status = 'failed';
+    task.error = err;
+  }
+  // Drop finished tasks from the queue so it doesn't grow forever.
+  const idx = bgUploadQueue.indexOf(task);
+  if (task.status === 'done' && idx !== -1) bgUploadQueue.splice(idx, 1);
+  renderBgUploadBadge();
+}
+
+function queueDeliveryPhoto(custId, file){
+  const c = customers.find(x=>x.id===custId);
+  const task = { id: bgUploadIdSeq++, custId, custName: c ? c.name : 'Customer', file, status: 'pending' };
+  bgUploadQueue.push(task);
+  renderBgUploadBadge();
+  processBgUpload(task);
+}
+
+// Auto-retry anything that failed once the connection comes back.
+window.addEventListener('online', ()=>{
+  bgUploadQueue.filter(t=>t.status==='failed').forEach(t => processBgUpload(t));
+});
 
 function renderPhotoModal(custId){
   const c = customers.find(x=>x.id===custId);
@@ -1996,32 +2070,31 @@ function renderPhotoModal(custId){
 
   captureBtn.onclick = ()=> fileInput.click();
 
-  fileInput.onchange = async (e)=>{
+  fileInput.onchange = (e)=>{
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     previewImg.src = URL.createObjectURL(file);
     previewImg.style.display = 'block';
-    captureBtn.style.pointerEvents = 'none';
-    captureBtn.style.opacity = '.5';
+    setStatus('Delivered ✓ — photo uploading in background…', true);
     setBusy(true);
-    try{
-      // Compress off the main flow before touching the network, so a big
-      // camera photo never stalls the UI or the upload — this keeps the
-      // whole delivery-photo flow quick even on a weak connection.
-      setStatus('Compressing photo…', true);
-      const blob = await compressImageToJpegBlob(file);
-      setStatus('Uploading…', true);
-      const url = await uploadDeliveryPhoto(blob, custId);
-      setStatus('Uploaded ✓ marking delivered…', true);
-      await finalizeDelivery(custId, url);
+    // Fire-and-forget: mark delivered + queue the photo for background
+    // compress/upload, and close the modal immediately. The delivery boy
+    // never has to wait for the network — see queueDeliveryPhoto() /
+    // processBgUpload() above.
+    (async ()=>{
+      try{
+        await update(ref(db, 'customers/' + custId), { status: 'completed', completedAt: serverTimestamp() });
+      }catch(err){
+        console.error('Instant mark-complete failed:', err);
+        showToast('Could not mark delivered — check your internet connection');
+        setStatus('Failed — internet check karo aur dobara try karo.', false);
+        setBusy(false);
+        return;
+      }
+      queueDeliveryPhoto(custId, file);
+      showToast('Delivered! Photo uploading in background…');
       closeModal('photoModal');
-    }catch(err){
-      console.error(err);
-      setStatus('Upload fail ho gaya — internet check karo aur dobara try karo.', false);
-      captureBtn.style.pointerEvents = 'auto';
-      captureBtn.style.opacity = '1';
-      setBusy(false);
-    }
+    })();
   };
 
   document.getElementById('photoCancelBtn').onclick = ()=> closeModal('photoModal');
