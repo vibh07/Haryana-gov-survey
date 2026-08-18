@@ -20,90 +20,118 @@
     --shadow-lg:0 16px 40px rgba(16,25,46,.14);
     --safe-b:env(safe-area-inset-bottom,0px);
     --safe-t:env(safe-area-inset-top,0px);
+    --gutter:14px;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{font-family:'Inter',sans-serif; background:var(--paper); color:var(--navy); min-height:100vh; font-size:14.5px; -webkit-font-smoothing:antialiased;}
   h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
   button{font-family:inherit; cursor:pointer;}
-  ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:#DEDBCF; border-radius:4px;}
+  input,select{font-family:inherit;}
+  ::-webkit-scrollbar{width:6px; height:6px;} ::-webkit-scrollbar-thumb{background:#DEDBCF; border-radius:4px;}
+  :focus-visible{outline:2px solid var(--orange); outline-offset:2px; border-radius:6px;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;} }
 
   /* ---------- topbar ---------- */
-  #topbar{min-height:56px; background:var(--navy); display:flex; align-items:center; gap:12px; padding:10px 14px; padding-top:calc(10px + var(--safe-t)); color:white; flex-wrap:wrap; position:sticky; top:0; z-index:200;}
-  #topbar .brand{display:flex; align-items:center; gap:9px; font-family:'Space Grotesk'; font-weight:700; font-size:16px;}
-  #topbar .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 4px rgba(255,90,54,.2);}
-  .live-pill{display:flex; align-items:center; gap:6px; background:rgba(0,200,150,.14); border:1px solid rgba(0,200,150,.35); color:#5FE9C9; font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:5px 10px; border-radius:20px;}
-  .live-pill .pulse{width:7px; height:7px; border-radius:50%; background:var(--mint); box-shadow:0 0 0 0 rgba(0,200,150,.7); animation:livepulse 1.8s infinite;}
-  @keyframes livepulse{0%{box-shadow:0 0 0 0 rgba(0,200,150,.55);}70%{box-shadow:0 0 0 7px rgba(0,200,150,0);}100%{box-shadow:0 0 0 0 rgba(0,200,150,0);}}
-  #backBtn{margin-left:auto; background:transparent; border:1px solid #26314E; color:#B9BFCB; font-size:12.5px; padding:9px 14px; border-radius:9px; font-weight:600; min-height:38px;}
+  #topbar{min-height:54px; background:var(--navy); display:flex; align-items:center; gap:10px; padding:9px 14px; padding-top:calc(9px + var(--safe-t)); color:white; position:sticky; top:0; z-index:200; box-shadow:0 2px 12px rgba(0,0,0,.18);}
+  #topbar .brand{display:flex; align-items:center; gap:8px; font-family:'Space Grotesk'; font-weight:700; font-size:15.5px; flex-shrink:0;}
+  #topbar .brand .dot{width:8px; height:8px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 4px rgba(255,90,54,.2); flex-shrink:0;}
+  .live-pill{display:flex; align-items:center; gap:5px; background:rgba(0,200,150,.14); border:1px solid rgba(0,200,150,.35); color:#5FE9C9; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:4px 9px; border-radius:20px; flex-shrink:0;}
+  .live-pill .pulse{width:6px; height:6px; border-radius:50%; background:var(--mint); box-shadow:0 0 0 0 rgba(0,200,150,.7); animation:livepulse 1.8s infinite; flex-shrink:0;}
+  @keyframes livepulse{0%{box-shadow:0 0 0 0 rgba(0,200,150,.55);}70%{box-shadow:0 0 0 6px rgba(0,200,150,0);}100%{box-shadow:0 0 0 0 rgba(0,200,150,0);}}
+  #backBtn{margin-left:auto; background:rgba(255,255,255,.06); border:1px solid #26314E; color:#B9BFCB; font-size:12px; padding:8px 12px; border-radius:9px; font-weight:600; min-height:36px; white-space:nowrap; flex-shrink:0; display:flex; align-items:center; gap:5px;}
   #backBtn:hover{color:white; border-color:var(--slate);}
+  #backBtn:active{transform:scale(.96);}
 
-  .wrap{max-width:1180px; margin:0 auto; padding:18px 16px calc(48px + var(--safe-b));}
-  .page-title{font-size:21px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:9px;}
-  .page-sub{font-size:12.5px; color:var(--slate); margin-bottom:18px;}
+  .wrap{max-width:1180px; margin:0 auto; padding:16px var(--gutter) calc(40px + var(--safe-b));}
+  .page-head{margin-bottom:16px;}
+  .page-title{font-size:19px; font-weight:700; margin-bottom:3px; display:flex; align-items:center; gap:8px; line-height:1.25;}
+  .page-sub{font-size:12px; color:var(--slate); line-height:1.5;}
 
-  /* ---------- stat strip ---------- */
-  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:16px;}
-  .stat-card{background:var(--card); border-radius:12px; padding:13px 14px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:3px; border:1px solid var(--line);}
-  .stat-card .n{font-family:'Space Grotesk'; font-size:22px; font-weight:700;}
-  .stat-card .l{font-size:11px; color:var(--slate); font-weight:600; text-transform:uppercase; letter-spacing:.03em;}
-  .stat-card.accent .n{color:var(--orange);}
+  /* ---------- stat strip — horizontal scroll-snap on phones ---------- */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-bottom:14px;}
+  .stat-card{background:var(--card); border-radius:13px; padding:12px 13px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:5px; border:1px solid var(--line); position:relative; overflow:hidden;}
+  .stat-card .ic{font-size:14px; opacity:.55;}
+  .stat-card .n{font-family:'Space Grotesk'; font-size:21px; font-weight:700; line-height:1;}
+  .stat-card .l{font-size:10px; color:var(--slate); font-weight:700; text-transform:uppercase; letter-spacing:.04em;}
+  .stat-card.accent .n{color:var(--orange-dark);}
   .stat-card.mint .n{color:var(--mint-dark);}
+  .stat-card::after{content:""; position:absolute; left:0; right:0; bottom:0; height:3px; background:transparent;}
+  .stat-card.accent::after{background:var(--orange);}
+  .stat-card.mint::after{background:var(--mint);}
 
-  /* ---------- filters ---------- */
-  .filters{background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow-sm); margin-bottom:14px; border:1px solid var(--line);}
-  .filters-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
-  .filters-head .ft{font-size:12px; font-weight:700; color:var(--navy); display:flex; align-items:center; gap:6px;}
-  .active-badge{background:var(--orange); color:white; font-size:10px; font-weight:700; padding:1px 7px; border-radius:20px; display:none;}
-  .filters-row{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;}
+  /* ---------- search + filters ---------- */
+  .search-shell{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); border:1px solid var(--line); margin-bottom:12px; overflow:hidden;}
+  .search-row{display:flex; align-items:center; gap:8px; padding:10px;}
+  .search-input-wrap{flex:1; position:relative; min-width:0;}
+  .search-input-wrap .sic{position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; color:var(--slate); pointer-events:none;}
+  .search-input-wrap input{width:100%; border:1.5px solid #DEDBCF; border-radius:11px; padding:11px 12px 11px 34px; font-size:14px; background:#FBFAF6; color:var(--navy); min-height:44px;}
+  .search-input-wrap input:focus{outline:2px solid var(--orange); outline-offset:1px; border-color:var(--orange);}
+  .filters-toggle{position:relative; flex-shrink:0; display:flex; align-items:center; gap:6px; background:#FBFAF6; border:1.5px solid #DEDBCF; border-radius:11px; padding:11px 13px; font-size:12.5px; font-weight:700; color:var(--navy); min-height:44px; white-space:nowrap;}
+  .filters-toggle:hover{border-color:var(--slate);}
+  .filters-toggle.on{background:var(--navy); border-color:var(--navy); color:white;}
+  .filters-toggle .chev{font-size:10px; transition:transform .18s ease;}
+  .filters-toggle.on .chev{transform:rotate(180deg);}
+  .active-badge{background:var(--orange); color:white; font-size:10px; font-weight:700; min-width:16px; height:16px; padding:0 4px; border-radius:20px; display:none; align-items:center; justify-content:center;}
+  .active-badge.show{display:inline-flex;}
+
+  .filters-panel{max-height:0; overflow:hidden; transition:max-height .22s ease;}
+  .filters-panel.open{max-height:520px;}
+  .filters-panel-inner{padding:4px 12px 14px; border-top:1px solid #F0EEE4;}
+  .filters-row{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; padding-top:12px;}
   .f-field{display:flex; flex-direction:column; gap:6px; flex:1; min-width:150px;}
-  .f-field label{font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--slate);}
-  .f-field input, .f-field select{border:1.5px solid #DEDBCF; border-radius:10px; padding:10px 12px; font-size:13.5px; background:#FBFAF6; font-family:'Inter'; min-height:40px; width:100%; color:var(--navy);}
+  .f-field label{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--slate);}
+  .f-field input, .f-field select{border:1.5px solid #DEDBCF; border-radius:10px; padding:10px 12px; font-size:13.5px; background:#FBFAF6; font-family:'Inter'; min-height:42px; width:100%; color:var(--navy);}
   .f-field select{appearance:none; background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238891A3' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat:no-repeat; background-position:right 10px center; background-size:16px; padding-right:32px;}
   .f-field input:focus, .f-field select:focus{outline:2px solid var(--orange); outline-offset:1px; border-color:var(--orange);}
-  .clear-btn{background:transparent; border:1.5px solid #DEDBCF; border-radius:10px; padding:10px 14px; font-size:12.5px; font-weight:600; color:var(--navy); min-height:40px; white-space:nowrap;}
-  .clear-btn:hover{border-color:var(--slate); background:#F5F4EF;}
+  .clear-btn{background:transparent; border:1.5px solid #DEDBCF; border-radius:10px; padding:10px 14px; font-size:12.5px; font-weight:700; color:var(--danger); min-height:42px; white-space:nowrap;}
+  .clear-btn:hover{border-color:var(--danger); background:#FFF2F3;}
 
-  .result-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;}
-  .result-count{font-size:12.5px; color:var(--slate); font-weight:600;}
+  .result-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:6px; padding:0 2px;}
+  .result-count{font-size:12px; color:var(--slate); font-weight:600;}
   .result-count b{color:var(--navy);}
-  .sort-hint{font-size:11px; color:var(--slate-light); font-weight:500;}
+  .sort-hint{font-size:10.5px; color:var(--slate-light); font-weight:600; display:flex; align-items:center; gap:4px;}
 
-  .import-bar{background:#FFF8EE; border:1.5px solid #F5E2B8; border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap; margin-bottom:16px;}
-  .import-title{font-weight:700; font-size:13px; margin-bottom:3px;}
-  .import-sub{font-size:11.5px; color:#7A6A3F; line-height:1.5; max-width:640px;}
-  .btn-import{background:var(--navy); color:white; border:none; border-radius:10px; padding:11px 16px; font-size:12.5px; font-weight:700; white-space:nowrap; min-height:40px; display:flex; align-items:center; gap:8px;}
+  .import-bar{background:#FFF8EE; border:1.5px solid #F5E2B8; border-radius:var(--radius); padding:13px 14px; display:flex; align-items:center; gap:12px; justify-content:space-between; flex-wrap:wrap; margin-bottom:14px;}
+  .import-title{font-weight:700; font-size:12.5px; margin-bottom:3px; display:flex; align-items:center; gap:6px;}
+  .import-sub{font-size:11px; color:#7A6A3F; line-height:1.5; max-width:640px;}
+  .btn-import{background:var(--navy); color:white; border:none; border-radius:10px; padding:11px 15px; font-size:12px; font-weight:700; white-space:nowrap; min-height:42px; display:flex; align-items:center; gap:8px; flex-shrink:0;}
   .btn-import:hover{filter:brightness(1.1);}
+  .btn-import:active{transform:scale(.97);}
   .btn-import:disabled{opacity:.6; pointer-events:none;}
 
   /* ---------- grid / cards ---------- */
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px;}
-  .pcard{background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; border:1px solid var(--line); transition:box-shadow .18s ease, transform .18s ease;}
-  .pcard:hover{box-shadow:var(--shadow-md); transform:translateY(-2px);}
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  .pcard{background:var(--card); border-radius:15px; overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; border:1px solid var(--line); transition:box-shadow .18s ease, transform .18s ease;}
+  @media(hover:hover){ .pcard:hover{box-shadow:var(--shadow-md); transform:translateY(-2px);} }
+  .pcard:active{transform:scale(.985);}
   .pcard.is-new{animation:newglow 2.4s ease;}
   @keyframes newglow{0%{box-shadow:0 0 0 3px rgba(0,200,150,.55), var(--shadow-md);}100%{box-shadow:var(--shadow-sm);}}
-  .pcard .thumb-wrap{position:relative; width:100%; aspect-ratio:4/3; background:#EFEDE4; overflow:hidden;}
+  .pcard .thumb-wrap{position:relative; width:100%; aspect-ratio:1/1; background:#EFEDE4; overflow:hidden;}
   .pcard .thumb-wrap img{width:100%; height:100%; object-fit:cover; display:block; cursor:pointer; opacity:0; transition:opacity .25s ease, transform .3s ease;}
   .pcard .thumb-wrap img.loaded{opacity:1;}
-  .pcard .thumb-wrap:hover img.loaded{transform:scale(1.04);}
+  @media(hover:hover){ .pcard .thumb-wrap:hover img.loaded{transform:scale(1.04);} }
   .pcard .thumb-wrap .img-skel{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;}
-  .pcard .time-chip{position:absolute; top:8px; left:8px; background:rgba(14,21,38,.72); backdrop-filter:blur(3px); color:#fff; font-size:10.5px; font-weight:600; padding:4px 9px; border-radius:20px; display:flex; align-items:center; gap:4px; pointer-events:none;}
-  .pcard .new-chip{position:absolute; top:8px; right:8px; background:var(--mint); color:#fff; font-size:9.5px; font-weight:700; padding:3px 8px; border-radius:20px; letter-spacing:.03em; text-transform:uppercase; pointer-events:none;}
-  .pcard .body{padding:11px 12px 12px; display:flex; flex-direction:column; gap:4px; flex:1;}
-  .pcard .cust{font-weight:700; font-size:13.5px;}
-  .pcard .addr{font-size:11.5px; color:var(--slate); line-height:1.4; min-height:15px; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
-  .pcard .meta{font-size:11px; color:#5B6178; display:flex; flex-direction:column; gap:2px; margin-top:2px;}
+  .pcard .grad{position:absolute; left:0; right:0; bottom:0; height:52%; background:linear-gradient(to top, rgba(10,15,28,.72), rgba(10,15,28,0)); pointer-events:none;}
+  .pcard .time-chip{position:absolute; top:7px; left:7px; background:rgba(14,21,38,.68); backdrop-filter:blur(3px); color:#fff; font-size:10px; font-weight:700; padding:4px 8px; border-radius:20px; display:flex; align-items:center; gap:4px; pointer-events:none; font-family:'JetBrains Mono';}
+  .pcard .new-chip{position:absolute; top:7px; right:7px; background:var(--mint); color:#fff; font-size:9px; font-weight:700; padding:3px 7px; border-radius:20px; letter-spacing:.03em; text-transform:uppercase; pointer-events:none; box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .pcard .name-overlay{position:absolute; left:9px; right:9px; bottom:8px; color:#fff; font-weight:700; font-size:12.5px; line-height:1.3; pointer-events:none; text-shadow:0 1px 3px rgba(0,0,0,.4); overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical;}
+  .pcard .body{padding:9px 10px 10px; display:flex; flex-direction:column; gap:5px; flex:1;}
+  .pcard .addr{font-size:11px; color:var(--slate); line-height:1.4; min-height:14px; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
+  .pcard .meta{font-size:10.5px; color:#5B6178; display:flex; flex-direction:column; gap:2px;}
   .pcard .meta b{color:var(--navy);}
-  .pcard .meta .date-full{font-family:'JetBrains Mono'; font-size:10.5px; color:var(--slate);}
-  .pcard .row-btns{display:flex; gap:7px; margin-top:9px;}
-  .pcard .row-btns button, .pcard .row-btns a{flex:1; text-align:center; border-radius:8px; padding:8px 6px; font-size:11.5px; font-weight:700; border:none; text-decoration:none;}
+  .pcard .meta .date-full{font-family:'JetBrains Mono'; font-size:9.5px; color:var(--slate);}
+  .pcard .row-btns{display:flex; gap:6px; margin-top:4px;}
+  .pcard .row-btns button, .pcard .row-btns a{flex:1; text-align:center; border-radius:8px; padding:9px 4px; font-size:11px; font-weight:700; border:none; text-decoration:none; min-height:38px; display:flex; align-items:center; justify-content:center; gap:4px;}
   .pcard .open-btn{background:#F5F4EF; color:var(--navy); border:1px solid #DEDBCF !important;}
   .pcard .open-btn:hover{background:#EDEBE2;}
   .pcard .del-btn{background:transparent; color:var(--danger); border:1px solid #F3D3D3 !important;}
   .pcard .del-btn:hover{background:#FFF2F3;}
+  .pcard .row-btns button:active, .pcard .row-btns a:active{transform:scale(.95);}
 
-  .empty-state, .loading-state{text-align:center; color:var(--slate); font-size:13px; font-weight:600; padding:60px 16px;}
-  .empty-state .ico{font-size:34px; margin-bottom:10px; display:block;}
+  .empty-state, .loading-state{text-align:center; color:var(--slate); font-size:13px; font-weight:600; padding:52px 16px;}
+  .empty-state .ico{font-size:32px; margin-bottom:10px; display:block;}
+  .empty-state .sub{font-weight:500; font-size:11.5px; color:var(--slate-light); margin-top:5px;}
 
   @keyframes rb-spin{to{transform:rotate(360deg);}}
   .rb-spinner{width:22px; height:22px; border-radius:50%; border:2.5px solid rgba(16,25,46,.15); border-top-color:var(--orange); display:inline-block; animation:rb-spin .7s linear infinite;}
@@ -111,33 +139,54 @@
   .loading-state{display:flex; flex-direction:column; align-items:center; gap:12px;}
 
   /* ---------- load more / pagination ---------- */
-  #loadMoreWrap{display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:22px;}
-  .load-more-btn{background:var(--card); border:1.5px solid var(--line); color:var(--navy); font-weight:700; font-size:13px; padding:11px 22px; border-radius:12px; box-shadow:var(--shadow-sm); display:flex; align-items:center; gap:8px;}
+  #loadMoreWrap{display:flex; flex-direction:column; align-items:center; gap:7px; margin-top:20px;}
+  .load-more-btn{background:var(--card); border:1.5px solid var(--line); color:var(--navy); font-weight:700; font-size:13px; padding:11px 22px; border-radius:12px; box-shadow:var(--shadow-sm); display:flex; align-items:center; gap:8px; min-height:44px;}
   .load-more-btn:hover{border-color:var(--orange); color:var(--orange-dark);}
-  .load-more-hint{font-size:11px; color:var(--slate-light);}
+  .load-more-btn:active{transform:scale(.97);}
+  .load-more-hint{font-size:10.5px; color:var(--slate-light); text-align:center;}
   #sentinel{height:1px;}
 
   /* ---------- lightbox ---------- */
-  .lightbox{position:fixed; inset:0; background:rgba(6,10,20,.92); z-index:3000; display:none; align-items:center; justify-content:center; padding:24px; padding-top:calc(24px + var(--safe-t)); padding-bottom:calc(24px + var(--safe-b));}
-  .lightbox.show{display:flex;}
-  .lightbox img{max-width:100%; max-height:80vh; border-radius:10px; box-shadow:0 20px 60px rgba(0,0,0,.5);}
-  .lightbox .lb-close{position:absolute; top:calc(16px + var(--safe-t)); right:16px; background:rgba(255,255,255,.12); color:white; border:none; width:38px; height:38px; border-radius:50%; font-size:18px;}
-  .lightbox .lb-cap{color:#D8DBE0; font-size:12.5px; margin-top:12px; text-align:center;}
-  .lightbox .lb-time{color:#8FE9CE; font-size:11.5px; margin-top:4px; text-align:center; font-family:'JetBrains Mono';}
+  .lightbox{position:fixed; inset:0; background:rgba(6,10,20,.94); z-index:3000; display:none; align-items:center; justify-content:center; padding:16px; padding-top:calc(16px + var(--safe-t)); padding-bottom:calc(16px + var(--safe-b));}
+  .lightbox.show{display:flex; animation:lbfade .18s ease;}
+  @keyframes lbfade{from{opacity:0;} to{opacity:1;}}
+  .lightbox img{max-width:100%; max-height:76vh; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.5); touch-action:pinch-zoom;}
+  .lightbox .lb-close{position:absolute; top:calc(14px + var(--safe-t)); right:14px; background:rgba(255,255,255,.14); color:white; border:none; width:42px; height:42px; border-radius:50%; font-size:18px; display:flex; align-items:center; justify-content:center;}
+  .lightbox .lb-close:active{transform:scale(.92);}
+  .lightbox .lb-cap{color:#E4E1D6; font-size:13px; font-weight:600; margin-top:14px; text-align:center; padding:0 20px;}
+  .lightbox .lb-time{color:#8FE9CE; font-size:11px; margin-top:5px; text-align:center; font-family:'JetBrains Mono';}
 
   /* ---------- toast ---------- */
-  #toastStack{position:fixed; top:calc(70px + var(--safe-t)); right:16px; z-index:4000; display:flex; flex-direction:column; gap:8px; align-items:flex-end;}
+  #toastStack{position:fixed; top:calc(64px + var(--safe-t)); right:12px; z-index:4000; display:flex; flex-direction:column; gap:8px; align-items:flex-end; max-width:calc(100vw - 24px);}
   .toast{background:var(--navy); color:#fff; padding:11px 16px; border-radius:12px; box-shadow:var(--shadow-lg); font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:9px; max-width:300px; animation:toastin .25s ease;}
   .toast .tdot{width:8px; height:8px; border-radius:50%; background:var(--mint); flex-shrink:0;}
   @keyframes toastin{from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);}}
   .toast.leaving{animation:toastout .25s ease forwards;}
   @keyframes toastout{to{opacity:0; transform:translateX(20px);}}
 
-  @media (max-width:520px){
-    .filters-row{flex-direction:column; align-items:stretch;}
-    .f-field{min-width:0;}
-    #toastStack{left:12px; right:12px; align-items:stretch;}
-    .toast{max-width:none;}
+  /* ---------- breakpoints ---------- */
+  @media (min-width:480px){
+    .grid{grid-template-columns:repeat(3,1fr);}
+  }
+  @media (min-width:640px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:13px;}
+    .pcard .thumb-wrap{aspect-ratio:4/3;}
+  }
+  @media (min-width:860px){
+    #topbar{padding:10px 20px; padding-top:calc(10px + var(--safe-t));}
+    .wrap{padding:20px 20px calc(48px + var(--safe-b));}
+    .page-title{font-size:21px;}
+    .stats{grid-template-columns:repeat(4,1fr); gap:10px;}
+    .filters-panel{max-height:none !important; overflow:visible;}
+    .filters-toggle{display:none;}
+    .filters-panel-inner{border-top:none; padding:0;}
+  }
+  @media (max-width:479px){
+    .wrap{padding:12px 10px calc(36px + var(--safe-b));}
+    .page-title{font-size:17px;}
+    .stats{gap:7px;}
+    .stat-card{padding:10px 10px;}
+    .stat-card .n{font-size:18px;}
   }
 </style>
 </head>
@@ -146,72 +195,80 @@
 <div id="topbar">
   <div class="brand"><span class="dot"></span>Anadi</div>
   <div class="live-pill"><span class="pulse"></span>Live</div>
-  <button id="backBtn">← Back to Admin</button>
+  <button id="backBtn">← Admin</button>
 </div>
 
 <div id="toastStack"></div>
 
 <div class="wrap">
-  <div class="page-title">📷 Delivery Photos</div>
-  <div class="page-sub">Har delivery proof photo — kisne deliver ki, kiske yaha, kab click hui — sab yaha realtime milega.</div>
-
-  <div class="stats" id="statsRow">
-    <div class="stat-card"><div class="n" id="statTotal">—</div><div class="l">Total Photos</div></div>
-    <div class="stat-card accent"><div class="n" id="statToday">—</div><div class="l">Today</div></div>
-    <div class="stat-card mint"><div class="n" id="statWeek">—</div><div class="l">This Week</div></div>
-    <div class="stat-card"><div class="n" id="statBoys">—</div><div class="l">Delivery Boys</div></div>
+  <div class="page-head">
+    <div class="page-title">📷 Delivery Photos</div>
+    <div class="page-sub">Every delivery proof photo — who delivered it, whose address, and when it was taken — all in real time.</div>
   </div>
 
-  <div class="filters">
-    <div class="filters-head">
-      <div class="ft">🔍 Filters <span class="active-badge" id="activeBadge">0</span></div>
+  <div class="stats" id="statsRow">
+    <div class="stat-card"><span class="ic">🗂️</span><div class="n" id="statTotal">—</div><div class="l">Total</div></div>
+    <div class="stat-card accent"><span class="ic">📅</span><div class="n" id="statToday">—</div><div class="l">Today</div></div>
+    <div class="stat-card mint"><span class="ic">📈</span><div class="n" id="statWeek">—</div><div class="l">This week</div></div>
+    <div class="stat-card"><span class="ic">🛵</span><div class="n" id="statBoys">—</div><div class="l">Delivery boys</div></div>
+  </div>
+
+  <div class="search-shell">
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <span class="sic">🔎</span>
+        <input type="text" id="searchInput" placeholder="Search by name or address…">
+      </div>
+      <button type="button" class="filters-toggle" id="filtersToggleBtn">
+        ⚙️ Filters <span class="active-badge" id="activeBadge">0</span><span class="chev">▾</span>
+      </button>
     </div>
-    <div class="filters-row">
-      <div class="f-field" style="flex:1.4; min-width:180px;">
-        <label>Search</label>
-        <input type="text" id="searchInput" placeholder="Naam ya address se search karo...">
-      </div>
-      <div class="f-field">
-        <label>Customer</label>
-        <select id="customerSelect"><option value="">Sab customers</option></select>
-      </div>
-      <div class="f-field">
-        <label>Delivery Boy</label>
-        <select id="boySelect"><option value="">Sab delivery boys</option></select>
-      </div>
-      <div class="f-field">
-        <label>Month</label>
-        <input type="month" id="monthInput">
-      </div>
-      <div class="f-field">
-        <label>From date</label>
-        <input type="date" id="fromInput">
-      </div>
-      <div class="f-field">
-        <label>To date</label>
-        <input type="date" id="toInput">
-      </div>
-      <div class="f-field" style="flex:0 0 auto; min-width:0;">
-        <label>&nbsp;</label>
-        <button class="clear-btn" id="clearFiltersBtn">✕ Clear filters</button>
+    <div class="filters-panel" id="filtersPanel">
+      <div class="filters-panel-inner">
+        <div class="filters-row">
+          <div class="f-field">
+            <label>Customer</label>
+            <select id="customerSelect"><option value="">All customers</option></select>
+          </div>
+          <div class="f-field">
+            <label>Delivery boy</label>
+            <select id="boySelect"><option value="">All delivery boys</option></select>
+          </div>
+          <div class="f-field">
+            <label>Month</label>
+            <input type="month" id="monthInput">
+          </div>
+          <div class="f-field">
+            <label>From date</label>
+            <input type="date" id="fromInput">
+          </div>
+          <div class="f-field">
+            <label>To date</label>
+            <input type="date" id="toInput">
+          </div>
+          <div class="f-field" style="flex:0 0 auto; min-width:0;">
+            <label>&nbsp;</label>
+            <button class="clear-btn" id="clearFiltersBtn">✕ Clear</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div id="importBar" class="import-bar" style="display:none;">
     <div>
-      <div class="import-title">Purani deliveries ki photos yaha nahi dikh rahi?</div>
-      <div class="import-sub">Ye page sirf is update ke baad hui deliveries ki photos apne aap dikhata hai. Pehle se maujood customer records mein jo latest proof photo save hai, use ek baar import karke yahan la sakte ho.</div>
+      <div class="import-title">🗄️ Older deliveries missing here?</div>
+      <div class="import-sub">This page only auto-logs deliveries made since this update. Each customer's most recently saved proof photo can be imported once, so nothing gets left out.</div>
     </div>
     <button class="btn-import" id="importBtn">🔄 Import existing photos</button>
   </div>
 
   <div class="result-bar">
     <div id="resultCount" class="result-count"></div>
-    <div class="sort-hint">Newest first</div>
+    <div class="sort-hint">↓ Newest first</div>
   </div>
   <div id="loadingState" class="loading-state"><span class="rb-spinner"></span>Loading photos…</div>
-  <div id="emptyState" class="empty-state" style="display:none;"><span class="ico">🗂️</span>No photos match these filters.</div>
+  <div id="emptyState" class="empty-state" style="display:none;"><span class="ico">🗂️</span>No photos match these filters.<div class="sub">Try clearing a filter or searching a different term.</div></div>
   <div id="grid" class="grid"></div>
   <div id="loadMoreWrap" style="display:none;">
     <button class="load-more-btn" id="loadMoreBtn">Load 50 more photos ↓</button>
@@ -222,7 +279,7 @@
 
 <div class="lightbox" id="lightbox">
   <button class="lb-close" id="lbClose">✕</button>
-  <div style="display:flex; flex-direction:column; align-items:center;">
+  <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
     <img id="lbImg" src="">
     <div class="lb-cap" id="lbCap"></div>
     <div class="lb-time" id="lbTime"></div>
@@ -301,7 +358,7 @@ onValue(ref(db, 'deliveryPhotos'), (snap)=>{
     if (newlyArrived.length === 1){
       showToast(`📸 New photo — ${newlyArrived[0].custName || 'customer'} (${newlyArrived[0].boyName || 'delivery boy'})`);
     } else if (newlyArrived.length > 1){
-      showToast(`📸 ${newlyArrived.length} new delivery photos aayi hain`);
+      showToast(`📸 ${newlyArrived.length} new delivery photos arrived`);
     }
     newlyArrived.forEach(p => recentlyAdded.add(p.id));
   }
@@ -341,9 +398,9 @@ function populateFilterOptions(){
   const custOptions = [...custMap.entries()].sort((a,b)=> a[1].localeCompare(b[1]));
   const boyOptions = [...boyMap.entries()].sort((a,b)=> a[1].localeCompare(b[1]));
 
-  custSel.innerHTML = '<option value="">Sab customers</option>' +
+  custSel.innerHTML = '<option value="">All customers</option>' +
     custOptions.map(([id,name]) => `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`).join('');
-  boySel.innerHTML = '<option value="">Sab delivery boys</option>' +
+  boySel.innerHTML = '<option value="">All delivery boys</option>' +
     boyOptions.map(([id,name]) => `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`).join('');
 
   if ([...custMap.keys()].includes(prevCust)) custSel.value = prevCust;
@@ -381,7 +438,7 @@ document.getElementById('importBtn').onclick = async ()=>{
       .filter(c => c.deliveryPhotoUrl && !already.has(c.id + '|' + c.deliveryPhotoUrl));
 
     if (!toImport.length){
-      showBanner('Kuch bhi naya import karne ko nahi mila — sab already up to date hai.');
+      showBanner('Nothing new to import — everything is already up to date.');
       return;
     }
 
@@ -398,10 +455,10 @@ document.getElementById('importBtn').onclick = async ()=>{
         importedFromCustomerRecord: true
       });
     }
-    showBanner(`${toImport.length} purani photo${toImport.length===1?'':'s'} import ho gayi!`);
+    showBanner(`${toImport.length} older photo${toImport.length===1?'':'s'} imported!`);
   }catch(err){
     console.error(err);
-    showBanner('Import fail ho gaya — internet check karke dobara try karo.', true);
+    showBanner('Import failed — check your internet connection and try again.', true);
   }finally{
     btn.innerHTML = origHtml;
     btn.disabled = false;
@@ -428,6 +485,17 @@ function showToast(msg){
     setTimeout(()=> el.remove(), 260);
   }, 4200);
 }
+
+// ---------- filters panel toggle (collapsible on mobile) ----------
+const filtersPanel = document.getElementById('filtersPanel');
+const filtersToggleBtn = document.getElementById('filtersToggleBtn');
+function isDesktopFiltersLayout(){ return window.matchMedia('(min-width:860px)').matches; }
+function setFiltersOpen(open){
+  filtersPanel.classList.toggle('open', open || isDesktopFiltersLayout());
+  filtersToggleBtn.classList.toggle('on', open);
+}
+filtersToggleBtn.onclick = ()=> setFiltersOpen(!filtersPanel.classList.contains('open'));
+window.addEventListener('resize', ()=>{ if (isDesktopFiltersLayout()) filtersPanel.classList.add('open'); });
 
 // ---------- filtering ----------
 function countActiveFilters(){
@@ -470,7 +538,7 @@ function render(){
   const badge = document.getElementById('activeBadge');
   const activeN = countActiveFilters();
   badge.textContent = activeN;
-  badge.style.display = activeN ? 'inline-block' : 'none';
+  badge.classList.toggle('show', !!activeN);
 
   const filtered = allPhotos.filter(matchesFilters);
   const grid = document.getElementById('grid');
@@ -489,7 +557,7 @@ function render(){
   }
   emptyState.style.display = 'none';
 
-  // Only render up to visibleLimit — 50 photos load karte hain at a time so the
+  // Only render up to visibleLimit — 50 photos load at a time so the
   // browser never has to decode/paint hundreds of images at once.
   const slice = filtered.slice(0, visibleLimit);
 
@@ -499,15 +567,16 @@ function render(){
     <div class="pcard ${recentlyAdded.has(p.id) ? 'is-new' : ''}" data-id="${p.id}">
       <div class="thumb-wrap">
         <div class="img-skel"><span class="rb-spinner sm"></span></div>
+        <img src="${escapeHtml(p.url)}" loading="lazy" onload="this.classList.add('loaded')" data-open="${p.id}">
+        <div class="grad"></div>
         <span class="time-chip">🕒 ${fmtTime(p.ts)}</span>
         ${recentlyAdded.has(p.id) ? '<span class="new-chip">New</span>' : ''}
-        <img src="${escapeHtml(p.url)}" loading="lazy" onload="this.classList.add('loaded')" data-open="${p.id}">
+        <div class="name-overlay">${escapeHtml(p.custName || 'Unknown customer')}</div>
       </div>
       <div class="body">
-        <div class="cust">${escapeHtml(p.custName || 'Unknown customer')}</div>
-        <div class="addr">${escapeHtml(p.custAddress || '')}</div>
+        <div class="addr">${escapeHtml(p.custAddress || 'No address noted')}</div>
         <div class="meta">
-          <span>Delivered by: <b>${escapeHtml(p.boyName || 'Unknown')}</b></span>
+          <span>By <b>${escapeHtml(p.boyName || 'Unknown')}</b></span>
           <span class="date-full">${fmtDate(p.ts)} · ${fmtTime(p.ts)}</span>
         </div>
         <div class="row-btns">
@@ -538,6 +607,7 @@ function render(){
   if (remaining > 0){
     loadMoreWrap.style.display = 'flex';
     loadMoreHint.textContent = `Showing ${slice.length} of ${filtered.length} — ${remaining} more available`;
+    document.getElementById('loadMoreBtn').style.display = '';
   } else {
     loadMoreWrap.style.display = filtered.length > PAGE_SIZE ? 'flex' : 'none';
     if (filtered.length > PAGE_SIZE){
@@ -572,7 +642,7 @@ const io = new IntersectionObserver((entries)=>{
 io.observe(document.getElementById('sentinel'));
 
 async function deletePhoto(id, btn){
-  if (!confirm('Ye photo record delete kar dein? Ye undo nahi ho sakta.')) return;
+  if (!confirm('Delete this photo record? This cannot be undone.')) return;
   const orig = btn.innerHTML;
   btn.innerHTML = '<span class="rb-spinner sm"></span>';
   btn.disabled = true;
@@ -585,7 +655,7 @@ async function deletePhoto(id, btn){
     await remove(ref(db, 'deliveryPhotos/' + id));
   }catch(err){
     console.error(err);
-    alert('Delete fail ho gaya — internet check karke dobara try karo.');
+    alert('Delete failed — check your internet connection and try again.');
     btn.innerHTML = orig;
     btn.disabled = false;
   }
@@ -614,6 +684,9 @@ document.getElementById('clearFiltersBtn').onclick = ()=>{
   document.getElementById('toInput').value = '';
   resetAndRender();
 };
+
+// Open filters panel by default on desktop widths, collapsed on phones.
+setFiltersOpen(false);
 </script>
 </body>
 </html>
