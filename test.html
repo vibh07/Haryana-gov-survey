@@ -271,7 +271,16 @@
   .map-toolbar{position:absolute; top:12px; right:12px; z-index:500; display:flex; flex-direction:column; gap:7px;}
   .map-toolbar button{background:white; border:1px solid #E4E1D6; box-shadow:var(--shadow-md); border-radius:11px; padding:10px 13px; font-size:12px; font-weight:700; cursor:pointer; color:var(--navy); min-height:40px;}
   .map-toolbar button.active{background:var(--navy); color:white; border-color:var(--navy);}
-  .map-loading{position:absolute; inset:0; background:var(--paper); display:flex; align-items:center; justify-content:center; font-size:13.5px; color:var(--slate); font-weight:600; z-index:400;}
+  .map-loading{position:absolute; inset:0; background:var(--paper); display:flex; align-items:center; justify-content:center; font-size:13.5px; color:var(--slate); font-weight:600; z-index:400; gap:10px;}
+  /* ---------------- generic loader / spinner ---------------- */
+  @keyframes rb-spin{to{transform:rotate(360deg);}}
+  .rb-spinner{width:15px; height:15px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; display:inline-block; animation:rb-spin .7s linear infinite; flex-shrink:0; vertical-align:-3px;}
+  .rb-spinner.dark{border:2px solid rgba(16,25,46,.15); border-top-color:var(--navy);}
+  .btn.is-loading{pointer-events:none; opacity:.82; position:relative;}
+  .btn.is-loading .btn-label{visibility:hidden;}
+  .btn.is-loading .rb-spinner{position:absolute; left:50%; top:50%; margin:-8px 0 0 -8px;}
+  /* full-panel skeleton shown while the first Firebase snapshot hasn't arrived yet */
+  .rb-skeleton{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:40px 16px; color:var(--slate); font-size:12.5px; font-weight:600;}
 
   /* ---------------- NAVIGATION MODE (delivery boy "start route") ---------------- */
   body.nav-mode #sidebar{display:none !important;}
@@ -794,13 +803,53 @@ function showToast(msg){
   t.textContent = msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2600);
 }
+// Puts a button into a spinning "working…" state and guarantees it's restored
+// even if the async action throws — used on every network-hitting button so
+// the person always sees something is happening instead of a frozen tap.
+function setBtnLoading(btn, on, loadingText){
+  if (!btn) return;
+  if (on){
+    if (btn.dataset.rbBusy === '1') return;
+    btn.dataset.rbBusy = '1';
+    btn.dataset.rbOrigHtml = btn.innerHTML;
+    btn.classList.add('is-loading');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="btn-label">${btn.dataset.rbOrigHtml}</span><span class="rb-spinner"></span>` + (loadingText ? `<span style="margin-left:6px;">${escapeHtml(loadingText)}</span>` : '');
+  } else {
+    if (btn.dataset.rbBusy !== '1') return;
+    btn.dataset.rbBusy = '0';
+    btn.classList.remove('is-loading');
+    btn.disabled = false;
+    if (btn.dataset.rbOrigHtml != null) btn.innerHTML = btn.dataset.rbOrigHtml;
+  }
+}
+// Wraps an async on-click handler so the button auto-spins while it runs and
+// always resets afterwards (success or failure) — one line to make any
+// button-triggered async action show a loader.
+function withBtnLoading(btn, fn){
+  return async (...args)=>{
+    setBtnLoading(btn, true);
+    try{ await fn(...args); }
+    catch(err){ console.error(err); showToast('Something went wrong — please try again.'); }
+    finally{ setBtnLoading(btn, false); }
+  };
+}
 function confirmAction(text, onOk){
   document.getElementById('confirmText').textContent = text;
   openModal('confirmModal');
   const okBtn = document.getElementById('confirmOk');
   const cancelBtn = document.getElementById('confirmCancel');
   const cleanup = ()=>{ closeModal('confirmModal'); okBtn.onclick=null; cancelBtn.onclick=null; };
-  okBtn.onclick = ()=>{ cleanup(); onOk(); };
+  // Keep the modal open with a spinner while the (usually Firebase) action is
+  // in flight, so a slow/flaky connection never looks like a dead tap —
+  // it only closes once the write has actually finished.
+  okBtn.onclick = async ()=>{
+    setBtnLoading(okBtn, true);
+    cancelBtn.disabled = true;
+    try{ await onOk(); }
+    catch(err){ console.error(err); showToast('Something went wrong — please try again.'); }
+    finally{ setBtnLoading(okBtn, false); cancelBtn.disabled = false; cleanup(); }
+  };
   cancelBtn.onclick = cleanup;
 }
 let openModalCount = 0;
@@ -980,8 +1029,9 @@ function ensureMapVisible(){ if (isMobileLayout()) setMobileView('map'); }
 
 /* ---------------- map ---------------- */
 let map, infoWindow;
-let custMarkers = [];
+let custMarkers = {};
 let boyMarkers = {};
+let openInfoFor = null; // {type:'cust'|'boy', id} — tracks which marker's popup is open so it survives re-renders
 let pendingPinLatLng = null;
 let pendingPinMarker = null;
 let routePolyline = null;
@@ -1065,6 +1115,10 @@ function initMap(){
     clickableIcons: false
   });
   infoWindow = new google.maps.InfoWindow();
+  // Only clear our "popup is open" tracker when the user actually dismisses
+  // it (tapping the built-in × or Esc) — this is what lets renderMapMarkers
+  // keep refreshing the open popup's content instead of ever force-closing it.
+  infoWindow.addListener('closeclick', ()=>{ openInfoFor = null; });
 
   map.addListener('click', (e)=>{
     // Admin is re-picking an existing customer's pin from the edit modal
@@ -1133,10 +1187,59 @@ function makeBoyIcon(color, initialsTxt, online){
 }
 function initials(name){ return (name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
 
+// Builds the popup HTML for a customer marker fresh from LIVE data (looked up
+// by id at click/refresh time) — never from a stale closured object — so the
+// text always matches what's true right now, not what was true when the
+// marker happened to be created.
+function custPopupHtml(custId){
+  const c = customers.find(x=>x.id===custId);
+  if (!c) return '';
+  const myBoy = (role==='delivery' && myBoyId) ? deliveryBoys.find(b=>b.id===myBoyId) : null;
+  const shiftLbl = custShift(c)==='evening' ? '🌆 Evening' : '🌅 Morning';
+  const newLbl = isNewCustomer(c) ? `<span style="font-size:11px;color:#E64A28;font-weight:700;">🆕 NEW</span> · ` : '';
+  let extra = '';
+  if (role === 'delivery' && c.assignedTo === myBoyId){
+    let distLine = '';
+    if (myBoy && myBoy.lat != null){
+      const d = estimatedRoadKm(myBoy.lat, myBoy.lng, c.lat, c.lng);
+      distLine = `<div style="font-size:11px; color:#5B6178; margin:4px 0 8px;">📍 ${fmtDist(d)} away · ~${fmtEtaMinutes(d)}</div>`;
+    }
+    if (c.status !== 'completed'){
+      extra = `${distLine}<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">
+        <button onclick="deliverFromMap('${c.id}')" style="background:#2AC2A6;color:white;border:none;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:700;cursor:pointer;">✓ Delivered</button>
+        ${c.phone ? `<a href="tel:${escapeHtml(c.phone)}" style="background:#F5F4EF;color:#10192E;border:1px solid #DEDBCF;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:700;text-decoration:none;">📞 Call</a>` : ''}
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}" target="_blank" style="background:#F5F4EF;color:#10192E;border:1px solid #DEDBCF;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:700;text-decoration:none;">🧭 Navigate</a>
+      </div>`;
+    } else {
+      extra = `<div style="font-size:11px; color:#1D9E86; font-weight:700; margin-top:4px;">✓ Delivered</div>`;
+    }
+  }
+  return `<div style="font-family:Inter,sans-serif; min-width:170px;"><b>${escapeHtml(c.name)}</b><br>${escapeHtml(c.address||'')}${c.phone && role!=='delivery'?`<br>${escapeHtml(c.phone)}`:''}<br>${newLbl}<span style="font-size:11px;color:#8A93A6;">${shiftLbl}</span>${extra}</div>`;
+}
+// Same idea for a delivery boy's popup — always computed fresh from the
+// live deliveryBoys array so Online/Offline never shows a frozen answer.
+function boyPopupHtml(boyId){
+  const b = deliveryBoys.find(x=>x.id===boyId);
+  if (!b) return '';
+  const online = isOnline(b);
+  return `<div style="font-family:Inter,sans-serif;"><b>${escapeHtml(b.name)}</b><br><span style="font-size:11px;color:${online?'#1D9E86':'#8A93A6'};">${online?'🟢 Online now':'⚫ Offline · last seen ' + timeAgo(b.lastUpdate)}</span></div>`;
+}
+// Refreshes the content of a currently-open popup in place (called on every
+// re-render) so Online/Offline / last-seen text stays live and accurate
+// while the popup is open, without ever closing/reopening it.
+function refreshOpenInfoWindow(){
+  if (!openInfoFor) return;
+  if (openInfoFor.type === 'cust'){
+    if (!customers.find(x=>x.id===openInfoFor.id)){ openInfoFor = null; return; }
+    infoWindow.setContent(custPopupHtml(openInfoFor.id));
+  } else if (openInfoFor.type === 'boy'){
+    if (!deliveryBoys.find(x=>x.id===openInfoFor.id)){ openInfoFor = null; return; }
+    infoWindow.setContent(boyPopupHtml(openInfoFor.id));
+  }
+}
+
 function renderMapMarkers(){
   if (!map) return;
-  custMarkers.forEach(m=>m.setMap(null));
-  custMarkers = [];
 
   const boyColorMap = {}; deliveryBoys.forEach(b=> boyColorMap[b.id]=b.color);
 
@@ -1155,41 +1258,45 @@ function renderMapMarkers(){
     }
   }
 
+  // Diff-update customer markers instead of destroying/recreating them on
+  // every render. Recreating markers on every single Firebase tick (which
+  // happens constantly while any delivery boy is GPS-tracking) was what made
+  // any open popup vanish almost instantly — removing a marker from the map
+  // auto-closes an InfoWindow anchored to it. Reusing the same marker object
+  // and just moving/repainting it never touches the open popup, and it's
+  // also far cheaper (no icon rebuild / DOM churn), which keeps things smooth.
+  const visibleCustIds = new Set(visibleCustomers.map(c=>c.id));
+  Object.keys(custMarkers).forEach(id=>{
+    if (!visibleCustIds.has(id)){ custMarkers[id].setMap(null); delete custMarkers[id]; }
+  });
+
   visibleCustomers.forEach((c,i)=>{
+    if (c.lat == null) return;
     const color = c.assignedTo ? (boyColorMap[c.assignedTo] || '#8A93A6') : '#8A93A6';
     const label = routeOrderMap ? (routeOrderMap[c.id] || i+1) : (i+1);
-    const marker = new google.maps.Marker({
-      position: { lat:c.lat, lng:c.lng },
-      map,
-      icon: makeCustIcon(color, label, c.status==='completed', custShift(c), isNewCustomer(c)),
-      title: c.name,
-      zIndex: c.status==='completed' ? 50 : 300 - label
-    });
+    const icon = makeCustIcon(color, label, c.status==='completed', custShift(c), isNewCustomer(c));
+    const zIndex = c.status==='completed' ? 50 : 300 - label;
 
-    marker.addListener('click', ()=>{
-      const shiftLbl = custShift(c)==='evening' ? '🌆 Evening' : '🌅 Morning';
-      const newLbl = isNewCustomer(c) ? `<span style="font-size:11px;color:#E64A28;font-weight:700;">🆕 NEW</span> · ` : '';
-      let extra = '';
-      if (role === 'delivery' && c.assignedTo === myBoyId){
-        let distLine = '';
-        if (myBoy && myBoy.lat != null){
-          const d = estimatedRoadKm(myBoy.lat, myBoy.lng, c.lat, c.lng);
-          distLine = `<div style="font-size:11px; color:#5B6178; margin:4px 0 8px;">📍 ${fmtDist(d)} away · ~${fmtEtaMinutes(d)}</div>`;
-        }
-        if (c.status !== 'completed'){
-          extra = `${distLine}<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">
-            <button onclick="deliverFromMap('${c.id}')" style="background:#2AC2A6;color:white;border:none;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:700;cursor:pointer;">✓ Delivered</button>
-            ${c.phone ? `<a href="tel:${escapeHtml(c.phone)}" style="background:#F5F4EF;color:#10192E;border:1px solid #DEDBCF;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:700;text-decoration:none;">📞 Call</a>` : ''}
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}" target="_blank" style="background:#F5F4EF;color:#10192E;border:1px solid #DEDBCF;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:700;text-decoration:none;">🧭 Navigate</a>
-          </div>`;
-        } else {
-          extra = `<div style="font-size:11px; color:#1D9E86; font-weight:700; margin-top:4px;">✓ Delivered</div>`;
-        }
-      }
-      infoWindow.setContent(`<div style="font-family:Inter,sans-serif; min-width:170px;"><b>${escapeHtml(c.name)}</b><br>${escapeHtml(c.address||'')}${c.phone && role!=='delivery'?`<br>${escapeHtml(c.phone)}`:''}<br>${newLbl}<span style="font-size:11px;color:#8A93A6;">${shiftLbl}</span>${extra}</div>`);
-      infoWindow.open(map, marker);
-    });
-    custMarkers.push(marker);
+    if (!custMarkers[c.id]){
+      const marker = new google.maps.Marker({
+        position: { lat:c.lat, lng:c.lng },
+        map,
+        icon,
+        title: c.name,
+        zIndex
+      });
+      marker.addListener('click', ()=>{
+        openInfoFor = { type:'cust', id:c.id };
+        infoWindow.setContent(custPopupHtml(c.id));
+        infoWindow.open(map, marker);
+      });
+      custMarkers[c.id] = marker;
+    } else {
+      const marker = custMarkers[c.id];
+      marker.setPosition({ lat:c.lat, lng:c.lng });
+      marker.setIcon(icon);
+      marker.setZIndex(zIndex);
+    }
   });
 
   const visibleBoys = (role==='delivery' && myBoyId) ? deliveryBoys.filter(b=>b.id===myBoyId) : deliveryBoys;
@@ -1210,7 +1317,8 @@ function renderMapMarkers(){
         opacity: online ? 1 : 0.7
       });
       boyMarkers[b.id].addListener('click', ()=>{
-        infoWindow.setContent(`<div style="font-family:Inter,sans-serif;"><b>${escapeHtml(b.name)}</b><br><span style="font-size:11px;color:${online?'#1D9E86':'#8A93A6'};">${online?'🟢 Online now':'⚫ Offline · last seen ' + timeAgo(b.lastUpdate)}</span></div>`);
+        openInfoFor = { type:'boy', id:b.id };
+        infoWindow.setContent(boyPopupHtml(b.id));
         infoWindow.open(map, boyMarkers[b.id]);
       });
     } else {
@@ -1220,6 +1328,10 @@ function renderMapMarkers(){
       boyMarkers[b.id].setZIndex(online ? 1000 : 500);
     }
   });
+
+  // Keep an already-open popup's text (e.g. Online/Offline, delivered status)
+  // live and correct without ever closing it.
+  refreshOpenInfoWindow();
 }
 
 /* ---------------- Google Directions (turn-by-turn, Navigation Mode only) ---------------- */
@@ -1601,7 +1713,9 @@ function logout(){
 
 function updateWhoami(){
   if (role === 'admin'){
-    document.getElementById('whoami').innerHTML = `<span class="hide-mobile"><b>Admin</b></span><button id="logoutBtn">Logout</button>`;
+    document.getElementById('whoami').innerHTML = `<span class="hide-mobile"><b>Admin</b></span><button id="photosNavBtn">📷 Photos</button><button id="logoutBtn">Logout</button>`;
+    const pb = document.getElementById('photosNavBtn');
+    if (pb) pb.onclick = ()=>{ window.location.href = './photos.html'; };
   } else {
     const boy = deliveryBoys.find(b=>b.id===myBoyId);
     const name = boy ? boy.name : '…';
@@ -1616,18 +1730,31 @@ function toArray(val){
   if (!val) return [];
   return Object.keys(val).map(id => ({ id, ...val[id] }));
 }
+// A GPS-tracking delivery boy writes a new location every few seconds, which
+// fires the 'deliveryBoys' listener below constantly. Calling the full
+// renderAll() (which rebuilds the admin customer list, team list, photos,
+// etc.) on every single one of those ticks is what made the UI feel laggy.
+// Coalesce bursts of updates into one render per animation frame instead —
+// still feels instant to the eye, but cuts redundant work drastically.
+let renderAllScheduled = false;
+function scheduleRenderAll(){
+  if (renderAllScheduled) return;
+  renderAllScheduled = true;
+  requestAnimationFrame(()=>{ renderAllScheduled = false; renderAll(); });
+}
+
 function startListeners(){
   onValue(ref(db, 'deliveryBoys'), (snap)=>{
     deliveryBoys = toArray(snap.val());
-    if (role) { updateWhoami(); renderAll(); }
+    if (role) { updateWhoami(); scheduleRenderAll(); }
   });
   onValue(ref(db, 'customers'), (snap)=>{
     customers = toArray(snap.val());
-    if (role) renderAll();
+    if (role) scheduleRenderAll();
   });
   onValue(ref(db, 'zones'), (snap)=>{
     zones = toArray(snap.val());
-    if (role) renderAll();
+    if (role) scheduleRenderAll();
   });
 }
 
@@ -1711,7 +1838,7 @@ document.getElementById('parseLinkBtn').onclick = async ()=>{
 };
 
 /* ================= ACTIONS ================= */
-document.getElementById('saveCustBtn').onclick = async ()=>{
+document.getElementById('saveCustBtn').onclick = withBtnLoading(document.getElementById('saveCustBtn'), async ()=>{
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
   const addr = document.getElementById('custAddr').value.trim();
@@ -1741,9 +1868,9 @@ document.getElementById('saveCustBtn').onclick = async ()=>{
   pendingPinLatLng = null;
   document.getElementById('pendingPinNote').style.display = 'none';
   showToast("Customer added!");
-};
+});
 
-document.getElementById('addBoyBtn').onclick = async ()=>{
+document.getElementById('addBoyBtn').onclick = withBtnLoading(document.getElementById('addBoyBtn'), async ()=>{
   const name = document.getElementById('boyName').value.trim();
   const zone = document.getElementById('boyZone').value;
   if (!name) return;
@@ -1752,9 +1879,9 @@ document.getElementById('addBoyBtn').onclick = async ()=>{
   await set(newRef, { name, zone: zone || null, color, lat:null, lng:null, lastUpdate:null });
   document.getElementById('boyName').value = '';
   showToast("Delivery boy added!");
-};
+});
 
-document.getElementById('addZoneBtn').onclick = async ()=>{
+document.getElementById('addZoneBtn').onclick = withBtnLoading(document.getElementById('addZoneBtn'), async ()=>{
   const name = document.getElementById('zoneName').value.trim();
   const color = document.getElementById('zoneColor').value;
   if (!name) return;
@@ -1762,7 +1889,7 @@ document.getElementById('addZoneBtn').onclick = async ()=>{
   await set(newRef, { name, color });
   document.getElementById('zoneName').value = '';
   showToast("Zone added!");
-};
+});
 
 /* ---------------- Delivery proof photo capture + upload ---------------- */
 let pendingDeliveryCustId = null;
@@ -1809,9 +1936,29 @@ async function uploadDeliveryPhoto(blob, custId){
 }
 
 async function finalizeDelivery(custId, photoUrl){
+  const now = Date.now();
   const updates = { status: 'completed', completedAt: serverTimestamp() };
-  if (photoUrl) { updates.deliveryPhotoUrl = photoUrl; updates.deliveryPhotoAt = Date.now(); }
+  if (photoUrl) { updates.deliveryPhotoUrl = photoUrl; updates.deliveryPhotoAt = now; }
   await update(ref(db, 'customers/' + custId), updates);
+  if (photoUrl){
+    // customers/{id}.deliveryPhotoUrl only ever holds the LATEST photo — it
+    // gets overwritten the next time this same customer is delivered to
+    // (e.g. next month). To let the admin browse every past proof photo by
+    // date/customer/month (photos.html), keep a permanent, append-only log
+    // of every delivery photo here instead of relying on that single field.
+    const c = customers.find(x=>x.id===custId);
+    const boy = myBoyId ? deliveryBoys.find(b=>b.id===myBoyId) : null;
+    const logRef = push(ref(db, 'deliveryPhotos'));
+    await set(logRef, {
+      custId,
+      custName: c ? c.name : '',
+      custAddress: c ? (c.address || '') : '',
+      boyId: myBoyId || null,
+      boyName: boy ? boy.name : '',
+      url: photoUrl,
+      ts: now
+    });
+  }
   showToast(photoUrl ? "Delivered — proof photo saved!" : "Marked as delivered (no photo)");
 }
 
@@ -1833,6 +1980,19 @@ function renderPhotoModal(custId){
   const captureBtn = document.getElementById('photoCaptureBtn');
   const previewImg = document.getElementById('photoPreviewImg');
   const statusEl = document.getElementById('photoStatusEl');
+  const cancelBtn = document.getElementById('photoCancelBtn');
+  const skipBtn = document.getElementById('photoSkipBtn');
+
+  const setStatus = (txt, spinning)=>{
+    statusEl.innerHTML = spinning ? `<span class="rb-spinner dark"></span> ${escapeHtml(txt)}` : escapeHtml(txt);
+    statusEl.classList.add('show');
+  };
+  const setBusy = (busy)=>{
+    cancelBtn.disabled = busy;
+    skipBtn.disabled = busy;
+    cancelBtn.style.opacity = busy ? '.5' : '1';
+    skipBtn.style.opacity = busy ? '.5' : '1';
+  };
 
   captureBtn.onclick = ()=> fileInput.click();
 
@@ -1841,22 +2001,26 @@ function renderPhotoModal(custId){
     if (!file) return;
     previewImg.src = URL.createObjectURL(file);
     previewImg.style.display = 'block';
-    statusEl.textContent = 'Compressing photo…';
-    statusEl.classList.add('show');
     captureBtn.style.pointerEvents = 'none';
     captureBtn.style.opacity = '.5';
+    setBusy(true);
     try{
+      // Compress off the main flow before touching the network, so a big
+      // camera photo never stalls the UI or the upload — this keeps the
+      // whole delivery-photo flow quick even on a weak connection.
+      setStatus('Compressing photo…', true);
       const blob = await compressImageToJpegBlob(file);
-      statusEl.textContent = 'Uploading…';
+      setStatus('Uploading…', true);
       const url = await uploadDeliveryPhoto(blob, custId);
-      statusEl.textContent = 'Uploaded ✓ marking delivered…';
+      setStatus('Uploaded ✓ marking delivered…', true);
       await finalizeDelivery(custId, url);
       closeModal('photoModal');
     }catch(err){
       console.error(err);
-      statusEl.textContent = 'Upload fail ho gaya — internet check karo aur dobara try karo.';
+      setStatus('Upload fail ho gaya — internet check karo aur dobara try karo.', false);
       captureBtn.style.pointerEvents = 'auto';
       captureBtn.style.opacity = '1';
+      setBusy(false);
     }
   };
 
@@ -1872,7 +2036,7 @@ window.markComplete = (id) => {
   renderPhotoModal(id);
   openModal('photoModal');
 };
-window.deliverFromMap = (id) => { infoWindow.close(); markComplete(id); };
+window.deliverFromMap = (id) => { infoWindow.close(); openInfoFor = null; markComplete(id); };
 window.reassignCustomer = async (id, bId) => { await update(ref(db, 'customers/' + id), { assignedTo: bId || null }); };
 window.setCustomerShift = async (id, shift) => { await update(ref(db, 'customers/' + id), { shift: shift==='evening'?'evening':'morning' }); };
 window.deleteCustomer = (id) => confirmAction("Delete customer?", async () => await remove(ref(db, 'customers/' + id)));
