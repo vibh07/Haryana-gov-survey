@@ -47,6 +47,13 @@
 
   .result-count{font-size:12px; color:var(--slate); font-weight:600; margin-bottom:12px;}
 
+  .import-bar{background:#FFF8EE; border:1.5px solid #F5E2B8; border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap; margin-bottom:16px;}
+  .import-title{font-weight:700; font-size:13px; margin-bottom:3px;}
+  .import-sub{font-size:11.5px; color:#7A6A3F; line-height:1.5; max-width:640px;}
+  .btn-import{background:var(--navy); color:white; border:none; border-radius:10px; padding:11px 16px; font-size:12.5px; font-weight:700; white-space:nowrap; min-height:40px; display:flex; align-items:center; gap:8px;}
+  .btn-import:hover{filter:brightness(1.1);}
+  .btn-import:disabled{opacity:.6; pointer-events:none;}
+
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px;}
   .pcard{background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column;}
   .pcard .thumb-wrap{position:relative; width:100%; aspect-ratio:4/3; background:#EFEDE4; overflow:hidden;}
@@ -117,6 +124,14 @@
     </div>
   </div>
 
+  <div id="importBar" class="import-bar" style="display:none;">
+    <div>
+      <div class="import-title">Purani deliveries ki photos yaha nahi dikh rahi?</div>
+      <div class="import-sub">Ye page sirf is update ke baad hui deliveries ki photos apne aap dikhata hai. Pehle se maujood customer records mein jo latest proof photo save hai, use ek baar import karke yahan la sakte ho.</div>
+    </div>
+    <button class="btn-import" id="importBtn">🔄 Import existing photos</button>
+  </div>
+
   <div id="resultCount" class="result-count"></div>
   <div id="loadingState" class="loading-state"><span class="rb-spinner"></span>Loading photos…</div>
   <div id="emptyState" class="empty-state" style="display:none;">No photos match these filters.</div>
@@ -134,7 +149,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getDatabase, ref, onValue, remove
+  getDatabase, ref, onValue, remove, get, push, set
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -180,7 +195,74 @@ onValue(ref(db, 'deliveryPhotos'), (snap)=>{
   document.getElementById('loadingState').style.display = 'none';
   firstLoad = false;
   render();
+  updateImportBarVisibility();
 });
+
+// The photo log (deliveryPhotos) only started being written to from this
+// update onward. Older deliveries still have their one saved photo sitting
+// on customers/{id}.deliveryPhotoUrl (only ever the latest one, since that
+// field gets overwritten on the next delivery) — this one-time import pulls
+// those into the log too, skipping anything already imported.
+function updateImportBarVisibility(){
+  document.getElementById('importBar').style.display = firstLoad ? 'none' : 'flex';
+}
+
+document.getElementById('importBtn').onclick = async ()=>{
+  const btn = document.getElementById('importBtn');
+  const origHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="rb-spinner sm" style="border-color:rgba(255,255,255,.35); border-top-color:#fff;"></span> Importing…';
+  btn.disabled = true;
+  try{
+    const [custSnap, boysSnap] = await Promise.all([
+      get(ref(db, 'customers')),
+      get(ref(db, 'deliveryBoys'))
+    ]);
+    const customersVal = custSnap.val() || {};
+    const boysVal = boysSnap.val() || {};
+    const boyName = (id)=> id && boysVal[id] ? boysVal[id].name : '';
+
+    // Build a set of what's already logged so re-running this never creates duplicates.
+    const already = new Set(allPhotos.map(p => p.custId + '|' + p.url));
+
+    const toImport = Object.keys(customersVal)
+      .map(id => ({ id, ...customersVal[id] }))
+      .filter(c => c.deliveryPhotoUrl && !already.has(c.id + '|' + c.deliveryPhotoUrl));
+
+    if (!toImport.length){
+      showBanner('Kuch bhi naya import karne ko nahi mila — sab already up to date hai.');
+      return;
+    }
+
+    for (const c of toImport){
+      const logRef = push(ref(db, 'deliveryPhotos'));
+      await set(logRef, {
+        custId: c.id,
+        custName: c.name || '',
+        custAddress: c.address || '',
+        boyId: c.assignedTo || null,
+        boyName: boyName(c.assignedTo),
+        url: c.deliveryPhotoUrl,
+        ts: c.deliveryPhotoAt || Date.now(),
+        importedFromCustomerRecord: true
+      });
+    }
+    showBanner(`${toImport.length} purani photo${toImport.length===1?'':'s'} import ho gayi!`);
+  }catch(err){
+    console.error(err);
+    showBanner('Import fail ho gaya — internet check karke dobara try karo.', true);
+  }finally{
+    btn.innerHTML = origHtml;
+    btn.disabled = false;
+  }
+};
+
+function showBanner(msg, isErr){
+  const sub = document.querySelector('#importBar .import-sub');
+  const orig = sub.dataset.orig || (sub.dataset.orig = sub.textContent);
+  sub.textContent = msg;
+  sub.style.color = isErr ? 'var(--danger)' : '#1D9E86';
+  setTimeout(()=>{ sub.textContent = orig; sub.style.color = ''; }, 4000);
+}
 
 function matchesFilters(p){
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
