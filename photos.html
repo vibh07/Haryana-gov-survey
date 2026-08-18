@@ -60,6 +60,39 @@
   .stat-card.accent::after{background:var(--orange);}
   .stat-card.mint::after{background:var(--mint);}
 
+  /* ---------- storage tracker ---------- */
+  .storage-card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); border:1px solid var(--line); padding:13px 15px; margin-bottom:12px;}
+  .storage-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px;}
+  .storage-title{font-weight:700; font-size:13px;}
+  .storage-figures{font-family:'JetBrains Mono'; font-size:12px; color:var(--slate); font-weight:600;}
+  .storage-figures b{color:var(--navy);}
+  .storage-bar{width:100%; height:9px; border-radius:20px; background:#EFEDE2; overflow:hidden;}
+  .storage-bar-fill{height:100%; border-radius:20px; background:linear-gradient(90deg,var(--mint),var(--mint-dark)); width:0%; transition:width .4s ease, background .3s ease;}
+  .storage-bar-fill.warn{background:linear-gradient(90deg,var(--morning),#E68A1E);}
+  .storage-bar-fill.danger{background:linear-gradient(90deg,var(--danger),#D93247);}
+  .storage-sub{font-size:11px; color:var(--slate); margin-top:7px; line-height:1.5;}
+  .storage-sub b{color:var(--navy);}
+
+  /* ---------- bulk select / delete / share ---------- */
+  .bulk-bar{background:var(--navy); color:#fff; border-radius:var(--radius); padding:11px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; box-shadow:var(--shadow-md);}
+  .bulk-left{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .bulk-selectall{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; cursor:pointer;}
+  .bulk-selectall input{width:16px; height:16px; accent-color:var(--orange);}
+  .bulk-count{font-size:12px; color:var(--slate-light); font-weight:600;}
+  .bulk-right{display:flex; gap:8px; flex-wrap:wrap;}
+  .bulk-right .btn-import{padding:9px 13px; font-size:11.5px; min-height:38px;}
+  .bulk-right .clear-btn{color:#fff; border-color:#3A4666; min-height:38px; padding:9px 13px;}
+  .bulk-right .clear-btn:hover{border-color:#fff; background:rgba(255,255,255,.06);}
+  .filters-toggle.on-select{background:var(--mint-dark); border-color:var(--mint-dark); color:#fff;}
+
+  .pcard .card-chk{position:absolute; top:7px; right:7px; width:22px; height:22px; border-radius:7px; accent-color:var(--orange); z-index:5; display:none; box-shadow:0 2px 6px rgba(0,0,0,.35);}
+  body.select-mode .pcard .card-chk{display:block;}
+  body.select-mode .pcard .new-chip{display:none;}
+  body.select-mode .pcard.is-selected{outline:2.5px solid var(--orange); outline-offset:-2.5px;}
+  .pcard .row-btns.three button, .pcard .row-btns.three a{flex:1 1 0; font-size:10px; padding:9px 3px;}
+  .pcard .share-btn{background:#EAFBF5; color:var(--mint-dark); border:1px solid #BFEEDF !important;}
+  .pcard .share-btn:hover{background:#D9F6EC;}
+
   /* ---------- search + filters ---------- */
   .search-shell{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-sm); border:1px solid var(--line); margin-bottom:12px; overflow:hidden;}
   .search-row{display:flex; align-items:center; gap:8px; padding:10px;}
@@ -213,6 +246,15 @@
     <div class="stat-card"><span class="ic">🛵</span><div class="n" id="statBoys">—</div><div class="l">Delivery boys</div></div>
   </div>
 
+  <div class="storage-card" id="storageCard">
+    <div class="storage-top">
+      <div class="storage-title">💾 Storage</div>
+      <div class="storage-figures" id="storageFigures">—</div>
+    </div>
+    <div class="storage-bar"><div class="storage-bar-fill" id="storageBarFill"></div></div>
+    <div class="storage-sub" id="storageSub">Calculating…</div>
+  </div>
+
   <div class="search-shell">
     <div class="search-row">
       <div class="search-input-wrap">
@@ -222,6 +264,7 @@
       <button type="button" class="filters-toggle" id="filtersToggleBtn">
         ⚙️ Filters <span class="active-badge" id="activeBadge">0</span><span class="chev">▾</span>
       </button>
+      <button type="button" class="filters-toggle" id="selectModeBtn">☑️ Select</button>
     </div>
     <div class="filters-panel" id="filtersPanel">
       <div class="filters-panel-inner">
@@ -265,7 +308,21 @@
 
   <div class="result-bar">
     <div id="resultCount" class="result-count"></div>
-    <div class="sort-hint">↓ Newest first</div>
+    <div class="sort-hint" id="sortHint">↓ Newest first</div>
+  </div>
+
+  <div class="bulk-bar" id="bulkBar" style="display:none;">
+    <div class="bulk-left">
+      <label class="bulk-selectall">
+        <input type="checkbox" id="selectAllChk"> Select all filtered
+      </label>
+      <span class="bulk-count" id="bulkCount">0 selected</span>
+    </div>
+    <div class="bulk-right">
+      <button class="btn-import" id="bulkShareBtn" style="background:var(--mint-dark);">📤 Share</button>
+      <button class="btn-import" id="bulkDeleteBtn" style="background:var(--danger);">🗑 Delete selected</button>
+      <button class="clear-btn" id="bulkCancelBtn">✕ Cancel</button>
+    </div>
   </div>
   <div id="loadingState" class="loading-state"><span class="rb-spinner"></span>Loading photos…</div>
   <div id="emptyState" class="empty-state" style="display:none;"><span class="ico">🗂️</span>No photos match these filters.<div class="sub">Try clearing a filter or searching a different term.</div></div>
@@ -348,6 +405,156 @@ let firstLoad = true;
 let knownIds = new Set();  // ids we've already rendered once (to detect genuinely new realtime arrivals)
 let visibleLimit = PAGE_SIZE;
 
+// ---------- storage tracker ----------
+// Cloudinary's free plan doesn't expose a safe, browser-callable "how much
+// storage have I used" endpoint (that needs the API secret, server-side
+// only). Instead we track the size of every photo *this app* uploads
+// (Cloudinary returns the byte size on upload — see uploadDeliveryPhoto()
+// in index.html) and sum that. It's an accurate live total of everything
+// logged here; it just won't include files uploaded outside this app.
+const STORAGE_LIMIT_BYTES = 25 * 1024 * 1024 * 1024; // 25 GB — Cloudinary free-plan storage. Change if your plan differs.
+function fmtBytes(n){
+  if (!n || n <= 0) return '0 MB';
+  const mb = n / (1024*1024);
+  if (mb < 1024) return mb.toFixed(mb < 10 ? 2 : 1) + ' MB';
+  return (mb/1024).toFixed(2) + ' GB';
+}
+function updateStorageStats(){
+  const tracked = allPhotos.filter(p => typeof p.bytes === 'number' && p.bytes > 0);
+  const usedBytes = tracked.reduce((sum,p)=> sum + p.bytes, 0);
+  const pct = Math.min(100, (usedBytes / STORAGE_LIMIT_BYTES) * 100);
+  const fill = document.getElementById('storageBarFill');
+  fill.style.width = pct.toFixed(1) + '%';
+  fill.classList.toggle('warn', pct >= 70 && pct < 90);
+  fill.classList.toggle('danger', pct >= 90);
+  document.getElementById('storageFigures').innerHTML = `<b>${fmtBytes(usedBytes)}</b> / ${fmtBytes(STORAGE_LIMIT_BYTES)}`;
+  const untracked = allPhotos.length - tracked.length;
+  const pendingBytes = Math.max(0, STORAGE_LIMIT_BYTES - usedBytes);
+  document.getElementById('storageSub').innerHTML =
+    `<b>${pct.toFixed(1)}%</b> filled · <b>${fmtBytes(pendingBytes)}</b> free/pending` +
+    (untracked > 0 ? ` · ${untracked} older photo${untracked===1?'':'s'} not counted (uploaded before size tracking)` : '');
+}
+
+// ---------- select / bulk delete / share ----------
+let selectMode = false;
+const selectedIds = new Set();
+const bulkBar = document.getElementById('bulkBar');
+const selectModeBtn = document.getElementById('selectModeBtn');
+
+function toggleSelect(id, forceState){
+  const on = forceState !== undefined ? forceState : !selectedIds.has(id);
+  if (on) selectedIds.add(id); else selectedIds.delete(id);
+  const card = document.querySelector(`.pcard[data-id="${id}"]`);
+  if (card) card.classList.toggle('is-selected', on);
+  updateBulkBar();
+}
+
+function updateBulkBar(){
+  document.getElementById('bulkCount').textContent = `${selectedIds.size} selected`;
+  const allChk = document.getElementById('selectAllChk');
+  const filtered = allPhotos.filter(matchesFilters).slice(0, visibleLimit);
+  allChk.checked = filtered.length > 0 && filtered.every(p => selectedIds.has(p.id));
+}
+
+function setSelectMode(on){
+  selectMode = on;
+  document.body.classList.toggle('select-mode', on);
+  selectModeBtn.classList.toggle('on-select', on);
+  selectModeBtn.textContent = on ? '✕ Cancel select' : '☑️ Select';
+  bulkBar.style.display = on ? 'flex' : 'none';
+  if (!on){ selectedIds.clear(); document.getElementById('selectAllChk').checked = false; }
+  updateBulkBar();
+}
+selectModeBtn.onclick = ()=> setSelectMode(!selectMode);
+document.getElementById('bulkCancelBtn').onclick = ()=> setSelectMode(false);
+
+document.getElementById('selectAllChk').onchange = (e)=>{
+  const filtered = allPhotos.filter(matchesFilters).slice(0, visibleLimit);
+  filtered.forEach(p => toggleSelect(p.id, e.target.checked));
+  render();
+};
+
+document.getElementById('bulkDeleteBtn').onclick = async ()=>{
+  if (!selectedIds.size) return;
+  if (!confirm(`Delete ${selectedIds.size} selected photo record(s)? This cannot be undone.`)) return;
+  const btn = document.getElementById('bulkDeleteBtn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="rb-spinner sm"></span> Deleting…';
+  btn.disabled = true;
+  const ids = [...selectedIds];
+  try{
+    // Fire all deletes in parallel — much faster than one-by-one for a
+    // large selection, and Firebase handles concurrent writes fine.
+    await Promise.all(ids.map(id => remove(ref(db, 'deliveryPhotos/' + id))));
+    showToast(`🗑 Deleted ${ids.length} photo${ids.length===1?'':'s'}`);
+    setSelectMode(false);
+  }catch(err){
+    console.error(err);
+    alert('Some deletes failed — check your internet connection and try again.');
+  }finally{
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
+};
+
+// Share one photo — tries to hand over the actual image file (so apps like
+// WhatsApp attach the photo itself, not just a link), and falls back to
+// sharing the URL, and finally to copying the link if navigator.share isn't
+// available at all (most desktop browsers).
+async function sharePhoto(p, btn){
+  const orig = btn ? btn.innerHTML : null;
+  if (btn){ btn.innerHTML = '<span class="rb-spinner sm"></span>'; btn.disabled = true; }
+  try{
+    const shareText = `${p.custName || 'Customer'} — delivery proof photo (${fmtDateTime(p.ts)})`;
+    let shared = false;
+    if (navigator.canShare){
+      try{
+        const res = await fetch(p.url);
+        const blob = await res.blob();
+        const file = new File([blob], 'delivery_proof.jpg', { type: blob.type || 'image/jpeg' });
+        if (navigator.canShare({ files: [file] })){
+          await navigator.share({ files: [file], title: 'Delivery proof photo', text: shareText });
+          shared = true;
+        }
+      }catch(e){ /* fall through to link share below */ }
+    }
+    if (!shared && navigator.share){
+      await navigator.share({ title: 'Delivery proof photo', text: shareText, url: p.url });
+      shared = true;
+    }
+    if (!shared){
+      await navigator.clipboard.writeText(p.url);
+      showToast('Sharing not supported here — link copied instead!');
+    }
+  }catch(err){
+    if (err && err.name === 'AbortError') { /* user cancelled the share sheet — no error toast */ }
+    else { console.error(err); showToast('Could not share this photo.'); }
+  }finally{
+    if (btn){ btn.innerHTML = orig; btn.disabled = false; }
+  }
+}
+
+// Bulk share: most browsers' Web Share API only accepts one file well, so
+// for multiple selected photos we share a text list of links instead
+// (works everywhere, including desktop, via clipboard fallback).
+document.getElementById('bulkShareBtn').onclick = async ()=>{
+  if (!selectedIds.size) return;
+  const photos = allPhotos.filter(p => selectedIds.has(p.id));
+  if (photos.length === 1){ sharePhoto(photos[0]); return; }
+  const text = `${photos.length} delivery proof photos:\n` +
+    photos.map(p => `• ${p.custName || 'Customer'} (${fmtDate(p.ts)}): ${p.url}`).join('\n');
+  try{
+    if (navigator.share){
+      await navigator.share({ title: `${photos.length} delivery photos`, text });
+    } else {
+      await navigator.clipboard.writeText(text);
+      showToast('Links copied to clipboard!');
+    }
+  }catch(err){
+    if (!(err && err.name === 'AbortError')) console.error(err);
+  }
+};
+
 onValue(ref(db, 'deliveryPhotos'), (snap)=>{
   const val = snap.val() || {};
   const fresh = Object.keys(val).map(id => ({ id, ...val[id] })).sort((a,b) => (b.ts||0) - (a.ts||0));
@@ -369,6 +576,7 @@ onValue(ref(db, 'deliveryPhotos'), (snap)=>{
   firstLoad = false;
   populateFilterOptions();
   updateStats();
+  updateStorageStats();
   render();
   updateImportBarVisibility();
 });
@@ -564,8 +772,9 @@ function render(){
   // Lazy-loaded images + a lightweight skeleton per card keep this smooth
   // even with a large photo history — nothing blocks the main thread.
   grid.innerHTML = slice.map(p => `
-    <div class="pcard ${recentlyAdded.has(p.id) ? 'is-new' : ''}" data-id="${p.id}">
+    <div class="pcard ${recentlyAdded.has(p.id) ? 'is-new' : ''} ${selectedIds.has(p.id) ? 'is-selected' : ''}" data-id="${p.id}">
       <div class="thumb-wrap">
+        <input type="checkbox" class="card-chk" data-chk="${p.id}" ${selectedIds.has(p.id) ? 'checked' : ''}>
         <div class="img-skel"><span class="rb-spinner sm"></span></div>
         <img src="${escapeHtml(p.url)}" loading="lazy" onload="this.classList.add('loaded')" data-open="${p.id}">
         <div class="grad"></div>
@@ -579,9 +788,10 @@ function render(){
           <span>By <b>${escapeHtml(p.boyName || 'Unknown')}</b></span>
           <span class="date-full">${fmtDate(p.ts)} · ${fmtTime(p.ts)}</span>
         </div>
-        <div class="row-btns">
-          <a href="${escapeHtml(p.url)}" target="_blank" class="open-btn">🔍 Full size</a>
-          <button class="del-btn" data-del="${p.id}">🗑 Delete</button>
+        <div class="row-btns three">
+          <a href="${escapeHtml(p.url)}" target="_blank" class="open-btn">🔍 Full</a>
+          <button class="share-btn" data-share="${p.id}">📤 Share</button>
+          <button class="del-btn" data-del="${p.id}">🗑</button>
         </div>
       </div>
     </div>
@@ -591,6 +801,7 @@ function render(){
     img.onclick = ()=>{
       const p = filtered.find(x=>x.id===img.dataset.open);
       if (!p) return;
+      if (selectMode){ toggleSelect(p.id); return; }
       document.getElementById('lbImg').src = p.url;
       document.getElementById('lbCap').textContent = `${p.custName || 'Unknown customer'} · delivered by ${p.boyName || 'Unknown'}`;
       document.getElementById('lbTime').textContent = `🕒 ${fmtDateTime(p.ts)}`;
@@ -598,8 +809,20 @@ function render(){
     };
   });
 
+  grid.querySelectorAll('input[data-chk]').forEach(chk=>{
+    chk.onclick = (e)=> e.stopPropagation();
+    chk.onchange = ()=> toggleSelect(chk.dataset.chk, chk.checked);
+  });
+
   grid.querySelectorAll('button[data-del]').forEach(btn=>{
     btn.onclick = ()=> deletePhoto(btn.dataset.del, btn);
+  });
+
+  grid.querySelectorAll('button[data-share]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const p = filtered.find(x=>x.id===btn.dataset.share);
+      if (p) sharePhoto(p, btn);
+    };
   });
 
   // pagination controls
@@ -617,6 +840,7 @@ function render(){
       document.getElementById('loadMoreBtn').style.display = '';
     }
   }
+  if (selectMode) updateBulkBar();
 }
 
 document.getElementById('loadMoreBtn').onclick = ()=>{
