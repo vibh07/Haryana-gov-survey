@@ -197,6 +197,13 @@ img{display:block; max-width:100%;}
 #footer .fl-copy{font-size:10px; color:var(--ink-mute);}
 
 /* ---- category page ---- */
+/* #tab-category needs a real (non-auto) height so .cat-layout's
+   height:100% below actually resolves. Without this, the sidebar and the
+   product grid just grow to their natural content height side by side and
+   the WHOLE category tab scrolls together as one long page inside
+   #mainScroll — instead of the sidebar staying put while only the product
+   grid underneath it scrolls. */
+#tab-category.active{height:100%; overflow:hidden;}
 .cat-layout{display:flex; gap:0; margin:-14px; height:calc(100% + 14px);}
 .cat-sidebar{width:92px; flex-shrink:0; background:var(--paper); overflow-y:auto; padding:10px 0 40px;}
 .cat-item{display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 4px; cursor:pointer; position:relative; border-left:3px solid transparent;}
@@ -617,26 +624,52 @@ img{display:block; max-width:100%;}
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getDatabase, ref, get, set, update, push, query, orderByChild, equalTo, onValue
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+/* ================= FIREBASE (loaded in the background) =================
+   These two SDK files used to be loaded with a static import at the very
+   top of this script. That meant the browser held off running ANY code
+   below it — including the click handlers for every button on the page —
+   until both files had finished downloading. On a slow connection that
+   could take several seconds, during which the login textbox, the
+   Continue button, tabs, add-to-cart — everything — looked frozen.
+   Loading them dynamically instead lets the rest of the app (browsing,
+   cart, categories, tabs) become interactive immediately. Only the
+   specific actions that truly need the database (checking a phone
+   number, placing an order, syncing the profile) wait on
+   `firebaseReady`, and only for as long as they actually need to — with
+   a timeout so a bad connection shows a clear message instead of a
+   button stuck forever. */
+let db, ref, get, set, update, push, query, orderByChild, equalTo, onValue;
+const firebaseReady = (async ()=>{
+  const [{ initializeApp }, dbMod] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js")
+  ]);
+  ({ ref, get, set, update, push, query, orderByChild, equalTo, onValue } = dbMod);
+  // Same Firebase project used by deliverychart.html (RouteBoy) — this is
+  // the "existing database" that already holds customers/scheduling data,
+  // so orders placed here show up directly in that chart.
+  const firebaseConfig = {
+    apiKey: "AIzaSyA4q2qD7K7o5yN5v9H9jSIvWsTPWlAvurY",
+    authDomain: "delivry-tracking-system.firebaseapp.com",
+    databaseURL: "https://delivry-tracking-system-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "delivry-tracking-system",
+    storageBucket: "delivry-tracking-system.firebasestorage.app",
+    messagingSenderId: "181704924735",
+    appId: "1:181704924735:web:7c57448137e91b745ca28a",
+    measurementId: "G-43WG6FFZVC"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  db = dbMod.getDatabase(fbApp);
+})();
 
-/* Same Firebase project used by deliverychart.html (RouteBoy) — this is the
-   "existing database" that already holds customers/scheduling data, so
-   orders placed here show up directly in that chart. */
-const firebaseConfig = {
-  apiKey: "AIzaSyA4q2qD7K7o5yN5v9H9jSIvWsTPWlAvurY",
-  authDomain: "delivry-tracking-system.firebaseapp.com",
-  databaseURL: "https://delivry-tracking-system-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "delivry-tracking-system",
-  storageBucket: "delivry-tracking-system.firebasestorage.app",
-  messagingSenderId: "181704924735",
-  appId: "1:181704924735:web:7c57448137e91b745ca28a",
-  measurementId: "G-43WG6FFZVC"
-};
-const fbApp = initializeApp(firebaseConfig);
-const db = getDatabase(fbApp);
+/* Rejects with a friendly error if a Firebase call takes longer than `ms` —
+   used around login/order actions so the button re-enables and the person
+   can retry instead of waiting forever on a bad connection. */
+function withTimeout(promise, ms, message){
+  let timer;
+  const timeout = new Promise((_, reject)=>{ timer = setTimeout(()=> reject(new Error(message||'timeout')), ms); });
+  return Promise.race([promise, timeout]).finally(()=> clearTimeout(timer));
+}
 
 // Maps customer-app products onto the 6 fixed products the delivery chart
 // tracks day-to-day. Anything not in this map still reaches the chart —
@@ -657,7 +690,7 @@ const CATEGORIES = [
 const catMap = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
 
 const PRODUCTS = [
-  {id:'p1', name:'Full Cream Milk', cat:'dairy', unit:'500 ml Pouch', price:34, mrp:38, emoji:'🥛', tag:'Bestseller', popular:true, desc:'Farm-fresh full-cream cow milk, delivered daily straight from our godham. Rich, creamy and pasteurised for complete purity — no water, no preservatives.'},
+  {id:'p1', name:'A2 Gir Gau Milk', cat:'dairy', unit:'500 ml ', price:34, mrp:38, emoji:'🥛', tag:'Bestseller', popular:true, desc:'Farm-fresh full-cream cow milk, delivered daily straight from our godham. Rich, creamy and pasteurised for complete purity — no water, no preservatives.'},
   {id:'p2', name:'Toned Milk', cat:'dairy', unit:'500 ml Pouch', price:28, mrp:31, emoji:'🥛', popular:true, desc:'Light and easy-to-digest toned milk, perfect for everyday tea and cooking. Sourced fresh every morning from local farmers.'},
   {id:'p3', name:'Fresh Paneer', cat:'dairy', unit:'200 g Block', price:90, mrp:100, emoji:'🧀', tag:'Fresh', popular:true, desc:'Soft, spongy paneer made fresh daily using traditional methods. High in protein, perfect for your favourite sabzi or paratha.'},
   {id:'p4', name:'Curd (Dahi)', cat:'dairy', unit:'400 g Tub', price:45, mrp:50, emoji:'🥣', popular:true, desc:'Thick, set curd made from pure cow milk — probiotic-rich and naturally fermented for a smooth, tangy taste.'},
@@ -685,11 +718,14 @@ function tileOf(p){ return 'tile-'+p.cat; }
 
 /* Live map of deliveryBoys/{id} -> {name,...}, kept in sync so the profile
    sheet can always show the current assigned partner's name, even if admin
-   reassigns or renames a delivery boy after this app was loaded. */
+   reassigns or renames a delivery boy after this app was loaded. Wired up
+   once Firebase is ready rather than blocking on it. */
 let deliveryBoysMap = {};
-onValue(ref(db,'deliveryBoys'), snap=>{
-  deliveryBoysMap = snap.val() || {};
-  if (customer && customer.id && $('#profileSheetOverlay') && $('#profileSheetOverlay').classList.contains('show')) openProfileSheet();
+firebaseReady.then(()=>{
+  onValue(ref(db,'deliveryBoys'), snap=>{
+    deliveryBoysMap = snap.val() || {};
+    if (customer && customer.id && $('#profileSheetOverlay') && $('#profileSheetOverlay').classList.contains('show')) openProfileSheet();
+  });
 });
 function partnerNameFor(assignedTo){
   if (!assignedTo || !deliveryBoysMap[assignedTo]) return null;
@@ -702,6 +738,7 @@ function defaultShiftNow(){ return new Date().getHours() < 16 ? 'morning' : 'eve
    ".indexOn" rule on some DB rule setups) so login/sync never silently break
    because of an index/permission quirk. Returns {key, rec} or null. */
 async function findCustomerByPhone(phone){
+  await firebaseReady;
   try{
     const q = query(ref(db,'customers'), orderByChild('phone'), equalTo(phone));
     const snap = await get(q);
@@ -758,9 +795,10 @@ function saveCustomer(){ localStorage.setItem('ag_customer', JSON.stringify(cust
    reassigns the delivery partner, this app reflects it without a re-login.
    Also detects the record being deleted by admin and logs the app out. */
 let custListenerAttachedFor = null;
-function attachCustomerListener(id){
+async function attachCustomerListener(id){
   if (!id || custListenerAttachedFor === id) return;
   custListenerAttachedFor = id;
+  await firebaseReady;
   onValue(ref(db, 'customers/'+id), snap=>{
     if (!snap.exists()){
       customer = null; saveCustomer(); custListenerAttachedFor = null;
@@ -1204,7 +1242,7 @@ $('#loginCheckBtn').addEventListener('click', async ()=>{
   const btn = $('#loginCheckBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
   try{
-    const match = await findCustomerByPhone(phone);
+    const match = await withTimeout(findCustomerByPhone(phone), 15000, 'server se response nahi mila');
     $('#loginExtraFields').style.display = 'block';
     if (match){
       matchedCustomerKey = match.key;
@@ -1246,8 +1284,8 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
   const rec = { name, phone, address };
   let custKey = null, full = null;
   try{
-    custKey = await upsertCustomerInFirebase(rec, matchedCustomerKey);
-    const snap = await get(ref(db,'customers/'+custKey));
+    custKey = await withTimeout(upsertCustomerInFirebase(rec, matchedCustomerKey), 15000, 'timeout');
+    const snap = await withTimeout(get(ref(db,'customers/'+custKey)), 15000, 'timeout');
     full = snap.val() || rec;
   } catch(e){
     console.error(e);
@@ -1281,6 +1319,7 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
 });
 
 async function upsertCustomerInFirebase(rec, existingKey){
+  await firebaseReady;
   if (existingKey){
     await update(ref(db,'customers/'+existingKey), { name:rec.name, phone:rec.phone, address:rec.address });
     return existingKey;
@@ -1323,6 +1362,7 @@ async function finalizeOrder(cust){
 }
 
 async function syncOrderToChart(cust, order){
+  await firebaseReady;
   let custKey = cust.id || matchedCustomerKey;
   if (!custKey){
     const match = await findCustomerByPhone(cust.phone);
@@ -1396,6 +1436,7 @@ async function adjustChartQty(order, item, dateStr, stopping){
   if (!custKey || !key) return;
   const path = `customers/${custKey}/overrides/${dateStr}`;
   try{
+    await firebaseReady;
     const snap = await get(ref(db, path));
     const existing = snap.val() || {};
     const cur = existing[key] || 0;
@@ -1427,6 +1468,7 @@ async function removeOrderNoteFromChart(order, dateStr){
   if (!custKey) return;
   const path = `customers/${custKey}/overrides/${dateStr}`;
   try{
+    await firebaseReady;
     const snap = await get(ref(db, path));
     const existing = snap.val() || {};
     if (!existing.note) return;
@@ -1698,10 +1740,10 @@ async function resumeSession(){
       }
     } catch(e){ console.error('session resume lookup failed', e); }
   }
-  // Nobody logged in yet — invite them to log in so orders/profile/partner
-  // details can actually be fetched. Browsing still works; the ✕ lets them
-  // dismiss and log in later from the profile tab or at checkout.
-  setTimeout(()=> openCheckoutSheet('login'), 450);
+  // Nobody logged in yet — that's fine, browsing doesn't need an account.
+  // Login is only asked for right when it's actually needed: placeOrderBtn
+  // and profileBtn already call openCheckoutSheet() themselves when there's
+  // no customer, so there's nothing to force here.
 }
 
 (function boot(){
