@@ -3,90 +3,137 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#FF6A3D">
+<script>
+/* Real viewport-height fix: mobile browsers (esp. Android) resize the
+   visual viewport when the keyboard opens/closes or the address bar
+   hides, but layout units like 100vh/100dvh don't always repaint their
+   consumers immediately — this is what causes buttons/inputs to become
+   briefly "dead" (unresponsive to taps) until a scroll forces a reflow.
+   We track the real height ourselves and push it into a CSS var on every
+   viewport change, so the shell always matches what's actually visible. */
+(function(){
+  function setVH(){
+    var vv = window.visualViewport;
+    var h = vv ? vv.height : window.innerHeight;
+    document.documentElement.style.setProperty('--vh', (h*0.01)+'px');
+  }
+  setVH();
+  window.addEventListener('resize', setVH);
+  window.addEventListener('orientationchange', setVH);
+  if (window.visualViewport){
+    window.visualViewport.addEventListener('resize', setVH);
+    window.visualViewport.addEventListener('scroll', setVH);
+  }
+})();
+</script>
+<meta name="theme-color" content="#C2410C">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Anadi Godham">
 <title>Anadi Godham — Farm Fresh, Daily Delivered</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --cream:#FBF7EF; --paper:#F5EFE2; --card:#FFFFFF; --card-2:#FAF5EA;
-  --ink:#221A12; --ink-soft:#71675A; --ink-mute:#A99E8D;
-  --line:#ECE2CE;
-  --saffron:#FF6A3D; --saffron-dark:#E14F22; --saffron-light:#FFE6D9;
-  --leaf:#1E8A5C; --leaf-dark:#166B47; --leaf-light:#E1F5EA;
-  --gold:#E8A227; --gold-light:#FCEED4;
-  --plum:#8A4FBF; --plum-light:#F1E6FA;
-  --navy:#1B2030; --navy-2:#262C42;
-  --danger:#E14C5B; --danger-light:#FDE7E9;
-  --grad-brand:linear-gradient(135deg,#FF8A54 0%,#FF5A6E 100%);
-  --grad-leaf:linear-gradient(135deg,#2CB279 0%,#14805A 100%);
-  --grad-gold:linear-gradient(135deg,#F7C15A 0%,#E08A28 100%);
-  --grad-plum:linear-gradient(135deg,#B07AE0 0%,#7A45B8 100%);
-  --grad-navy:linear-gradient(120deg,#171B2B 0%,#262C46 55%,#3A2A52 100%);
+  --cream:#FBF6EC; --paper:#F3EAD8; --card:#FFFFFF; --card-2:#F7F0E3;
+  --ink:#241A12; --ink-soft:#6E6154; --ink-mute:#A89A87;
+  --line:#EBE0CB;
+  --saffron:#D9860A; --saffron-dark:#B36A05; --saffron-light:#FBE8C6;
+  --leaf:#1F6E5C; --leaf-dark:#154F42; --leaf-light:#DCF0EA;
+  --gold:#E3A008; --gold-light:#FBEBC7;
+  --plum:#7A3FA8; --plum-light:#EFE2F8;
+  --navy:#211334; --navy-2:#331F4E;
+  --danger:#C1443B; --danger-light:#FBE4E1;
+  --grad-brand:linear-gradient(135deg,#F0B429 0%,#C2410C 100%);
+  --grad-leaf:linear-gradient(135deg,#2C8F73 0%,#154F42 100%);
+  --grad-gold:linear-gradient(135deg,#F3C55D 0%,#C97A1B 100%);
+  --grad-plum:linear-gradient(135deg,#9B63C9 0%,#5F2E8C 100%);
+  --grad-navy:linear-gradient(155deg,#180F26 0%,#2B1B42 55%,#472759 100%);
   --tile-dairy:linear-gradient(150deg,#EAF3FF 0%,#DCEBFF 60%,#CFE3FF 100%);
-  --tile-pooja:linear-gradient(150deg,#FFF3DC 0%,#FCE7BC 60%,#F8D999 100%);
-  --tile-gift:linear-gradient(150deg,#F6E9FF 0%,#EAD5FB 60%,#DEC2F5 100%);
-  --tile-breakfast:linear-gradient(150deg,#FFEADC 0%,#FFDCC2 60%,#FFCBA6 100%);
-  --radius-sm:10px; --radius:16px; --radius-lg:22px; --radius-xl:28px; --radius-full:999px;
-  --shadow-sm:0 2px 10px rgba(34,22,10,.07);
-  --shadow-md:0 10px 26px rgba(34,22,10,.10);
-  --shadow-lg:0 24px 56px rgba(20,12,6,.24);
+  --tile-pooja:linear-gradient(150deg,#FFF3DC 0%,#FCE4B3 60%,#F7CD7C 100%);
+  --tile-gift:linear-gradient(150deg,#F5E9FB 0%,#E9D4F5 60%,#D9B9EE 100%);
+  --tile-breakfast:linear-gradient(150deg,#FFEADC 0%,#FDD8BC 60%,#F8BE93 100%);
+  --radius-sm:10px; --radius:16px; --radius-lg:20px; --radius-xl:26px; --radius-full:999px;
+  --shadow-sm:0 1px 2px rgba(36,26,18,.05), 0 3px 10px rgba(36,26,18,.06);
+  --shadow-md:0 4px 12px rgba(36,26,18,.06), 0 14px 32px rgba(36,26,18,.09);
+  --shadow-lg:0 20px 48px rgba(20,12,8,.24);
   --ease:cubic-bezier(.22,.8,.36,1);
   --safe-t:env(safe-area-inset-top,0px);
   --safe-b:env(safe-area-inset-bottom,0px);
   --nav-h:64px;
+  --vh:1vh;
 }
-*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; touch-action:manipulation;}
+html,body{height:100%; overscroll-behavior:none;}
 body{font-family:'Inter',sans-serif; background:var(--cream); color:var(--ink); font-size:14.5px; -webkit-font-smoothing:antialiased; overflow:hidden;}
-h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif; letter-spacing:-.01em;}
+h1,h2,h3,.display{font-family:'Fraunces',serif; letter-spacing:-.008em; font-optical-sizing:auto;}
 .mono{font-family:'JetBrains Mono',monospace;}
-button{font-family:inherit;}
-input,textarea,select{font-family:inherit;}
+button{font-family:inherit; touch-action:manipulation;}
+input,textarea,select{font-family:inherit; touch-action:manipulation;}
 img{display:block; max-width:100%;}
 ::-webkit-scrollbar{width:0; height:0;}
 :focus-visible{outline:2px solid var(--saffron); outline-offset:2px; border-radius:6px;}
 
-#shell{max-width:460px; margin:0 auto; height:100vh; height:100dvh; position:relative; background:var(--cream); box-shadow:0 0 60px rgba(0,0,0,.08); overflow:hidden;}
+/* height uses the JS-measured real viewport (falls back to dvh/vh if JS
+   hasn't run yet) so the whole shell never sits taller than what's
+   actually visible — this is what stops touches from landing on the
+   wrong place after the keyboard or address bar shows/hides. */
+#shell{max-width:460px; margin:0 auto; height:100vh; height:100dvh; height:calc(var(--vh, 1vh) * 100); position:relative; background:var(--cream); box-shadow:0 0 60px rgba(0,0,0,.08); overflow:hidden;}
 @media(min-width:461px){ body{background:#E7E1D2;} }
+
+/* ============ APP PRELOADER ============ */
+#appPreloader{position:fixed; inset:0; z-index:9999; background:var(--grad-navy); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; transition:opacity .45s var(--ease), visibility .45s var(--ease);}
+#appPreloader.hide{opacity:0; visibility:hidden; pointer-events:none;}
+#appPreloader .pl-logo{width:64px; height:64px; border-radius:20px; background:var(--grad-brand); display:flex; align-items:center; justify-content:center; box-shadow:0 14px 34px rgba(194,65,12,.38); animation:plPulse 1.6s var(--ease) infinite;}
+#appPreloader .pl-logo span{font-family:'Fraunces'; font-weight:800; font-size:26px; color:#fff;}
+@keyframes plPulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.06);}}
+#appPreloader .pl-track{width:120px; height:3px; border-radius:99px; background:rgba(255,255,255,.14); overflow:hidden;}
+#appPreloader .pl-bar{width:40%; height:100%; border-radius:99px; background:var(--grad-brand); animation:plSlide 1.1s ease-in-out infinite;}
+@keyframes plSlide{0%{transform:translateX(-110%);} 100%{transform:translateX(340%);}}
+#appPreloader .pl-txt{font-family:'Fraunces'; font-weight:700; font-size:12.5px; color:#C7BEDC; letter-spacing:.02em;}
+
+/* skeleton shimmer, used for anything loading in place */
+.skeleton{position:relative; overflow:hidden; background:var(--card-2);}
+.skeleton::after{content:''; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); animation:shimmer 1.3s ease-in-out infinite;}
+@keyframes shimmer{100%{transform:translateX(100%);}}
 
 /* ============ LOGIN ============ */
 #loginScreen{position:absolute; inset:0; background:var(--grad-navy); z-index:3000; display:none; flex-direction:column; overflow:hidden;}
 #loginScreen.show{display:flex;}
-#loginScreen::before{content:'';position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,138,84,.35),transparent 70%);top:-140px;right:-120px;filter:blur(6px);}
-#loginScreen::after{content:'';position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(138,79,191,.3),transparent 70%);bottom:-140px;left:-120px;filter:blur(6px);}
-.login-scroll{position:relative; flex:1; overflow-y:auto; display:flex; flex-direction:column; justify-content:center; padding:24px; padding-top:calc(24px + var(--safe-t)); padding-bottom:calc(24px + var(--safe-b));}
+#loginScreen::before{content:'';position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(227,160,8,.26),transparent 68%);top:-140px;right:-120px;pointer-events:none;}
+#loginScreen::after{content:'';position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(44,143,115,.28),transparent 68%);bottom:-140px;left:-120px;pointer-events:none;}
+.login-scroll{position:relative; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; justify-content:center; padding:24px; padding-top:calc(24px + var(--safe-t)); padding-bottom:calc(24px + var(--safe-b));}
 .login-brand{display:flex; align-items:center; gap:11px; justify-content:center; margin-bottom:8px;}
 .login-brand .logo-circle{width:46px;height:46px;}
-.login-brand .txt{font-family:'Space Grotesk'; font-weight:800; font-size:22px; color:#fff; line-height:1.15; text-align:left;}
+.login-brand .txt{font-family:'Fraunces'; font-weight:800; font-size:22px; color:#fff; line-height:1.15; text-align:left;}
 .login-brand .txt span{display:block; font-size:10.5px; font-weight:600; color:#CBB8E8; letter-spacing:.03em;}
 .login-tag{text-align:center; color:#C7BEDC; font-size:12.5px; font-weight:600; margin-bottom:26px;}
-.login-card{position:relative; background:var(--card); border-radius:26px; padding:26px 22px 24px; box-shadow:0 30px 70px rgba(0,0,0,.4); animation:cardRise .45s var(--ease);}
+.login-card{position:relative; background:var(--card); border-radius:24px; padding:26px 22px 24px; box-shadow:0 26px 60px rgba(0,0,0,.38); animation:cardRise .4s var(--ease); border:1px solid rgba(255,255,255,.06);}
+.login-card.busy{pointer-events:none;}
+.login-card.busy .login-h, .login-card.busy .login-sub{opacity:.55;}
 @keyframes cardRise{from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:none;}}
-.login-h{font-weight:800; font-size:19px; margin-bottom:4px;}
+.login-h{font-weight:800; font-size:19px; margin-bottom:4px; letter-spacing:-.01em;}
 .login-sub{font-size:12.5px; color:var(--ink-soft); margin-bottom:20px; line-height:1.5;}
 .field{margin-bottom:14px;}
 .field label{display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-mute); margin-bottom:7px;}
-.field .phone-input-wrap{display:flex; align-items:center; border:1.5px solid #E7DFCC; border-radius:14px; background:var(--card-2); overflow:hidden;}
+.field .phone-input-wrap{display:flex; align-items:center; border:1.5px solid #E7DFCC; border-radius:14px; background:var(--card-2); overflow:hidden; transition:border-color .15s var(--ease), box-shadow .15s var(--ease);}
+.field .phone-input-wrap:focus-within{border-color:var(--saffron); box-shadow:0 0 0 4px rgba(227,160,8,.16);}
 .field .phone-input-wrap .cc{padding:14px 10px 14px 14px; font-weight:700; color:var(--ink-soft); font-size:15px; border-right:1.5px solid #E7DFCC;}
 .field .phone-input-wrap input{border:none; background:transparent; flex:1; min-width:0; padding:14px; font-size:16px;}
 .field input, .field select, .field textarea{width:100%; border:1.5px solid #E7DFCC; border-radius:14px; padding:14px; font-size:16px; background:var(--card-2); -webkit-appearance:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease);}
 .field textarea{resize:none; min-height:64px; line-height:1.4; font-size:14.5px;}
-.field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--saffron); box-shadow:0 0 0 4px rgba(255,106,61,.13);}
-.login-err{font-size:12.5px; color:var(--danger); font-weight:600; margin:-6px 0 12px; display:none;}
+.field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--saffron); box-shadow:0 0 0 4px rgba(227,160,8,.16);}
+.login-err{font-size:12.5px; color:var(--danger); font-weight:600; margin:-6px 0 12px; display:none; background:var(--danger-light); border-radius:12px; padding:10px 12px; line-height:1.5;}
 .login-err.show{display:block;}
 .login-found-note{font-size:12px; font-weight:700; color:var(--leaf-dark); background:var(--leaf-light); border-radius:12px; padding:10px 12px; margin:-6px 0 14px; line-height:1.5;}
 
-.btn{border:none; border-radius:14px; padding:14px 16px; font-weight:700; font-size:14.5px; cursor:pointer; transition:transform .1s var(--ease),opacity .15s var(--ease); min-height:48px; display:flex; align-items:center; justify-content:center; gap:8px;}
+.btn{border:none; border-radius:14px; padding:14px 16px; font-weight:700; font-size:14.5px; letter-spacing:-.005em; cursor:pointer; transition:transform .12s var(--ease),opacity .15s var(--ease),box-shadow .15s var(--ease); min-height:48px; display:flex; align-items:center; justify-content:center; gap:8px;}
 .btn:active{transform:scale(.965);}
-.btn:disabled{opacity:.45; cursor:default; transform:none !important;}
-.btn-primary{background:var(--grad-brand); color:#fff; width:100%; box-shadow:0 10px 24px rgba(255,90,54,.3);}
+.btn:disabled{opacity:.5; cursor:default; transform:none !important;}
+.btn-primary{background:var(--grad-brand); color:#fff; width:100%; box-shadow:0 10px 22px rgba(194,65,12,.28);}
 .btn-ghost{background:var(--card); color:var(--ink); border:1.5px solid #E7DFCC; width:100%;}
-.btn-leaf{background:var(--grad-leaf); color:#fff; box-shadow:0 8px 20px rgba(20,128,90,.26);}
+.btn-leaf{background:var(--grad-leaf); color:#fff; box-shadow:0 8px 20px rgba(21,79,66,.24);}
 .btn-danger{background:transparent; color:var(--danger); border:1.5px solid #F6D3D7;}
 .btn-sm{padding:9px 13px; font-size:12.5px; min-height:36px;}
 .btn-block{width:100%;}
@@ -94,47 +141,55 @@ img{display:block; max-width:100%;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* ============ LOGO ============ */
-.logo-circle{width:38px;height:38px;border-radius:50%;background:var(--grad-brand); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px rgba(255,90,54,.34); position:relative; overflow:hidden;}
-.logo-circle::after{content:'';position:absolute; width:60%; height:60%; border-radius:50%; border:1.5px solid rgba(255,255,255,.5); top:8%; left:18%;}
-.logo-circle span{font-family:'Space Grotesk'; font-weight:800; font-size:15px; color:#fff; position:relative;}
+.logo-circle{width:38px;height:38px;border-radius:50%;background:var(--grad-brand); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px rgba(194,65,12,.32); position:relative; overflow:hidden;}
+.logo-circle::after{content:'';position:absolute; width:60%; height:60%; border-radius:50%; border:1.5px solid rgba(255,255,255,.5); top:8%; left:18%; pointer-events:none;}
+.logo-circle span{font-family:'Fraunces'; font-weight:800; font-size:15px; color:#fff; position:relative;}
 
 /* ============ APP SHELL ============ */
 #app{position:absolute; inset:0; display:none; flex-direction:column; background:var(--cream);}
 #app.show{display:flex;}
-#topbar{background:var(--card); display:flex; align-items:center; gap:10px; padding:11px 14px; padding-top:calc(11px + var(--safe-t)); flex-shrink:0; box-shadow:0 1px 0 var(--line); position:relative; z-index:60;}
+#topbar{background:rgba(255,255,255,.92); backdrop-filter:saturate(1.4) blur(10px); -webkit-backdrop-filter:saturate(1.4) blur(10px); display:flex; align-items:center; gap:10px; padding:11px 14px; padding-top:calc(11px + var(--safe-t)); flex-shrink:0; box-shadow:0 1px 0 var(--line); position:relative; z-index:60;}
 .brand-mark{display:flex; align-items:center; gap:9px; min-width:0;}
-.brand-name{font-family:'Space Grotesk'; font-weight:800; font-size:14.5px; line-height:1.15; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.brand-name{font-family:'Fraunces'; font-weight:800; font-size:14.5px; line-height:1.15; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .brand-name span{display:block; font-size:9.5px; font-weight:600; color:var(--ink-mute); letter-spacing:.04em; text-transform:uppercase; margin-top:1px;}
 .topbar-spacer{flex:1;}
-.icon-btn{position:relative; background:var(--card-2); border:1px solid var(--line); color:var(--ink); width:40px; height:40px; border-radius:13px; font-size:17px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
-.icon-btn:active{transform:scale(.93);}
+.icon-btn{position:relative; background:var(--card-2); border:1px solid var(--line); color:var(--ink); width:40px; height:40px; border-radius:13px; font-size:17px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:transform .12s var(--ease), background .15s ease;}
+.icon-btn:active{transform:scale(.9);}
 .icon-btn .badge{position:absolute; top:-5px; right:-5px; min-width:17px; height:17px; padding:0 3px; border-radius:999px; background:var(--saffron); color:#fff; font-size:9.5px; font-weight:800; display:none; align-items:center; justify-content:center; border:2px solid var(--card);}
 .icon-btn .badge.show{display:flex;}
 
 #mainScroll{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 14px calc(28px + var(--nav-h) + var(--safe-b));}
+#mainScroll.pane-locked{overflow:hidden;}
 .tab-pane{display:none;}
 .tab-pane.active{display:block; animation:fadeUp .28s var(--ease);}
+/* The category tab gets its own fixed-height two-column layout (instead of
+   the normal auto-height block) so the sidebar stays put and ONLY the
+   product list on the right scrolls — #mainScroll itself is locked while
+   this tab is open (see .pane-locked, toggled in JS) so there's no more
+   double/competing scroll between the outer page and the inner columns. */
+#tab-category.active{height:100%; display:flex; flex-direction:column; animation:fadeUp .28s var(--ease);}
 @keyframes fadeUp{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
 
 /* ---- banner carousel ---- */
 .banner-carousel{position:relative; border-radius:var(--radius-xl); overflow:hidden; margin-bottom:18px; box-shadow:var(--shadow-md);}
 .banner-track{display:flex; transition:transform .5s var(--ease);}
 .banner-slide{flex:0 0 100%; min-height:132px; padding:20px 20px 22px; display:flex; flex-direction:column; justify-content:center; position:relative; overflow:hidden; color:#fff;}
-.banner-slide::after{content:'';position:absolute; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.14); top:-60px; right:-50px;}
+.banner-slide::after{content:'';position:absolute; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.14); top:-60px; right:-50px; pointer-events:none;}
 .banner-eyebrow{font-size:10.5px; font-weight:800; letter-spacing:.06em; opacity:.9; margin-bottom:6px; position:relative;}
-.banner-title{font-family:'Space Grotesk'; font-weight:700; font-size:19px; line-height:1.3; margin-bottom:5px; position:relative; max-width:80%;}
+.banner-title{font-family:'Fraunces'; font-weight:700; font-size:19px; line-height:1.3; margin-bottom:5px; position:relative; max-width:80%;}
 .banner-sub{font-size:12px; opacity:.92; line-height:1.5; position:relative; max-width:78%;}
 .banner-dots{position:absolute; bottom:11px; left:0; right:0; display:flex; justify-content:center; gap:5px; z-index:2;}
 .banner-dots i{width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.45); transition:all .25s var(--ease);}
 .banner-dots i.active{width:16px; border-radius:4px; background:#fff;}
 
 .section-row{display:flex; align-items:baseline; justify-content:space-between; margin:4px 0 12px;}
-.section-label{font-size:16px; font-weight:800; font-family:'Space Grotesk';}
+.section-label{font-size:16px; font-weight:800; font-family:'Fraunces';}
 .section-link{font-size:12px; color:var(--saffron-dark); font-weight:700; cursor:pointer;}
 
 /* ---- compact grid (row of 4) ---- */
 .grid-4{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px;}
-.pcard-sm{background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; cursor:pointer;}
+.pcard-sm{background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; cursor:pointer; transition:transform .12s var(--ease), box-shadow .15s ease;}
+.pcard-sm:active{transform:scale(.97);}
 .pcard-sm .tile{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; font-size:26px; position:relative;}
 .pcard-sm .tag{position:absolute; top:4px; left:4px; background:rgba(255,255,255,.85); color:var(--saffron-dark); font-size:7.5px; font-weight:800; padding:2px 5px; border-radius:5px; letter-spacing:.01em;}
 .pcard-sm .body{padding:7px 6px 9px;}
@@ -152,27 +207,28 @@ img{display:block; max-width:100%;}
 
 /* ---- banner single (promo) ---- */
 .banner-promo{border-radius:var(--radius-lg); padding:16px 16px; display:flex; align-items:center; gap:14px; color:#fff; margin-bottom:18px; box-shadow:var(--shadow-md); position:relative; overflow:hidden;}
-.banner-promo::after{content:'';position:absolute; width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.12); bottom:-50px; right:-40px;}
+.banner-promo::after{content:'';position:absolute; width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.12); bottom:-50px; right:-40px; pointer-events:none;}
 .banner-promo .ic{font-size:34px; flex-shrink:0;}
-.banner-promo .tx b{font-family:'Space Grotesk'; font-size:14.5px; display:block; margin-bottom:2px;}
+.banner-promo .tx b{font-family:'Fraunces'; font-size:14.5px; display:block; margin-bottom:2px;}
 .banner-promo .tx span{font-size:11.5px; opacity:.9;}
 
 /* ---- big grid (row of 2) ---- */
 .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:6px;}
-.pcard-lg{background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); overflow:visible; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; cursor:pointer;}
+.pcard-lg{background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); overflow:visible; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; cursor:pointer; transition:transform .12s var(--ease);}
+.pcard-lg:active{transform:scale(.98);}
 .pcard-lg .tile{border-radius:var(--radius-lg) var(--radius-lg) 0 0; aspect-ratio:1/0.85; display:flex; align-items:center; justify-content:center; font-size:38px; position:relative;}
 .pcard-lg .veg{position:absolute; top:8px; left:8px; width:15px; height:15px; border:1.5px solid var(--leaf-dark); border-radius:3px; background:#fff; display:flex; align-items:center; justify-content:center;}
 .pcard-lg .veg i{width:7px; height:7px; border-radius:50%; background:var(--leaf-dark);}
-.pcard-lg .tag{position:absolute; top:8px; right:8px; background:rgba(27,32,48,.8); color:#fff; font-size:9px; font-weight:700; padding:3px 7px; border-radius:6px;}
+.pcard-lg .tag{position:absolute; top:8px; right:8px; background:rgba(33,19,52,.82); color:#fff; font-size:9px; font-weight:700; padding:3px 7px; border-radius:6px;}
 .pcard-lg .body{padding:11px 11px 16px; position:relative; flex:1;}
 .pcard-lg .nm{font-weight:700; font-size:13px; line-height:1.3; margin-bottom:2px;}
 .pcard-lg .un{font-size:11px; color:var(--ink-mute); margin-bottom:8px;}
 .pcard-lg .pr{font-size:13px; font-weight:800; font-family:'JetBrains Mono';}
 .pcard-lg .pr .mrp{color:var(--ink-mute); font-weight:600; text-decoration:line-through; font-size:10.5px; margin-left:4px;}
 .pcard-lg .cta{position:absolute; right:11px; bottom:-14px; left:11px; display:flex; justify-content:flex-end;}
-.add-btn{background:var(--card); color:var(--leaf-dark); border:1.5px solid var(--leaf); border-radius:10px; padding:8px 0; width:70px; font-weight:800; font-size:12px; cursor:pointer; box-shadow:0 4px 10px rgba(20,128,90,.16);}
+.add-btn{background:var(--card); color:var(--leaf-dark); border:1.5px solid var(--leaf); border-radius:10px; padding:8px 0; width:70px; font-weight:800; font-size:12px; cursor:pointer; box-shadow:0 4px 10px rgba(21,79,66,.16);}
 .add-btn:active{transform:scale(.94);}
-.stepper-pill{display:flex; align-items:center; background:var(--grad-leaf); border-radius:10px; box-shadow:0 4px 10px rgba(20,128,90,.28); overflow:hidden; width:80px;}
+.stepper-pill{display:flex; align-items:center; background:var(--grad-leaf); border-radius:10px; box-shadow:0 4px 10px rgba(21,79,66,.26); overflow:hidden; width:80px;}
 .stepper-pill button{width:25px; height:30px; border:none; background:transparent; color:#fff; font-size:15px; font-weight:800; cursor:pointer;}
 .stepper-pill .qv{flex:1; text-align:center; color:#fff; font-family:'JetBrains Mono'; font-weight:700; font-size:11.5px;}
 
@@ -191,30 +247,23 @@ img{display:block; max-width:100%;}
 /* ---- footer ---- */
 #footer{margin-top:22px; padding:22px 6px 6px; border-top:1px solid var(--line); text-align:center;}
 #footer .fl-logo{display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px;}
-#footer .fl-name{font-family:'Space Grotesk'; font-weight:800; font-size:14px;}
+#footer .fl-name{font-family:'Fraunces'; font-weight:800; font-size:14px;}
 #footer .fl-tag{font-size:11.5px; color:var(--ink-mute); line-height:1.6; max-width:280px; margin:0 auto 12px;}
 #footer .fl-links{display:flex; justify-content:center; gap:14px; font-size:11px; font-weight:700; color:var(--ink-soft); margin-bottom:14px;}
 #footer .fl-copy{font-size:10px; color:var(--ink-mute);}
 
 /* ---- category page ---- */
-/* #tab-category needs a real (non-auto) height so .cat-layout's
-   height:100% below actually resolves. Without this, the sidebar and the
-   product grid just grow to their natural content height side by side and
-   the WHOLE category tab scrolls together as one long page inside
-   #mainScroll — instead of the sidebar staying put while only the product
-   grid underneath it scrolls. */
-#tab-category.active{height:100%; overflow:hidden;}
-.cat-layout{display:flex; gap:0; margin:-14px; height:calc(100% + 14px);}
-.cat-sidebar{width:92px; flex-shrink:0; background:var(--paper); overflow-y:auto; padding:10px 0 40px;}
-.cat-item{display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 4px; cursor:pointer; position:relative; border-left:3px solid transparent;}
-.cat-item .ic{width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:21px; background:var(--card); box-shadow:var(--shadow-sm);}
+.cat-layout{display:flex; gap:0; flex:1; min-height:0; margin:-14px -14px calc(-28px - var(--nav-h) - var(--safe-b)) -14px;}
+.cat-sidebar{width:96px; flex-shrink:0; background:var(--paper); overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 0 calc(40px + var(--nav-h) + var(--safe-b)); border-right:1px solid var(--line);}
+.cat-item{display:flex; flex-direction:column; align-items:center; gap:7px; padding:14px 4px; cursor:pointer; position:relative; border-left:3px solid transparent; transition:background .15s ease;}
+.cat-item .ic{width:44px; height:44px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:21px; background:var(--card); box-shadow:var(--shadow-sm); transition:transform .15s var(--ease), box-shadow .15s ease;}
 .cat-item .lb{font-size:10px; font-weight:700; text-align:center; color:var(--ink-soft); line-height:1.25;}
-.cat-item.active{background:var(--cream); border-left-color:var(--saffron);}
-.cat-item.active .ic{background:var(--grad-brand); color:#fff; box-shadow:0 6px 14px rgba(255,90,54,.3);}
+.cat-item.active{background:var(--cream); border-left-color:var(--gold);}
+.cat-item.active .ic{background:var(--grad-gold); color:#fff; box-shadow:0 8px 18px rgba(227,160,8,.34); transform:scale(1.06);}
 .cat-item.active .lb{color:var(--saffron-dark); font-weight:800;}
-.cat-content{flex:1; min-width:0; overflow-y:auto; padding:14px 12px 40px 12px;}
-.cat-content-title{font-family:'Space Grotesk'; font-weight:800; font-size:16px; margin-bottom:2px;}
-.cat-content-count{font-size:11.5px; color:var(--ink-mute); margin-bottom:12px;}
+.cat-content{flex:1; min-width:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 14px calc(40px + var(--nav-h) + var(--safe-b)) 14px;}
+.cat-content-title{font-family:'Fraunces'; font-weight:700; font-size:18px; margin-bottom:2px;}
+.cat-content-count{font-size:11.5px; color:var(--ink-mute); margin-bottom:14px;}
 .cat-grid{display:grid; grid-template-columns:1fr 1fr; gap:11px;}
 
 /* ---- overlay screens (product / cart) ---- */
@@ -222,7 +271,7 @@ img{display:block; max-width:100%;}
 .overlay-screen.show{transform:translateX(0);}
 .overlay-header{display:flex; align-items:center; gap:10px; padding:12px 14px; padding-top:calc(12px + var(--safe-t)); background:var(--card); box-shadow:0 1px 0 var(--line); flex-shrink:0; position:relative; z-index:5;}
 .overlay-back{width:38px; height:38px; border-radius:12px; background:var(--card-2); border:1px solid var(--line); font-size:16px; cursor:pointer; flex-shrink:0;}
-.overlay-title{font-weight:800; font-size:15px; font-family:'Space Grotesk'; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.overlay-title{font-weight:800; font-size:15px; font-family:'Fraunces'; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .overlay-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;}
 
 /* product detail */
@@ -234,7 +283,7 @@ img{display:block; max-width:100%;}
 .pd-dots i.active{width:16px; border-radius:4px; background:var(--saffron);}
 .pd-info{padding:6px 18px 18px;}
 .pd-tag{display:inline-block; background:var(--leaf-light); color:var(--leaf-dark); font-size:10px; font-weight:800; padding:4px 9px; border-radius:999px; margin-bottom:9px;}
-.pd-name{font-family:'Space Grotesk'; font-weight:800; font-size:21px; line-height:1.25; margin-bottom:4px;}
+.pd-name{font-family:'Fraunces'; font-weight:800; font-size:21px; line-height:1.25; margin-bottom:4px;}
 .pd-unit{font-size:12.5px; color:var(--ink-mute); font-weight:600; margin-bottom:12px;}
 .pd-price-row{display:flex; align-items:center; gap:9px; margin-bottom:16px;}
 .pd-price{font-family:'JetBrains Mono'; font-weight:800; font-size:22px;}
@@ -276,16 +325,16 @@ img{display:block; max-width:100%;}
 .cart-empty .s{font-size:12.5px; line-height:1.6;}
 
 /* ---- floating bottom nav + whatsapp ---- */
-#bottomNav{position:absolute; left:14px; right:14px; bottom:calc(12px + var(--safe-b)); height:var(--nav-h); background:var(--navy); border-radius:20px; display:flex; box-shadow:0 16px 34px rgba(20,14,8,.32); z-index:50;}
-#bottomNav button{flex:1; border:none; background:transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:#8A8FA6; font-size:9.5px; font-weight:700; cursor:pointer; position:relative;}
+#bottomNav{position:absolute; left:14px; right:14px; bottom:calc(12px + var(--safe-b)); height:var(--nav-h); background:rgba(24,15,38,.94); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.06); border-radius:20px; display:flex; box-shadow:0 16px 34px rgba(16,9,24,.36); z-index:50;}
+#bottomNav button{flex:1; border:none; background:transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:#8D89A0; font-size:9.5px; font-weight:700; cursor:pointer; position:relative; transition:color .15s ease;}
 #bottomNav button .nic{font-size:18px; line-height:1;}
 #bottomNav button.active{color:#fff;}
-#bottomNav button.active::before{content:'';position:absolute; top:6px; width:26px; height:26px; border-radius:9px; background:rgba(255,106,61,.22); z-index:-1;}
+#bottomNav button.active::before{content:'';position:absolute; top:6px; width:26px; height:26px; border-radius:9px; background:rgba(227,160,8,.24); z-index:-1;}
 #whatsappBtn{position:absolute; right:16px; bottom:calc(var(--nav-h) + 22px + var(--safe-b)); width:52px; height:52px; border-radius:50%; background:#25D366; border:none; box-shadow:0 12px 26px rgba(37,211,102,.42); z-index:52; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff;}
 #whatsappBtn:active{transform:scale(.92);}
 
 /* ---- sheets (profile / schedule) ---- */
-.sheet-overlay{position:absolute; inset:0; background:rgba(20,14,8,.5); z-index:500; display:none; align-items:flex-end; opacity:0; transition:opacity .22s var(--ease);}
+.sheet-overlay{position:absolute; inset:0; background:rgba(15,10,8,.52); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:500; display:none; align-items:flex-end; opacity:0; transition:opacity .22s var(--ease);}
 .sheet-overlay.show{display:flex; opacity:1;}
 .sheet{width:100%; background:var(--card); border-radius:26px 26px 0 0; padding:20px 20px calc(20px + var(--safe-b)); max-height:86%; overflow-y:auto; transform:translateY(24px); transition:transform .28s var(--ease); box-shadow:0 -20px 50px rgba(0,0,0,.22);}
 .sheet-overlay.show .sheet{transform:translateY(0);}
@@ -293,8 +342,8 @@ img{display:block; max-width:100%;}
 
 /* profile sheet */
 .profile-card-hero{display:flex; align-items:center; gap:13px; padding:4px 2px 18px;}
-.profile-card-hero .av{width:56px; height:56px; border-radius:50%; background:var(--grad-brand); color:#fff; font-weight:800; font-size:20px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 18px rgba(255,90,54,.28); flex-shrink:0;}
-.profile-card-hero .nm{font-weight:800; font-size:17px; font-family:'Space Grotesk';}
+.profile-card-hero .av{width:56px; height:56px; border-radius:50%; background:var(--grad-brand); color:#fff; font-weight:800; font-size:20px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 18px rgba(194,65,12,.26); flex-shrink:0;}
+.profile-card-hero .nm{font-weight:800; font-size:17px; font-family:'Fraunces';}
 .profile-card-hero .ph{font-size:12px; color:var(--ink-mute); margin-top:2px;}
 .profile-row{display:flex; align-items:flex-start; justify-content:space-between; padding:13px 2px; border-bottom:1px solid var(--line); gap:14px;}
 .profile-row:last-of-type{border-bottom:none;}
@@ -307,7 +356,7 @@ img{display:block; max-width:100%;}
 
 /* schedule calendar sheet */
 .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
-.cal-head .m{font-weight:800; font-size:15px; font-family:'Space Grotesk';}
+.cal-head .m{font-weight:800; font-size:15px; font-family:'Fraunces';}
 .cal-nav{display:flex; gap:6px;}
 .cal-nav button{width:32px; height:32px; border-radius:10px; border:1px solid var(--line); background:var(--card-2); font-size:14px; cursor:pointer;}
 .cal-nav button:disabled{opacity:.3; cursor:default;}
@@ -318,7 +367,7 @@ img{display:block; max-width:100%;}
 .cal-cell.blank{visibility:hidden; cursor:default;}
 .cal-cell.disabled{color:var(--ink-mute); opacity:.35; cursor:default;}
 .cal-cell.today{box-shadow:inset 0 0 0 1.5px var(--saffron);}
-.cal-cell.selected{background:var(--grad-leaf); color:#fff; box-shadow:0 4px 10px rgba(20,128,90,.3);}
+.cal-cell.selected{background:var(--grad-leaf); color:#fff; box-shadow:0 4px 10px rgba(21,79,66,.28);}
 .cal-selected-title{font-size:11.5px; font-weight:800; color:var(--ink-soft); margin-bottom:8px;}
 .cal-chips{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:18px; min-height:14px;}
 .cal-chip{background:var(--leaf-light); color:var(--leaf-dark); font-size:11px; font-weight:700; padding:5px 9px 5px 10px; border-radius:999px; display:flex; align-items:center; gap:5px;}
@@ -359,9 +408,9 @@ img{display:block; max-width:100%;}
 
 /* ---- bill ---- */
 .bill-hero{background:var(--grad-navy); border-radius:var(--radius-xl); padding:22px 20px; color:#fff; margin-bottom:18px; position:relative; overflow:hidden; box-shadow:var(--shadow-md);}
-.bill-hero::after{content:'';position:absolute; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.08); top:-60px; right:-50px;}
+.bill-hero::after{content:'';position:absolute; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.08); top:-60px; right:-50px; pointer-events:none;}
 .bill-hero .lbl{font-size:11px; font-weight:700; opacity:.75; margin-bottom:6px; position:relative;}
-.bill-hero .amt{font-family:'Space Grotesk'; font-weight:800; font-size:32px; position:relative;}
+.bill-hero .amt{font-family:'Fraunces'; font-weight:800; font-size:32px; position:relative;}
 .bill-hero .sub{font-size:11.5px; opacity:.8; margin-top:6px; position:relative;}
 .bill-row{display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:13px 15px; margin-bottom:9px; box-shadow:var(--shadow-sm); max-height:100px; overflow:hidden; opacity:1; transition:max-height .32s var(--ease), opacity .28s ease, padding .32s var(--ease), margin .32s var(--ease);}
 .bill-row.removing{max-height:0; opacity:0; padding-top:0; padding-bottom:0; margin-bottom:0; border-color:transparent;}
@@ -375,7 +424,7 @@ img{display:block; max-width:100%;}
 .order-card.removing{max-height:0; opacity:0; margin-bottom:0; overflow:hidden;}
 
 /* ---- confirm dialog (logout etc) ---- */
-.confirm-overlay{position:absolute; inset:0; background:rgba(20,14,8,.5); z-index:900; display:none; align-items:center; justify-content:center; padding:20px;}
+.confirm-overlay{position:absolute; inset:0; background:rgba(15,10,8,.52); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:900; display:none; align-items:center; justify-content:center; padding:20px;}
 .confirm-overlay.show{display:flex;}
 .confirm-sheet{width:100%; max-width:340px; background:var(--card); border-radius:22px; padding:22px 20px 20px; box-shadow:var(--shadow-lg); animation:cardRise .3s var(--ease);}
 .confirm-sheet h3{font-size:15.5px; margin-bottom:7px;}
@@ -386,12 +435,12 @@ img{display:block; max-width:100%;}
 /* ---- order success animation ---- */
 #orderSuccess{position:absolute; inset:0; background:var(--cream); z-index:1500; display:none; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center;}
 #orderSuccess.show{display:flex;}
-.success-ring{width:96px; height:96px; border-radius:50%; background:var(--grad-leaf); display:flex; align-items:center; justify-content:center; margin-bottom:22px; box-shadow:0 16px 40px rgba(20,128,90,.34); transform:scale(0); animation:ringPop .5s var(--ease) forwards;}
+.success-ring{width:96px; height:96px; border-radius:50%; background:var(--grad-leaf); display:flex; align-items:center; justify-content:center; margin-bottom:22px; box-shadow:0 16px 40px rgba(21,79,66,.32); transform:scale(0); animation:ringPop .5s var(--ease) forwards;}
 @keyframes ringPop{to{transform:scale(1);}}
 .success-ring svg{width:48px; height:48px;}
 .success-ring path{stroke-dasharray:48; stroke-dashoffset:48; animation:drawTick .4s .35s var(--ease) forwards;}
 @keyframes drawTick{to{stroke-dashoffset:0;}}
-#orderSuccess h2{font-family:'Space Grotesk'; font-size:21px; margin-bottom:8px; opacity:0; animation:txtIn .4s .5s var(--ease) forwards;}
+#orderSuccess h2{font-family:'Fraunces'; font-size:21px; margin-bottom:8px; opacity:0; animation:txtIn .4s .5s var(--ease) forwards;}
 #orderSuccess p{font-size:13px; color:var(--ink-soft); line-height:1.6; max-width:270px; margin-bottom:26px; opacity:0; animation:txtIn .4s .6s var(--ease) forwards;}
 #orderSuccess .btn{opacity:0; animation:txtIn .4s .7s var(--ease) forwards; max-width:220px;}
 @keyframes txtIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
@@ -401,10 +450,25 @@ img{display:block; max-width:100%;}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
 .loading-full{position:absolute; inset:0; background:var(--cream); z-index:5000; display:flex; align-items:center; justify-content:center;}
-.loading-full .spinner{width:30px; height:30px; border-width:3px; border-color:rgba(255,106,61,.2); border-top-color:var(--saffron);}
+.loading-full .spinner{width:30px; height:30px; border-width:3px; border-color:rgba(227,160,8,.22); border-top-color:var(--saffron);}
 </style>
 </head>
 <body>
+<div id="appPreloader">
+  <div class="pl-logo"><span>अ</span></div>
+  <div class="pl-track"><div class="pl-bar"></div></div>
+  <div class="pl-txt">Anadi Godham load ho raha hai…</div>
+</div>
+<script>
+/* Safety net: if the app script fails to run for any reason (e.g. this
+   file opened directly from disk instead of a real server/URL, where
+   module scripts get blocked), don't leave the person staring at a
+   preloader forever — reveal the app shell anyway after a few seconds. */
+setTimeout(function(){
+  var pl = document.getElementById('appPreloader');
+  if (pl && !pl.classList.contains('hide')) pl.classList.add('hide');
+}, 6000);
+</script>
 <div id="shell">
 
   <!-- ============ LOGIN ============ -->
@@ -415,7 +479,7 @@ img{display:block; max-width:100%;}
         <div class="txt">Anadi Godham<span>FARM FRESH DAIRY, DAILY</span></div>
       </div>
       <div class="login-tag">Shuddh doodh, ghee aur pooja samagri — seedha aapke ghar</div>
-      <div class="login-card" style="position:relative;">
+      <div class="login-card" id="loginCard" style="position:relative;">
         <button id="loginCloseBtn" style="position:absolute; top:14px; right:14px; width:30px; height:30px; border:none; border-radius:50%; background:var(--card-2); color:var(--ink-soft); font-size:14px; cursor:pointer;">✕</button>
         <div class="login-h" id="loginHeading">Order karne ke liye 👋</div>
         <div class="login-sub" id="loginSub">Bas apna mobile number daalein — agar aap pehle se registered hain, to baaki details apne aap aa jayengi.</div>
@@ -624,51 +688,37 @@ img{display:block; max-width:100%;}
 </div>
 
 <script type="module">
-/* ================= FIREBASE (loaded in the background) =================
-   These two SDK files used to be loaded with a static import at the very
-   top of this script. That meant the browser held off running ANY code
-   below it — including the click handlers for every button on the page —
-   until both files had finished downloading. On a slow connection that
-   could take several seconds, during which the login textbox, the
-   Continue button, tabs, add-to-cart — everything — looked frozen.
-   Loading them dynamically instead lets the rest of the app (browsing,
-   cart, categories, tabs) become interactive immediately. Only the
-   specific actions that truly need the database (checking a phone
-   number, placing an order, syncing the profile) wait on
-   `firebaseReady`, and only for as long as they actually need to — with
-   a timeout so a bad connection shows a clear message instead of a
-   button stuck forever. */
-let db, ref, get, set, update, push, query, orderByChild, equalTo, onValue;
-const firebaseReady = (async ()=>{
-  const [{ initializeApp }, dbMod] = await Promise.all([
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js")
-  ]);
-  ({ ref, get, set, update, push, query, orderByChild, equalTo, onValue } = dbMod);
-  // Same Firebase project used by deliverychart.html (RouteBoy) — this is
-  // the "existing database" that already holds customers/scheduling data,
-  // so orders placed here show up directly in that chart.
-  const firebaseConfig = {
-    apiKey: "AIzaSyA4q2qD7K7o5yN5v9H9jSIvWsTPWlAvurY",
-    authDomain: "delivry-tracking-system.firebaseapp.com",
-    databaseURL: "https://delivry-tracking-system-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "delivry-tracking-system",
-    storageBucket: "delivry-tracking-system.firebasestorage.app",
-    messagingSenderId: "181704924735",
-    appId: "1:181704924735:web:7c57448137e91b745ca28a",
-    measurementId: "G-43WG6FFZVC"
-  };
-  const fbApp = initializeApp(firebaseConfig);
-  db = dbMod.getDatabase(fbApp);
-})();
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getDatabase, ref, get, set, update, push, query, orderByChild, equalTo, onValue
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-/* Rejects with a friendly error if a Firebase call takes longer than `ms` —
-   used around login/order actions so the button re-enables and the person
-   can retry instead of waiting forever on a bad connection. */
-function withTimeout(promise, ms, message){
-  let timer;
-  const timeout = new Promise((_, reject)=>{ timer = setTimeout(()=> reject(new Error(message||'timeout')), ms); });
-  return Promise.race([promise, timeout]).finally(()=> clearTimeout(timer));
+/* Same Firebase project used by deliverychart.html (RouteBoy) — this is the
+   "existing database" that already holds customers/scheduling data, so
+   orders placed here show up directly in that chart. */
+const firebaseConfig = {
+  apiKey: "AIzaSyA4q2qD7K7o5yN5v9H9jSIvWsTPWlAvurY",
+  authDomain: "delivry-tracking-system.firebaseapp.com",
+  databaseURL: "https://delivry-tracking-system-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "delivry-tracking-system",
+  storageBucket: "delivry-tracking-system.firebasestorage.app",
+  messagingSenderId: "181704924735",
+  appId: "1:181704924735:web:7c57448137e91b745ca28a",
+  measurementId: "G-43WG6FFZVC"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+
+/* Slow/flaky mobile networks can leave a Firebase call pending for a long
+   time before it actually errors out — meanwhile a button just sits there
+   spinning forever with zero feedback, which feels like the app is "stuck".
+   This wraps any Firebase promise with a hard timeout so the user always
+   gets a clear message + a retry option instead of an endless spinner. */
+function withTimeout(promise, ms=12000){
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('TIMEOUT')), ms))
+  ]);
 }
 
 // Maps customer-app products onto the 6 fixed products the delivery chart
@@ -718,14 +768,11 @@ function tileOf(p){ return 'tile-'+p.cat; }
 
 /* Live map of deliveryBoys/{id} -> {name,...}, kept in sync so the profile
    sheet can always show the current assigned partner's name, even if admin
-   reassigns or renames a delivery boy after this app was loaded. Wired up
-   once Firebase is ready rather than blocking on it. */
+   reassigns or renames a delivery boy after this app was loaded. */
 let deliveryBoysMap = {};
-firebaseReady.then(()=>{
-  onValue(ref(db,'deliveryBoys'), snap=>{
-    deliveryBoysMap = snap.val() || {};
-    if (customer && customer.id && $('#profileSheetOverlay') && $('#profileSheetOverlay').classList.contains('show')) openProfileSheet();
-  });
+onValue(ref(db,'deliveryBoys'), snap=>{
+  deliveryBoysMap = snap.val() || {};
+  if (customer && customer.id && $('#profileSheetOverlay') && $('#profileSheetOverlay').classList.contains('show')) openProfileSheet();
 });
 function partnerNameFor(assignedTo){
   if (!assignedTo || !deliveryBoysMap[assignedTo]) return null;
@@ -738,7 +785,6 @@ function defaultShiftNow(){ return new Date().getHours() < 16 ? 'morning' : 'eve
    ".indexOn" rule on some DB rule setups) so login/sync never silently break
    because of an index/permission quirk. Returns {key, rec} or null. */
 async function findCustomerByPhone(phone){
-  await firebaseReady;
   try{
     const q = query(ref(db,'customers'), orderByChild('phone'), equalTo(phone));
     const snap = await get(q);
@@ -758,10 +804,10 @@ async function findCustomerByPhone(phone){
 }
 
 const BANNERS = [
-  {grad:'linear-gradient(135deg,#FF8A54,#FF5A6E)', eyebrow:'PURE & FRESH', title:'Pure A2 Cow Milk, Now Available', sub:'Asli swaad, seedha godham se — har subah fresh.'},
-  {grad:'linear-gradient(135deg,#F7C15A,#E08A28)', eyebrow:'LIMITED OFFER', title:'Flat 10% OFF on Desi Ghee', sub:'Is hafte special — bilona ghee par bachat.'},
-  {grad:'linear-gradient(135deg,#2CB279,#14805A)', eyebrow:'REFER & EARN', title:'Invite Dost, Kamao ₹50', sub:'Apne dost ko app bhejein aur reward paayein.'},
-  {grad:'linear-gradient(135deg,#B07AE0,#7A45B8)', eyebrow:'FESTIVE GIFTING', title:'Shuddhta Ka Tohfa Bhejein', sub:'Premium hampers apno ke liye, is tyohaar.'},
+  {grad:'linear-gradient(135deg,#E08A28,#C2410C)', eyebrow:'PURE & FRESH', title:'Pure A2 Cow Milk, Now Available', sub:'Asli swaad, seedha godham se — har subah fresh.'},
+  {grad:'linear-gradient(135deg,#F3C55D,#C97A1B)', eyebrow:'LIMITED OFFER', title:'Flat 10% OFF on Desi Ghee', sub:'Is hafte special — bilona ghee par bachat.'},
+  {grad:'linear-gradient(135deg,#2C8F73,#154F42)', eyebrow:'REFER & EARN', title:'Invite Dost, Kamao ₹50', sub:'Apne dost ko app bhejein aur reward paayein.'},
+  {grad:'linear-gradient(135deg,#9B63C9,#5F2E8C)', eyebrow:'FESTIVE GIFTING', title:'Shuddhta Ka Tohfa Bhejein', sub:'Premium hampers apno ke liye, is tyohaar.'},
 ];
 
 const REVIEWS = [
@@ -795,10 +841,9 @@ function saveCustomer(){ localStorage.setItem('ag_customer', JSON.stringify(cust
    reassigns the delivery partner, this app reflects it without a re-login.
    Also detects the record being deleted by admin and logs the app out. */
 let custListenerAttachedFor = null;
-async function attachCustomerListener(id){
+function attachCustomerListener(id){
   if (!id || custListenerAttachedFor === id) return;
   custListenerAttachedFor = id;
-  await firebaseReady;
   onValue(ref(db, 'customers/'+id), snap=>{
     if (!snap.exists()){
       customer = null; saveCustomer(); custListenerAttachedFor = null;
@@ -950,7 +995,7 @@ function renderHome(){
   $('#popularGrid').innerHTML = popular.map(smallCardHtml).join('');
 
   const mb = BANNERS[1];
-  $('#midBanner').style.background = 'linear-gradient(135deg,#2CB279,#14805A)';
+  $('#midBanner').style.background = 'linear-gradient(135deg,#9B63C9,#5F2E8C)';
   $('#midBanner').innerHTML = `<div class="ic">🎁</div><div class="tx"><b>Festive Gift Hampers</b><span>Apno ke liye shuddhta ka tohfa bhejein</span></div>`;
 
   const featured = PRODUCTS.filter(p=>p.featured).slice(0,4);
@@ -1230,7 +1275,10 @@ function openCheckoutSheet(mode){
 
 /* Look up the phone number in the existing Firebase customers database
    (the same one the delivery chart reads from) and reveal the right next step. */
+let loginBusy = false; // re-entrancy guard: ignores rapid repeat taps while a call is in flight
+
 $('#loginCheckBtn').addEventListener('click', async ()=>{
+  if (loginBusy) return;
   const phone = $('#loginPhone').value.trim();
   const err = $('#loginErr');
   if (phone.length!==10 || !/^[0-9]{10}$/.test(phone)){
@@ -1240,9 +1288,11 @@ $('#loginCheckBtn').addEventListener('click', async ()=>{
   }
   err.classList.remove('show');
   const btn = $('#loginCheckBtn');
+  loginBusy = true;
+  $('#loginCard').classList.add('busy');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
   try{
-    const match = await withTimeout(findCustomerByPhone(phone), 15000, 'server se response nahi mila');
+    const match = await withTimeout(findCustomerByPhone(phone));
     $('#loginExtraFields').style.display = 'block';
     if (match){
       matchedCustomerKey = match.key;
@@ -1262,13 +1312,20 @@ $('#loginCheckBtn').addEventListener('click', async ()=>{
     $('#loginSubmitBtn').textContent = checkoutMode==='order' ? 'Confirm & Place Order' : 'Save Details';
   } catch(e){
     console.error(e);
-    err.textContent = 'Kuch gadbad ho gayi (' + (e && (e.code || e.message) || 'unknown error') + '). Dobara try karein.';
+    const isTimeout = e && e.message === 'TIMEOUT';
+    err.textContent = isTimeout
+      ? 'Network slow lag raha hai — dobara try karein.'
+      : 'Kuch gadbad ho gayi (' + (e && (e.code || e.message) || 'unknown error') + '). Dobara try karein.';
     err.classList.add('show');
     btn.disabled = false; btn.textContent = 'Continue →';
+  } finally {
+    loginBusy = false;
+    $('#loginCard').classList.remove('busy');
   }
 });
 
 $('#loginSubmitBtn').addEventListener('click', async ()=>{
+  if (loginBusy) return;
   const phone = $('#loginPhone').value.trim();
   const name = $('#loginName').value.trim();
   const address = $('#loginAddress').value.trim();
@@ -1280,16 +1337,18 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
   }
   err.classList.remove('show');
   const btn = $('#loginSubmitBtn');
+  loginBusy = true;
+  $('#loginCard').classList.add('busy');
   btn.disabled = true; const origTxt = btn.textContent; btn.innerHTML = '<span class="spinner"></span>';
   const rec = { name, phone, address };
   let custKey = null, full = null;
   try{
-    custKey = await withTimeout(upsertCustomerInFirebase(rec, matchedCustomerKey), 15000, 'timeout');
-    const snap = await withTimeout(get(ref(db,'customers/'+custKey)), 15000, 'timeout');
+    custKey = await withTimeout(upsertCustomerInFirebase(rec, matchedCustomerKey));
+    const snap = await withTimeout(get(ref(db,'customers/'+custKey)));
     full = snap.val() || rec;
   } catch(e){
     console.error(e);
-    showToast('Database se connect nahi ho paaya, phir bhi login ho raha hai');
+    showToast(e && e.message==='TIMEOUT' ? 'Network slow hai, phir bhi login ho raha hai' : 'Database se connect nahi ho paaya, phir bhi login ho raha hai');
   }
   if (custKey){
     customer = {
@@ -1308,6 +1367,8 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
   saveCustomer();
   $('#loginScreen').classList.remove('show');
   btn.disabled = false; btn.textContent = origTxt;
+  loginBusy = false;
+  $('#loginCard').classList.remove('busy');
   if (checkoutMode==='order'){
     finalizeOrder(customer);
   } else if (checkoutMode==='login'){
@@ -1319,7 +1380,6 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
 });
 
 async function upsertCustomerInFirebase(rec, existingKey){
-  await firebaseReady;
   if (existingKey){
     await update(ref(db,'customers/'+existingKey), { name:rec.name, phone:rec.phone, address:rec.address });
     return existingKey;
@@ -1362,7 +1422,6 @@ async function finalizeOrder(cust){
 }
 
 async function syncOrderToChart(cust, order){
-  await firebaseReady;
   let custKey = cust.id || matchedCustomerKey;
   if (!custKey){
     const match = await findCustomerByPhone(cust.phone);
@@ -1436,7 +1495,6 @@ async function adjustChartQty(order, item, dateStr, stopping){
   if (!custKey || !key) return;
   const path = `customers/${custKey}/overrides/${dateStr}`;
   try{
-    await firebaseReady;
     const snap = await get(ref(db, path));
     const existing = snap.val() || {};
     const cur = existing[key] || 0;
@@ -1468,7 +1526,6 @@ async function removeOrderNoteFromChart(order, dateStr){
   if (!custKey) return;
   const path = `customers/${custKey}/overrides/${dateStr}`;
   try{
-    await firebaseReady;
     const snap = await get(ref(db, path));
     const existing = snap.val() || {};
     if (!existing.note) return;
@@ -1642,6 +1699,9 @@ function switchTab(tab){
   $$('.tab-pane').forEach(p=>p.classList.remove('active'));
   $('#tab-'+tab).classList.add('active');
   $('#mainScroll').scrollTop = 0;
+  // Category tab manages its own two-column scrolling internally, so the
+  // outer page scroll is locked to stop it fighting with the sidebar/list.
+  $('#mainScroll').classList.toggle('pane-locked', tab==='category');
   if (tab==='category') renderCategoryTab();
   if (tab==='orders') renderOrders();
   if (tab==='bill') renderBill();
@@ -1740,10 +1800,10 @@ async function resumeSession(){
       }
     } catch(e){ console.error('session resume lookup failed', e); }
   }
-  // Nobody logged in yet — that's fine, browsing doesn't need an account.
-  // Login is only asked for right when it's actually needed: placeOrderBtn
-  // and profileBtn already call openCheckoutSheet() themselves when there's
-  // no customer, so there's nothing to force here.
+  // Nobody logged in yet — invite them to log in so orders/profile/partner
+  // details can actually be fetched. Browsing still works; the ✕ lets them
+  // dismiss and log in later from the profile tab or at checkout.
+  setTimeout(()=> openCheckoutSheet('login'), 450);
 }
 
 (function boot(){
@@ -1753,7 +1813,16 @@ async function resumeSession(){
   renderOrders();
   renderBill();
   refreshCartBadges();
+  // Warm up the Firebase connection early (fire-and-forget) so it's likely
+  // already established by the time the person reaches the login card —
+  // this is what removes most of the "waiting with no feedback" feeling.
+  get(ref(db,'deliveryBoys')).catch(()=>{});
   resumeSession();
+  // Preloader hides once the shell has actually painted, with a small
+  // minimum so it never just flashes.
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{ const pl=$('#appPreloader'); if (pl) pl.classList.add('hide'); }, 350);
+  });
 })();
 </script>
 </body>
