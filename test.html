@@ -4,13 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <script>
-/* Real viewport-height fix: mobile browsers (esp. Android) resize the
-   visual viewport when the keyboard opens/closes or the address bar
-   hides, but layout units like 100vh/100dvh don't always repaint their
-   consumers immediately — this is what causes buttons/inputs to become
-   briefly "dead" (unresponsive to taps) until a scroll forces a reflow.
-   We track the real height ourselves and push it into a CSS var on every
-   viewport change, so the shell always matches what's actually visible. */
 (function(){
   function setVH(){
     var vv = window.visualViewport;
@@ -26,7 +19,7 @@
   }
 })();
 </script>
-<meta name="theme-color" content="#15140F">
+<meta name="theme-color" content="#0E2A1C">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -36,26 +29,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* ---- premium minimal palette: near-monochrome ink/stone surfaces with
-     a single restrained accent (deep moss) and a muted bronze for rare
-     highlights — quiet, sober, and letting product photography carry
-     the colour instead of the UI chrome. ---- */
+  /* ---- unified green brand palette: every accent, gradient and dark
+     surface across the app now derives from a single brand green
+     (#2c6602) instead of the old mixed brown/black/bronze tones. ---- */
   --cream:#F8F7F4; --paper:#F1EFE9; --card:#FFFFFF; --card-2:#F5F4F0;
   --ink:#17160F; --ink-soft:#6E6D64; --ink-mute:#A7A59A;
   --line:#E7E5DD;
-  --saffron:#20281F; --saffron-dark:#0F140E; --saffron-light:#EAECE6;
-  --leaf:#8A7A4F; --leaf-dark:#5E5233; --leaf-light:#F1ECDD;
-  --gold:#8A7A4F; --gold-light:#F1ECDD;
-  --clay:#6E6D64; --clay-dark:#48473F; --clay-light:#EEEDE7;
-  --plum:#55534A; --plum-light:#ECEBE5;
-  --navy:#15140F; --navy-2:#1C1B14;
+  --brand:#2C6602; --brand-dark:#1D4501; --brand-light:#E3EEDA;
+  --saffron:#2C6602; --saffron-dark:#1D4501; --saffron-light:#E3EEDA;
+  --leaf:#2C6602; --leaf-dark:#1D4501; --leaf-light:#E3EEDA;
+  --gold:#2C6602; --gold-light:#E3EEDA;
+  --clay:#2C6602; --clay-dark:#1D4501; --clay-light:#E3EEDA;
+  --plum:#2C6602; --plum-light:#E3EEDA;
+  --navy:#1D4501; --navy-2:#153801;
   --danger:#A8402F; --danger-light:#F6E4DF;
-  --grad-brand:linear-gradient(135deg,#2A2E22 0%,#15140F 100%);
-  --grad-leaf:linear-gradient(135deg,#3C3A2E 0%,#20281F 100%);
-  --grad-gold:linear-gradient(135deg,#A38F5E 0%,#7A6A42 100%);
-  --grad-plum:linear-gradient(135deg,#6B6A60 0%,#454438 100%);
-  --grad-navy:linear-gradient(160deg,#141309 0%,#1B1A12 45%,#201E15 78%,#25231A 100%);
-  --grad-clay:linear-gradient(135deg,#5C5B51 0%,#3A392F 100%);
+  --grad-brand:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
+  --grad-leaf:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
+  --grad-gold:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
+  --grad-plum:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
+  --grad-navy:linear-gradient(160deg,#0F2A01 0%,#153801 45%,#1D4501 78%,#245401 100%);
+  --grad-clay:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
   --tile-dairy:linear-gradient(150deg,#F6F5F1 0%,#EEECE4 100%);
   --tile-pooja:linear-gradient(150deg,#F6F4EC 0%,#EEEADC 100%);
   --tile-gift:linear-gradient(150deg,#F5F4F0 0%,#ECEAE2 100%);
@@ -64,8 +57,8 @@
   --shadow-sm:0 1px 2px rgba(23,22,15,.04), 0 2px 9px rgba(23,22,15,.05);
   --shadow-md:0 4px 12px rgba(23,22,15,.05), 0 14px 28px rgba(23,22,15,.07);
   --shadow-lg:0 20px 46px rgba(15,14,9,.20);
-  --shadow-glow-brand:0 10px 22px rgba(15,14,9,.20);
-  --shadow-glow-leaf:0 8px 18px rgba(32,40,31,.20);
+  --shadow-glow-brand:0 10px 22px rgba(29,69,1,.28);
+  --shadow-glow-leaf:0 8px 18px rgba(29,69,1,.24);
   --ease:cubic-bezier(.22,.8,.36,1);
   --ease-spring:cubic-bezier(.34,1.56,.64,1);
   --safe-t:env(safe-area-inset-top,0px);
@@ -85,10 +78,16 @@ img{display:block; max-width:100%;}
    the has-img class (i.e. a real image URL was supplied), the element's
    own emoji-centering background gets neutralised and the <img> fills it
    edge-to-edge instead; everything else about the layout is unchanged. */
-.tile.has-img, .pd-slide.has-img, .cat-item .ic.has-img{background:var(--card-2) !important; font-size:0;}
-.tile.has-img img, .pd-slide.has-img img, .cat-item .ic.has-img img{width:100%; height:100%; object-fit:cover; display:block;}
-.brand-mark .logo-circle.has-img, .login-brand .logo-circle.has-img{background:var(--card-2);}
-.logo-circle.has-img img{width:100%; height:100%; object-fit:cover; border-radius:inherit;}
+.tile.has-img, .pd-slide.has-img, .cat-item .ic.has-img{background:var(--card-2) !important; font-size:0; overflow:hidden;}
+.tile.has-img img, .pd-slide.has-img img, .cat-item .ic.has-img img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .35s var(--ease);}
+.pcard-sm:hover .tile.has-img img, .pcard-lg:hover .tile.has-img img{transform:scale(1.07);}
+.pcard-lg .tile{overflow:hidden;}
+.logo-circle.has-img{background:#1d4501;}
+.logo-circle.has-img img{width:78%; height:78%; margin:11%; object-fit:contain; border-radius:inherit;}
+/* the ring drawn by .logo-circle::after (below) is only meant to decorate
+   the plain letter-mark version — over a real photo it renders as a stray
+   white circle sitting on top of the logo, so it's switched off here. */
+.logo-circle.has-img::after{content:none;}
 ::-webkit-scrollbar{width:0; height:0;}
 :focus-visible{outline:2px solid var(--saffron); outline-offset:2px; border-radius:6px;}
 
@@ -105,41 +104,89 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 #shell{max-width:460px; margin:0 auto; height:100vh; height:100dvh; height:calc(var(--vh, 1vh) * 100); position:relative; background:var(--cream); box-shadow:0 0 60px rgba(0,0,0,.08); overflow:hidden; z-index:1;}
 @media(min-width:461px){ body{background:#E7E5DD;} }
 
-/* ============ APP PRELOADER ============ */
-#appPreloader{position:fixed; inset:0; z-index:9999; background:var(--grad-navy); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; transition:opacity .45s var(--ease), visibility .45s var(--ease);}
+/* ============ APP PRELOADER — now a skeleton of the home screen itself,
+   not a logo splash, so it reads as "your app is drawing itself" rather
+   than a separate loading interstitial. It sits inside the same #shell
+   footprint and just fades out once the real content is ready. ============ */
+#appPreloader{position:fixed; inset:0; z-index:9999; background:var(--cream); transition:opacity .35s var(--ease), visibility .35s var(--ease); display:flex; justify-content:center; overflow:hidden;}
 #appPreloader.hide{opacity:0; visibility:hidden; pointer-events:none;}
-#appPreloader .pl-logo{width:64px; height:64px; border-radius:20px; background:var(--grad-brand); display:flex; align-items:center; justify-content:center; box-shadow:0 14px 34px rgba(194,65,12,.38); animation:plPulse 1.6s var(--ease) infinite; overflow:hidden;}
-#appPreloader .pl-logo.has-img{background:var(--card-2);}
-#appPreloader .pl-logo.has-img img{width:100%; height:100%; object-fit:cover; border-radius:inherit;}
-#appPreloader .pl-logo span{font-family:'Fraunces'; font-weight:800; font-size:26px; color:#fff;}
-@keyframes plPulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.06);}}
-#appPreloader .pl-track{width:120px; height:3px; border-radius:99px; background:rgba(255,255,255,.14); overflow:hidden;}
-#appPreloader .pl-bar{width:40%; height:100%; border-radius:99px; background:var(--grad-brand); animation:plSlide 1.1s ease-in-out infinite;}
-@keyframes plSlide{0%{transform:translateX(-110%);} 100%{transform:translateX(340%);}}
-#appPreloader .pl-txt{font-family:'Fraunces'; font-weight:700; font-size:12.5px; color:#B7B4A6; letter-spacing:.02em;}
+#appPreloader .sk-shell{width:100%; max-width:460px; height:100%; display:flex; flex-direction:column; background:var(--cream);}
+#appPreloader .sk-topbar{display:flex; align-items:center; gap:10px; padding:11px 14px; padding-top:calc(11px + var(--safe-t));}
+#appPreloader .sk-logo{width:38px; height:38px; border-radius:50%; flex-shrink:0;}
+#appPreloader .sk-brand{width:120px; height:14px; border-radius:6px;}
+#appPreloader .sk-spacer{flex:1;}
+#appPreloader .sk-icon{width:40px; height:40px; border-radius:13px; flex-shrink:0;}
+#appPreloader .sk-body{flex:1; overflow:hidden; padding:14px;}
+#appPreloader .sk-search{height:46px; border-radius:16px; margin-bottom:14px;}
+#appPreloader .sk-cats{display:flex; gap:10px; margin-bottom:18px;}
+#appPreloader .sk-cat{width:56px; height:56px; border-radius:17px; flex-shrink:0;}
+#appPreloader .sk-banner{height:132px; border-radius:20px; margin-bottom:18px;}
+#appPreloader .sk-label{width:130px; height:16px; border-radius:6px; margin-bottom:12px;}
+#appPreloader .sk-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+#appPreloader .sk-card{border-radius:15px; overflow:hidden; background:var(--card); border:1px solid var(--line);}
+#appPreloader .sk-card .sk-img{aspect-ratio:1/1; border-radius:0;}
+#appPreloader .sk-card .sk-lines{padding:7px 6px 9px;}
+#appPreloader .sk-card .sk-ln{height:9px; border-radius:4px; margin-bottom:6px;}
+#appPreloader .sk-card .sk-ln:last-child{width:60%; margin-bottom:0;}
+#appPreloader .skeleton{border-radius:8px;}
 
-/* skeleton shimmer, used for anything loading in place */
-.skeleton{position:relative; overflow:hidden; background:var(--card-2);}
-.skeleton::after{content:''; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); animation:shimmer 1.3s ease-in-out infinite;}
+/* skeleton shimmer, used for anything loading in place.
+   Darker than the old light-grey fill so it remains clearly visible on white. */
+.skeleton{position:relative; overflow:hidden; background:#B9BBB7;}
+.skeleton::after{content:''; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.48), transparent); animation:shimmer 1.15s ease-in-out infinite;}
 @keyframes shimmer{100%{transform:translateX(100%);}}
 
-/* ============ LOGIN ============ */
-#loginScreen{position:absolute; inset:0; background:var(--grad-navy); z-index:3000; display:none; flex-direction:column; overflow:hidden;}
+/* ---- per-image skeleton, used on every real photo (product tiles, category
+   icons, pd-slides, logo) while that specific <img> is still downloading —
+   the shimmer shows first, then fades out into the photo once it's loaded,
+   so nothing ever pops in on a slow connection. */
+.has-img.img-loading{background:#B9BBB7 !important; position:relative;}
+.has-img.img-loading::after{content:''; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.48), transparent); animation:shimmer 1.15s ease-in-out infinite; z-index:1;}
+.has-img.img-loading::before{content:''; position:absolute; width:24px; height:24px; left:50%; top:50%; margin:-12px 0 0 -12px; border:3px solid rgba(255,255,255,.62); border-top-color:var(--brand-dark); border-radius:50%; animation:spin .75s linear infinite; z-index:2; box-shadow:0 1px 4px rgba(0,0,0,.12);}
+.has-img.img-loading img{opacity:0;}
+.has-img.img-error{background:#B9BBB7 !important; position:relative;}
+.has-img.img-error::before{content:'⌁'; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.82); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; z-index:2;}
+.has-img.img-error::after{display:none;}
+.has-img.img-error img{opacity:0;}
+.has-img img{opacity:1; transition:opacity .35s var(--ease);}
+
+
+/* Network failure state — full-screen overlay over the skeleton, never normal-flow content. */
+#appPreloader .network-error{
+  position:absolute; inset:0; z-index:20;
+  display:none; align-items:center; justify-content:center;
+  flex-direction:column; gap:10px;
+  padding:28px 22px calc(28px + var(--safe-b));
+  text-align:center; background:var(--cream);
+}
+#appPreloader .network-error.show{display:flex;}
+#appPreloader .network-illustration{width:150px; height:122px; color:#17160f; margin-bottom:2px;}
+#appPreloader .network-illustration svg{width:100%; height:100%; display:block;}
+#appPreloader .network-error-title{font-size:20px; line-height:1.15; font-weight:800; color:var(--ink); letter-spacing:-.02em;}
+#appPreloader .network-error-text{max-width:300px; font-size:13px; line-height:1.5; color:var(--ink-soft);}
+#appPreloader .network-retry{
+  appearance:none; border:0; border-radius:12px;
+  min-height:42px; padding:0 18px;
+  background:var(--ink); color:#fff;
+  font:inherit; font-size:13px; font-weight:800;
+  cursor:pointer; box-shadow:0 6px 16px rgba(23,22,15,.16);
+}
+#appPreloader .network-retry:active{transform:translateY(1px);}
+
+/* ============ LOGIN — small bottom-sheet popup, not a full page ============ */
+#loginScreen{position:absolute; inset:0; background:rgba(11,20,15,.55); z-index:3000; display:none; align-items:flex-end; justify-content:center; overflow:hidden;}
 #loginScreen.show{display:flex;}
-#loginScreen::before{content:'';position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.05),transparent 68%);top:-140px;right:-120px;pointer-events:none;}
-#loginScreen::after{content:'';position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(163,143,94,.10),transparent 68%);bottom:-140px;left:-120px;pointer-events:none;}
-.login-scroll{position:relative; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; justify-content:center; padding:24px; padding-top:calc(24px + var(--safe-t)); padding-bottom:calc(24px + var(--safe-b));}
-.login-brand{display:flex; align-items:center; gap:11px; justify-content:center; margin-bottom:8px;}
-.login-brand .logo-circle{width:46px;height:46px;}
-.login-brand .txt{font-family:'Fraunces'; font-weight:800; font-size:22px; color:#fff; line-height:1.15; text-align:left;}
-.login-brand .txt span{display:block; font-size:10.5px; font-weight:600; color:#B7B4A6; letter-spacing:.03em;}
-.login-tag{text-align:center; color:#B7B4A6; font-size:12.5px; font-weight:600; margin-bottom:26px;}
-.login-card{position:relative; background:var(--card); border-radius:24px; padding:26px 22px 24px; box-shadow:0 26px 60px rgba(0,0,0,.38); animation:cardRise .45s var(--ease-spring); border:1px solid rgba(255,255,255,.06);}
-.login-card::before{content:'';position:absolute; top:0; left:22px; right:22px; height:3px; border-radius:0 0 3px 3px; background:var(--grad-brand);}
+.login-scroll{position:relative; width:100%; max-height:88%; overflow-y:auto; -webkit-overflow-scrolling:touch; background:var(--card); border-radius:22px 22px 0 0; padding:10px 20px calc(18px + var(--safe-b)); box-shadow:0 -20px 50px rgba(0,0,0,.3); transform:translateY(18px); opacity:0; transition:transform .3s var(--ease), opacity .3s var(--ease);}
+#loginScreen.show .login-scroll{transform:translateY(0); opacity:1;}
+.login-brand{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+.login-brand .logo-circle{width:38px;height:38px;}
+.login-brand .txt{font-family:'Fraunces'; font-weight:800; font-size:16px; color:var(--ink); line-height:1.15; text-align:left;}
+.login-brand .txt span{display:block; font-size:9px; font-weight:600; color:var(--ink-mute); letter-spacing:.03em;}
+.login-tag{text-align:left; color:var(--ink-soft); font-size:11px; font-weight:600; margin-bottom:14px;}
+.login-card{position:relative;}
 .login-card.busy{pointer-events:none;}
 .login-card.busy .login-h, .login-card.busy .login-sub{opacity:.55;}
-@keyframes cardRise{from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:none;}}
-.login-h{font-weight:800; font-size:19px; margin-bottom:4px; letter-spacing:-.01em;}
+.login-h{font-weight:800; font-size:17px; margin-bottom:4px; letter-spacing:-.01em;}
 .login-sub{font-size:12.5px; color:var(--ink-soft); margin-bottom:20px; line-height:1.5;}
 .field{margin-bottom:14px;}
 .field label{display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-mute); margin-bottom:7px;}
@@ -170,7 +217,7 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* ============ LOGO ============ */
-.logo-circle{width:38px;height:38px;border-radius:50%;background:var(--grad-brand); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px rgba(194,65,12,.32); position:relative; overflow:hidden;}
+.logo-circle{width:38px;height:38px;border-radius:50%;background:var(--grad-brand); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px rgba(29,69,1,.32); position:relative; overflow:hidden;}
 .logo-circle::after{content:'';position:absolute; width:60%; height:60%; border-radius:50%; border:1.5px solid rgba(255,255,255,.5); top:8%; left:18%; pointer-events:none;}
 .logo-circle span{font-family:'Fraunces'; font-weight:800; font-size:15px; color:#fff; position:relative;}
 
@@ -219,7 +266,7 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .section-link{font-size:12px; color:var(--saffron-dark); font-weight:700; cursor:pointer;}
 
 /* ---- compact grid (row of 4) ---- */
-.grid-4{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px;}
+.grid-4{display:grid; grid-template-columns:repeat(3,1fr); align-items:stretch; gap:10px; margin-bottom:12px;}
 .grid-4 .pcard-sm, .grid-2 .pcard-lg, .cat-grid .pcard-sm{animation:cardIn .38s var(--ease-spring) backwards;}
 .grid-4 .pcard-sm:nth-child(1),.grid-2 .pcard-lg:nth-child(1),.cat-grid .pcard-sm:nth-child(1){animation-delay:.02s;}
 .grid-4 .pcard-sm:nth-child(2),.grid-2 .pcard-lg:nth-child(2),.cat-grid .pcard-sm:nth-child(2){animation-delay:.06s;}
@@ -227,12 +274,20 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .grid-4 .pcard-sm:nth-child(4),.grid-2 .pcard-lg:nth-child(4),.cat-grid .pcard-sm:nth-child(4){animation-delay:.14s;}
 .grid-4 .pcard-sm:nth-child(n+5),.grid-2 .pcard-lg:nth-child(n+5),.cat-grid .pcard-sm:nth-child(n+5){animation-delay:.16s;}
 @keyframes cardIn{from{opacity:0; transform:translateY(10px) scale(.96);} to{opacity:1; transform:none;}}
-.pcard-sm{background:var(--card); border:1px solid var(--line); border-radius:15px; overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; cursor:pointer; transition:transform .18s var(--ease-spring), box-shadow .2s ease, border-color .2s ease;}
+.pcard-sm{height:100%; background:var(--card); border:1px solid var(--line); border-radius:15px; overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; cursor:pointer; transition:transform .18s var(--ease-spring), box-shadow .2s ease, border-color .2s ease;}
 .pcard-sm:active{transform:scale(.96);}
 .pcard-sm:hover{box-shadow:var(--shadow-md); border-color:var(--saffron-light); transform:translateY(-2px);}
-.pcard-sm .tile{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; font-size:26px; position:relative;}
+.pcard-sm .tile{aspect-ratio:1/1; width:100%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:26px; position:relative;}
 .pcard-sm .tag{position:absolute; top:4px; left:4px; background:rgba(255,255,255,.85); color:var(--saffron-dark); font-size:7.5px; font-weight:800; padding:2px 5px; border-radius:5px; letter-spacing:.01em;}
-.pcard-sm .body{padding:7px 6px 9px;}
+/* stock-state badges — reused across sm/lg cards and the product-detail slider */
+.badge-oos,.badge-soon{position:absolute; top:4px; left:4px; font-size:7.5px; font-weight:800; padding:2px 6px; border-radius:5px; letter-spacing:.01em; z-index:2;}
+.pcard-lg .badge-oos,.pcard-lg .badge-soon,.pd-slide .badge-oos,.pd-slide .badge-soon{top:8px; left:8px; font-size:9px; padding:3px 7px; border-radius:6px;}
+.badge-oos{background:var(--danger); color:#fff;}
+.badge-soon{background:var(--gold); color:#fff;}
+.tile.unavailable .tile-media,.tile.unavailable img{filter:grayscale(.55) brightness(.9); opacity:.75;}
+.add-btn:disabled,.mini-add:disabled{background:var(--ink-mute) !important; box-shadow:none !important; cursor:not-allowed; opacity:.75;}
+.pcard-sm .body{padding:7px 6px 9px; flex:1; display:flex; flex-direction:column;}
+.pcard-sm .body>[data-cta-host]{margin-top:auto;}
 .pcard-sm .nm{font-size:10.5px; font-weight:700; line-height:1.25; height:26px; overflow:hidden; margin-bottom:4px;}
 .pcard-sm .pr{font-size:11px; font-weight:800; font-family:'JetBrains Mono'; margin-bottom:6px;}
 .pcard-sm .pr .mrp{color:var(--ink-mute); font-weight:600; text-decoration:line-through; font-size:9px; margin-left:3px;}
@@ -274,7 +329,7 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .banner-promo .tx span{font-size:11.5px; opacity:.9;}
 
 /* ---- big grid (row of 2) ---- */
-.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:6px;}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; align-items:stretch; gap:28px 14px; margin-bottom:25px;}
 .pcard-lg{background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); overflow:visible; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; cursor:pointer; transition:transform .18s var(--ease-spring), box-shadow .2s ease;}
 .pcard-lg:active{transform:scale(.97);}
 .pcard-lg:hover{box-shadow:var(--shadow-md); transform:translateY(-2px);}
@@ -326,7 +381,7 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .cat-content{flex:1; min-width:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 14px calc(40px + var(--nav-h) + var(--safe-b)) 14px;}
 .cat-content-title{font-family:'Fraunces'; font-weight:700; font-size:18px; margin-bottom:2px;}
 .cat-content-count{font-size:11.5px; color:var(--ink-mute); margin-bottom:14px;}
-.cat-grid{display:grid; grid-template-columns:1fr 1fr; gap:11px;}
+.cat-grid{display:grid; grid-template-columns:1fr 1fr; align-items:stretch; gap:30px 12px; padding-bottom:4px;}
 
 /* ---- overlay screens (product / cart) ---- */
 .overlay-screen{position:absolute; inset:0; background:var(--cream); z-index:200; display:flex; flex-direction:column; transform:translateX(100%); transition:transform .32s var(--ease);}
@@ -368,7 +423,7 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 
 /* cart */
 .cart-item{display:flex; gap:11px; padding:13px 14px; background:var(--card); border-radius:var(--radius-lg); margin-bottom:11px; box-shadow:var(--shadow-sm); border:1px solid var(--line);}
-.cart-item .tile{width:62px; height:62px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0;}
+.cart-item .tile{width:62px; height:62px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0; overflow:hidden;}
 .cart-item .mid{flex:1; min-width:0;}
 .cart-item .nm{font-weight:700; font-size:13px; margin-bottom:1px;}
 .cart-item .un{font-size:11px; color:var(--ink-mute); margin-bottom:8px;}
@@ -389,8 +444,8 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .cart-empty .s{font-size:12.5px; line-height:1.6;}
 
 /* ---- floating bottom nav + whatsapp ---- */
-#bottomNav{position:absolute; left:14px; right:14px; bottom:calc(12px + var(--safe-b)); height:var(--nav-h); background:rgba(23,16,31,.94); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.07); border-radius:20px; display:flex; box-shadow:0 16px 34px rgba(16,9,24,.4); z-index:50;}
-#bottomNav button{flex:1; border:none; background:transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:#8D89A0; font-size:9.5px; font-weight:700; cursor:pointer; position:relative; transition:color .18s ease, transform .18s var(--ease-spring);}
+#bottomNav{position:absolute; left:14px; right:14px; bottom:calc(12px + var(--safe-b)); height:var(--nav-h); background:rgba(14,32,22,.94); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.07); border-radius:20px; display:flex; box-shadow:0 16px 34px rgba(9,24,16,.4); z-index:50;}
+#bottomNav button{flex:1; border:none; background:transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; color:#8D89A0; font-size:9.5px; font-weight:700; cursor:pointer; position:relative; transition:color .18s ease, transform .18s var(--ease-spring);}
 #bottomNav button:active{transform:scale(.92);}
 #bottomNav button .nic{font-size:18px; line-height:1; transition:transform .22s var(--ease-spring);}
 #bottomNav button .nic svg{width:20px; height:20px; display:block;}
@@ -410,7 +465,7 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 
 /* profile sheet */
 .profile-card-hero{display:flex; align-items:center; gap:13px; padding:4px 2px 18px;}
-.profile-card-hero .av{width:56px; height:56px; border-radius:50%; background:var(--grad-brand); color:#fff; font-weight:800; font-size:20px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 18px rgba(194,65,12,.26); flex-shrink:0;}
+.profile-card-hero .av{width:56px; height:56px; border-radius:50%; background:var(--grad-brand); color:#fff; font-weight:800; font-size:20px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 18px rgba(29,69,1,.26); flex-shrink:0;}
 .profile-card-hero .nm{font-weight:800; font-size:17px; font-family:'Fraunces';}
 .profile-card-hero .ph{font-size:12px; color:var(--ink-mute); margin-top:2px;}
 .profile-row{display:flex; align-items:flex-start; justify-content:space-between; padding:13px 2px; border-bottom:1px solid var(--line); gap:14px;}
@@ -459,11 +514,11 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .order-body{max-height:0; overflow:hidden; transition:max-height .3s var(--ease);}
 .order-card.open .order-body{max-height:1400px;}
 .order-body-in{padding:0 15px 15px; border-top:1px solid var(--line);}
-.oi-row{display:flex; align-items:flex-start; gap:10px; padding:12px 0; border-bottom:1px solid var(--line); overflow:hidden; max-height:300px; opacity:1; transform:translateX(0); transition:max-height .32s var(--ease), opacity .28s ease, padding .32s var(--ease), margin .32s var(--ease), transform .28s ease, border-color .32s var(--ease);}
+.oi-row{display:flex; align-items:flex-start; gap:10px; padding:12px 0; border-bottom:1px solid var(--line); overflow:hidden; max-height:3000px; opacity:1; transform:translateX(0); transition:max-height .32s var(--ease), opacity .28s ease, padding .32s var(--ease), margin .32s var(--ease), transform .28s ease, border-color .32s var(--ease);}
 .oi-row:last-child{border-bottom:none;}
 .oi-row.removing{max-height:0; opacity:0; padding-top:0; padding-bottom:0; margin-bottom:0; transform:translateX(16px); border-bottom-color:transparent; pointer-events:none;}
 .oi-row .del-item-btn{margin-left:auto; flex-shrink:0;}
-.oi-row .tile{width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;}
+.oi-row .tile{width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; overflow:hidden;}
 .oi-row .mid{flex:1; min-width:0;}
 .oi-row .nm{font-weight:700; font-size:12.5px; margin-bottom:1px;}
 .oi-row .qp{font-size:10.5px; color:var(--ink-mute); margin-bottom:7px;}
@@ -526,28 +581,81 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 </head>
 <body>
 <div id="appPreloader">
-  <div class="pl-logo"><span>A</span></div>
-  <div class="pl-track"><div class="pl-bar"></div></div>
-  <div class="pl-txt">Anadi Godham load ho raha hai…</div>
+  <div class="sk-shell">
+    <div class="sk-topbar">
+      <div class="sk-logo skeleton"></div>
+      <div class="sk-brand skeleton"></div>
+      <div class="sk-spacer"></div>
+      <div class="sk-icon skeleton"></div>
+      <div class="sk-icon skeleton"></div>
+    </div>
+    <div class="sk-body">
+      <div class="sk-search skeleton"></div>
+      <div class="sk-cats">
+        <div class="sk-cat skeleton"></div>
+        <div class="sk-cat skeleton"></div>
+        <div class="sk-cat skeleton"></div>
+        <div class="sk-cat skeleton"></div>
+        <div class="sk-cat skeleton"></div>
+      </div>
+      <div class="sk-banner skeleton"></div>
+      <div class="sk-label skeleton"></div>
+      <div class="sk-grid">
+        <div class="sk-card"><div class="sk-img skeleton"></div><div class="sk-lines"><div class="sk-ln skeleton"></div><div class="sk-ln skeleton"></div></div></div>
+        <div class="sk-card"><div class="sk-img skeleton"></div><div class="sk-lines"><div class="sk-ln skeleton"></div><div class="sk-ln skeleton"></div></div></div>
+        <div class="sk-card"><div class="sk-img skeleton"></div><div class="sk-lines"><div class="sk-ln skeleton"></div><div class="sk-ln skeleton"></div></div></div>
+        <div class="sk-card"><div class="sk-img skeleton"></div><div class="sk-lines"><div class="sk-ln skeleton"></div><div class="sk-ln skeleton"></div></div></div>
+        <div class="sk-card"><div class="sk-img skeleton"></div><div class="sk-lines"><div class="sk-ln skeleton"></div><div class="sk-ln skeleton"></div></div></div>
+        <div class="sk-card"><div class="sk-img skeleton"></div><div class="sk-lines"><div class="sk-ln skeleton"></div><div class="sk-ln skeleton"></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="network-error" id="networkError" aria-live="polite">
+    <div class="network-illustration" aria-hidden="true">
+      <svg viewBox="0 0 160 130" fill="none">
+        <circle cx="80" cy="72" r="50" stroke="currentColor" stroke-opacity=".12" stroke-width="3"/>
+        <path d="M31 89c7-16 24-27 43-27 19 0 36 11 43 27" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+        <path d="M47 73c7-9 16-14 27-14s20 5 27 14" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+        <path d="M64 56c3-3 7-5 10-5s7 2 10 5" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="80" cy="93" r="7" fill="currentColor"/>
+        <path d="m116 27-17 17m0-17 17 17" stroke="var(--danger)" stroke-width="7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="network-error-title">Network issue</div>
+    <div class="network-error-text">Page load nahi ho paayi. Internet connection check karke dobara try karein.</div>
+    <button class="network-retry" id="networkRetry">Retry connection</button>
+  </div>
 </div>
 <script>
-setTimeout(function(){
-  var pl = document.getElementById('appPreloader');
-  if (pl && !pl.classList.contains('hide')) pl.classList.add('hide');
-}, 6000);
+(function(){
+  var timer = setTimeout(function(){
+    var pl = document.getElementById('appPreloader');
+    var err = document.getElementById('networkError');
+    if (pl && !pl.classList.contains('hide') && err) err.classList.add('show');
+  }, 7000);
+  window.__networkLoadingTimer = timer;
+  window.__showNetworkError = function(){
+    var err = document.getElementById('networkError');
+    if (err) err.classList.add('show');
+  };
+  document.addEventListener('click', function(e){
+    if (e.target && e.target.id === 'networkRetry') window.location.reload();
+  });
+})();
 </script>
 <div id="shell">
 
   <!-- ============ LOGIN ============ -->
   <div id="loginScreen">
     <div class="login-scroll">
+      <div class="sheet-handle"></div>
+      <button id="loginCloseBtn" style="position:absolute; top:10px; right:16px; width:28px; height:28px; border:none; border-radius:50%; background:var(--card-2); color:var(--ink-soft); font-size:13px; cursor:pointer;">✕</button>
       <div class="login-brand">
-        <div class="logo-circle" style="width:46px;height:46px;"><span style="font-size:17px;">A</span></div>
+        <div class="logo-circle" style="width:38px;height:38px;"><span style="font-size:14px;">A</span></div>
         <div class="txt">Anadi Godham<span>FARM FRESH DAIRY, DAILY</span></div>
       </div>
       <div class="login-tag">Shuddh doodh, ghee aur pooja samagri — seedha aapke ghar</div>
-      <div class="login-card" id="loginCard" style="position:relative;">
-        <button id="loginCloseBtn" style="position:absolute; top:14px; right:14px; width:30px; height:30px; border:none; border-radius:50%; background:var(--card-2); color:var(--ink-soft); font-size:14px; cursor:pointer;">✕</button>
+      <div class="login-card" id="loginCard">
         <div class="login-h" id="loginHeading">Order karne ke liye 👋</div>
         <div class="login-sub" id="loginSub">Bas apna mobile number daalein — agar aap pehle se registered hain, to baaki details apne aap aa jayengi.</div>
 
@@ -659,7 +767,9 @@ setTimeout(function(){
       <!-- ---- BILL TAB ---- -->
       <section class="tab-pane" id="tab-bill">
         <div class="bill-hero" id="billHero"></div>
-        <div class="section-row"><div class="section-label">Order-wise Breakdown</div></div>
+        <div class="section-row"><div class="section-label">📅 Day-wise Purchase</div></div>
+        <div id="billDayWise"></div>
+        <div class="section-row" style="margin-top:6px;"><div class="section-label">Order-wise Breakdown</div></div>
         <div id="billList"></div>
       </section>
 
@@ -778,7 +888,7 @@ setTimeout(function(){
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getDatabase, ref, get, set, update, remove, push, query, orderByChild, equalTo, onValue, off
+  getDatabase, ref, get, set, update, remove, push, query, orderByChild, equalTo, onValue, off, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 /* Same Firebase project used by deliverychart.html (RouteBoy) — this is the
@@ -821,7 +931,7 @@ function withTimeout(promise, ms=12000){
    nothing else needs to change. Recommended: square photos (1:1) for
    products/logo, roughly 800×400 landscape for banners, hosted on any
    public URL (Firebase Storage, Cloudinary, imgur, your own server, etc).*/
-const BRAND_LOGO_URL = ''; // e.g. 'https://yourcdn.com/anadi-logo.png'
+const BRAND_LOGO_URL = 'https://anadi.co.in/wp-content/uploads/2024/10/WhatsApp_Image_2024-10-06_at_3.59.51_AM-removebg-preview.png';
 
 /* Swaps every logo placeholder (topbar, login screen, footer, preloader)
    for BRAND_LOGO_URL in one shot — called once on boot. Leave the const
@@ -829,15 +939,57 @@ const BRAND_LOGO_URL = ''; // e.g. 'https://yourcdn.com/anadi-logo.png'
 function applyBrandLogo(){
   if (!BRAND_LOGO_URL) return;
   document.querySelectorAll('.logo-circle, .pl-logo').forEach(el=>{
-    el.classList.add('has-img');
+    el.classList.add('has-img','img-loading');
     el.innerHTML = `<img src="${BRAND_LOGO_URL}" alt="Anadi Godham">`;
   });
 }
 
-/* Renders an <img> when p.image is set, else falls back to the emoji tile
-   content exactly as before — used everywhere a product tile is drawn. */
+/* Some products only have a photo in the newer `images` array (multi-photo
+   admin uploads) and never got the older single `image` field filled in.
+   Every place that decides "does this product have a photo?" must check
+   both, or some cart/grid rows show a real photo while others silently
+   fall back to the emoji — which is exactly what made the cart look
+   uneven. This is the single source of truth for "this product's photo". */
+/* Every real photo (product tiles, category icons, pd-slide gallery, logo)
+   is stamped with `img-loading` the moment it's drawn, so it shows the
+   skeleton shimmer first — this single delegated listener catches every
+   <img>'s load/error anywhere in the app and lifts that class the instant
+   the photo actually finishes downloading (or fails), revealing it with a
+   soft fade instead of a hard pop. Capture phase is required because
+   `load`/`error` on <img> don't bubble. */
+document.addEventListener('load', e=>{
+  if (e.target && e.target.tagName === 'IMG'){
+    const host = e.target.closest('.has-img');
+    if (host){
+      host.classList.remove('img-loading','img-error');
+      host.classList.add('img-loaded');
+    }
+  }
+}, true);
+document.addEventListener('error', e=>{
+  if (e.target && e.target.tagName === 'IMG'){
+    const host = e.target.closest('.has-img');
+    if (host){
+      /* Broken images no longer become blank cards: stop the spinner and
+         keep a visible image-area fallback. */
+      host.classList.remove('img-loading','img-loaded');
+      host.classList.add('img-error');
+    }
+  }
+}, true);
+
+function firstImageOf(p){
+  if (!p) return '';
+  if (p.image) return p.image;
+  if (p.images && p.images.length) return p.images[0];
+  return '';
+}
+/* Renders an <img> when the product has a photo (via either field above),
+   else falls back to the emoji tile content exactly as before — used
+   everywhere a product tile is drawn. */
 function tileMedia(p){
-  if (p && p.image) return `<img src="${p.image}" alt="${escapeHtml(p.name||'')}" loading="lazy">`;
+  const img = firstImageOf(p);
+  if (img) return `<img src="${img}" alt="${escapeHtml(p.name||'')}" loading="lazy">`;
   return p ? p.emoji : '📦';
 }
 function catMedia(c){
@@ -852,15 +1004,21 @@ const CHART_PRODUCT_KEY = {
 /* ================= DATA ================= */
 const WHATSAPP_NUMBER = "919999999999"; // TODO: replace with real business WhatsApp number
 
-const CATEGORIES = [
-  {id:'dairy', name:'Dairy', icon:'🥛', image:'', tile:'tile-dairy'},
-  {id:'pooja', name:'Pooja', icon:'🪔', image:'', tile:'tile-pooja'},
-  {id:'gift', name:'Gifts', icon:'🎁', image:'', tile:'tile-gift'},
-  {id:'breakfast', name:'Breakfast', icon:'🍳', image:'', tile:'tile-breakfast'},
+/* ---- CATALOG NOW LIVES IN FIREBASE (catalog/categories, catalog/products,
+   catalog/banners) so admin.html can control stock, pricing, images,
+   categories and banners in real time without touching this file. The
+   arrays below are only the ONE-TIME SEED written to Firebase the very
+   first time the app runs against an empty database — after that, this
+   app always renders from whatever is live in Firebase. Edit everything
+   from admin.html going forward. */
+const SEED_CATEGORIES = [
+  {id:'dairy', name:'Dairy', icon:'🥛', image:'', tile:'tile-dairy', order:0},
+  {id:'pooja', name:'Pooja', icon:'🪔', image:'', tile:'tile-pooja', order:1},
+  {id:'gift', name:'Gifts', icon:'🎁', image:'', tile:'tile-gift', order:2},
+  {id:'breakfast', name:'Breakfast', icon:'🍳', image:'', tile:'tile-breakfast', order:3},
 ];
-const catMap = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
 
-const PRODUCTS = [
+const SEED_PRODUCTS = [
   {id:'p1', name:'A2 Gir Gau Milk', cat:'dairy', unit:'500 ml ', price:34, mrp:38, emoji:'🥛', image:'', tag:'Bestseller', popular:true, desc:'Farm-fresh full-cream cow milk, delivered daily straight from our godham. Rich, creamy and pasteurised for complete purity — no water, no preservatives.'},
   {id:'p2', name:'Toned Milk', cat:'dairy', unit:'500 ml Pouch', price:28, mrp:31, emoji:'🥛', image:'', popular:true, desc:'Light and easy-to-digest toned milk, perfect for everyday tea and cooking. Sourced fresh every morning from local farmers.'},
   {id:'p3', name:'Fresh Paneer', cat:'dairy', unit:'200 g Block', price:90, mrp:100, emoji:'🧀', image:'', tag:'Fresh', popular:true, desc:'Soft, spongy paneer made fresh daily using traditional methods. High in protein, perfect for your favourite sabzi or paratha.'},
@@ -883,9 +1041,101 @@ const PRODUCTS = [
   {id:'p20', name:'Butter Toast Spread', cat:'breakfast', unit:'100 g Pack', price:60, mrp:68, emoji:'🧈', image:'', desc:'Creamy, spreadable butter made for your morning toast — smooth texture, rich taste.'},
   {id:'p21', name:'Paneer Bhurji Mix', cat:'breakfast', unit:'250 g Pack', price:120, mrp:135, emoji:'🍳', image:'', desc:'Fresh crumbled paneer with mild spices, ready to cook for a protein-rich breakfast in minutes.'},
   {id:'p22', name:'Masala Chaas', cat:'breakfast', unit:'200 ml Pouch', price:18, mrp:21, emoji:'🥤', image:'', desc:'Spiced buttermilk with roasted cumin and mint — light, cooling and great to start the day.'},
+].map(p=>({ ...p, images:p.image?[p.image]:[], stock:null, comingSoon:false }));
+
+const SEED_BANNERS_OBJ = [
+  {grad:'linear-gradient(135deg,#2F5A03,#122601)', image:'', eyebrow:'PURE & FRESH', title:'Pure A2 Cow Milk, Now Available', sub:'Asli swaad, seedha godham se — har subah fresh.', order:0},
+  {grad:'linear-gradient(135deg,#3A8003,#1D4501)', image:'', eyebrow:'LIMITED OFFER', title:'Flat 10% OFF on Desi Ghee', sub:'Is hafte special — bilona ghee par bachat.', order:1},
+  {grad:'linear-gradient(135deg,#265001,#0F2000)', image:'', eyebrow:'REFER & EARN', title:'Invite Dost, Kamao ₹50', sub:'Apne dost ko app bhejein aur reward paayein.', order:2},
+  {grad:'linear-gradient(135deg,#4C8C1C,#1D4501)', image:'', eyebrow:'FESTIVE GIFTING', title:'Shuddhta Ka Tohfa Bhejein', sub:'Premium hampers apno ke liye, is tyohaar.', order:3},
 ];
-const prodMap = Object.fromEntries(PRODUCTS.map(p=>[p.id,p]));
-function tileOf(p){ return 'tile-'+p.cat; }
+
+/* Live catalog state — populated from Firebase, falls back to the seed
+   arrays above until the first snapshot arrives. */
+let CATEGORIES = SEED_CATEGORIES;
+let PRODUCTS = SEED_PRODUCTS;
+let BANNERS = SEED_BANNERS_OBJ;
+let catMap = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
+let prodMap = Object.fromEntries(PRODUCTS.map(p=>[p.id,p]));
+function tileOf(p){ return 'tile-'+(p.cat||''); }
+
+/* Availability of a product for ordering — three states admin.html
+   controls per-SKU: 'coming_soon' (not orderable, shown as a preview),
+   'out_of_stock' (either flagged manually or because stock hit 0 from
+   orders), or 'active' (orderable, optionally with a live stock count). */
+function stockStatus(p){
+  if (!p) return 'active';
+  if (p.comingSoon) return 'coming_soon';
+  if (p.outOfStock) return 'out_of_stock';
+  if (typeof p.stock === 'number' && p.stock <= 0) return 'out_of_stock';
+  return 'active';
+}
+function stockLeft(p){ return typeof p.stock === 'number' ? p.stock : Infinity; }
+
+let catalogSeeded = false;
+async function ensureCatalogSeeded(){
+  try{
+    const snap = await get(ref(db,'catalog/products'));
+    if (snap.exists()) return; // already has live data — never overwrite it
+    const catObj = Object.fromEntries(SEED_CATEGORIES.map(c=>[c.id,c]));
+    const prodObj = Object.fromEntries(SEED_PRODUCTS.map(p=>[p.id,p]));
+    const banObj = Object.fromEntries(SEED_BANNERS_OBJ.map((b,i)=>[`b${i+1}`,b]));
+    await set(ref(db,'catalog'), { categories:catObj, products:prodObj, banners:banObj });
+  } catch(e){ console.error('Catalog seed failed', e); }
+}
+
+/* Live-sync catalog from Firebase. Whenever admin.html changes a price,
+   image, stock count or adds/removes a category/product/banner, every
+   open customer app updates within moments — no reload needed. */
+let catalogReady = {categories:false, products:false};
+function markCatalogReady(kind){
+  catalogReady[kind] = true;
+  if (catalogReady.categories && catalogReady.products && window.__finishAppPreloader){
+    window.__finishAppPreloader();
+  }
+}
+
+function attachCatalogListeners(){
+  onValue(ref(db,'catalog/categories'), snap=>{
+    const val = snap.val();
+    // An empty node is still a successful Firebase response — do not mistake
+    // an empty catalog for a network failure.
+    CATEGORIES = val ? Object.entries(val).map(([id,c])=>({...c, id})).sort((a,b)=>(a.order||0)-(b.order||0)) : [];
+    catMap = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
+    if (!catMap[activeCat] && CATEGORIES.length) activeCat = CATEGORIES[0].id;
+    catalogSeeded = true;
+    refreshCatalogUI();
+    markCatalogReady('categories');
+  }, err=>{
+    console.error('Categories load failed', err);
+    window.__showNetworkError && window.__showNetworkError();
+  });
+  onValue(ref(db,'catalog/products'), snap=>{
+    const val = snap.val();
+    PRODUCTS = val ? Object.entries(val).map(([id,p])=>({...p, id})) : [];
+    prodMap = Object.fromEntries(PRODUCTS.map(p=>[p.id,p]));
+    refreshCatalogUI();
+    markCatalogReady('products');
+  }, err=>{
+    console.error('Products load failed', err);
+    window.__showNetworkError && window.__showNetworkError();
+  });
+  onValue(ref(db,'catalog/banners'), snap=>{
+    const val = snap.val();
+    if (!val) return;
+    BANNERS = Object.values(val).sort((a,b)=>(a.order||0)-(b.order||0));
+    if (document.getElementById('bannerTrack')) renderBanners();
+  }, err=>{
+    console.warn('Banners load failed', err);
+  });
+}
+/* Re-renders whichever screens are currently visible so a live catalog
+   change is reflected immediately without losing scroll position elsewhere. */
+function refreshCatalogUI(){
+  renderHome();
+  renderCategoryTab();
+  if (currentProductId && prodMap[currentProductId]) openProduct(currentProductId, true);
+}
 
 /* Live map of deliveryBoys/{id} -> {name,...}, kept in sync so the profile
    sheet can always show the current assigned partner's name, even if admin
@@ -923,13 +1173,6 @@ async function findCustomerByPhone(phone){
     return key ? { key, rec: all[key] } : null;
   }
 }
-
-const BANNERS = [
-  {grad:'linear-gradient(135deg,#2E2C22,#15140F)', image:'', eyebrow:'PURE & FRESH', title:'Pure A2 Cow Milk, Now Available', sub:'Asli swaad, seedha godham se — har subah fresh.'},
-  {grad:'linear-gradient(135deg,#A38F5E,#6E5D38)', image:'', eyebrow:'LIMITED OFFER', title:'Flat 10% OFF on Desi Ghee', sub:'Is hafte special — bilona ghee par bachat.'},
-  {grad:'linear-gradient(135deg,#3C3A2E,#20281F)', image:'', eyebrow:'REFER & EARN', title:'Invite Dost, Kamao ₹50', sub:'Apne dost ko app bhejein aur reward paayein.'},
-  {grad:'linear-gradient(135deg,#5C5B51,#312F26)', image:'', eyebrow:'FESTIVE GIFTING', title:'Shuddhta Ka Tohfa Bhejein', sub:'Premium hampers apno ke liye, is tyohaar.'},
-];
 
 const REVIEWS = [
   {name:'Priya Sharma', rating:5, text:'Doodh ekdum fresh aata hai roz subah, bacchon ko bahut pasand hai.'},
@@ -1018,11 +1261,21 @@ function attachOrdersListener(id){
   ordersListenerRef = ref(db, 'customers/'+id+'/webOrders');
   onValue(ordersListenerRef, snap=>{
     const val = snap.val() || {};
+    // Every live update (stop/resume, delete item, delete order — even the
+    // echo of our OWN write to Firebase) rebuilds `orders` from scratch and
+    // re-renders. Without capturing+restoring which cards were expanded,
+    // this listener firing right after an action (which it always does)
+    // wipes the .open class and snaps every expanded card shut — that's
+    // what caused cards to slam closed on Stop, or flicker closed-then-open
+    // on delete (our own explicit re-render restored .open, then this
+    // listener's re-render immediately undid it).
+    const openIds = getOpenOrderIds();
     orders = Object.keys(val)
       .map(k=> ({ ...val[k], id:k, custId:id }))
       .sort((a,b)=> new Date(b.placedAt) - new Date(a.placedAt));
     saveOrders();
     renderOrders();
+    restoreOpenOrderIds(openIds);
     renderBill();
   }, err=> console.error('Orders listener failed', err));
 }
@@ -1084,12 +1337,22 @@ function refreshCartBadges(){
 
 /* ================= CART OPS ================= */
 function addToCart(id, qty=1){
+  const p = prodMap[id];
+  if (stockStatus(p)!=='active'){
+    showToast(stockStatus(p)==='coming_soon' ? 'Yeh product jald hi aa raha hai' : 'Yeh product abhi stock mein nahi hai');
+    return;
+  }
   let it = cart.find(c=>c.id===id);
-  if (it) it.qty += qty;
-  else cart.push({id, qty, dates:[]});
+  const current = it ? it.qty : 0;
+  const capped = Math.min(current+qty, stockLeft(p));
+  if (capped<=current){ showToast('Available stock khatam ho gaya hai'); return; }
+  if (it) it.qty = capped;
+  else cart.push({id, qty:capped, dates:[]});
   saveCart(); refreshCartBadges();
 }
 function setQty(id, qty){
+  const p = prodMap[id];
+  if (qty>0 && qty>stockLeft(p)){ showToast('Available stock khatam ho gaya hai'); qty = stockLeft(p); }
   let it = cart.find(c=>c.id===id);
   if (!it) { if (qty>0) addToCart(id, qty); return; }
   if (qty<=0){ cart = cart.filter(c=>c.id!==id); }
@@ -1099,23 +1362,31 @@ function setQty(id, qty){
 function removeFromCart(id){
   cart = cart.filter(c=>c.id!==id);
   saveCart(); refreshCartBadges();
-  renderCart();
+  renderCart(); refreshAllCtas();
 }
 
 /* ================= STEPPER / ADD BUTTON RENDER ================= */
 function ctaMarkup(id, size){ // size: 'sm' or 'lg'
+  const p = prodMap[id];
+  const status = stockStatus(p);
+  if (status!=='active'){
+    const label = status==='coming_soon' ? 'SOON' : 'SOLD OUT';
+    return `<button class="${size==='sm'?'mini-add':'add-btn'}" disabled>${label}</button>`;
+  }
   const q = cartQtyOf(id);
   if (q<=0){
     return `<button class="${size==='sm'?'mini-add':'add-btn'}" data-add="${id}">ADD</button>`;
   }
+  const atLimit = q >= stockLeft(p);
   if (size==='sm'){
-    return `<div class="mini-stepper"><button data-dec="${id}">−</button><div class="qv">${q}</div><button data-inc="${id}">+</button></div>`;
+    return `<div class="mini-stepper"><button data-dec="${id}">−</button><div class="qv">${q}</div><button data-inc="${id}" ${atLimit?'disabled':''}>+</button></div>`;
   }
-  return `<div class="stepper-pill"><button data-dec="${id}">−</button><div class="qv">${q}</div><button data-inc="${id}">+</button></div>`;
+  return `<div class="stepper-pill"><button data-dec="${id}">−</button><div class="qv">${q}</div><button data-inc="${id}" ${atLimit?'disabled':''}>+</button></div>`;
 }
 
 /* ================= RENDER: HOME ================= */
 function renderBanners(){
+  if (!BANNERS.length){ $('#bannerTrack').innerHTML=''; $('#bannerDots').innerHTML=''; clearInterval(bannerTimer); return; }
   $('#bannerTrack').innerHTML = BANNERS.map(b=>`
     <div class="banner-slide" style="background:${b.image?`url('${b.image}') center/cover no-repeat`:b.grad}">
       ${b.image?'<div class="banner-scrim"></div>':''}
@@ -1137,9 +1408,16 @@ function startBannerAuto(){
   bannerTimer = setInterval(()=>goBanner(bannerIndex+1), 3800);
 }
 
+function stockBadgeHtml(p){
+  const status = stockStatus(p);
+  if (status==='coming_soon') return `<span class="badge-soon">COMING SOON</span>`;
+  if (status==='out_of_stock') return `<span class="badge-oos">OUT OF STOCK</span>`;
+  return '';
+}
 function smallCardHtml(p){
+  const status = stockStatus(p);
   return `<div class="pcard-sm" data-open="${p.id}">
-    <div class="tile ${tileOf(p)} ${p.image?'has-img':''}">${p.tag?`<span class="tag">${p.tag}</span>`:''}${tileMedia(p)}</div>
+    <div class="tile ${tileOf(p)} ${firstImageOf(p)?'has-img img-loading':''} ${status!=='active'?'unavailable':''}">${status==='active'&&p.tag?`<span class="tag">${p.tag}</span>`:stockBadgeHtml(p)}${tileMedia(p)}</div>
     <div class="body">
       <div class="nm">${escapeHtml(p.name)}</div>
       <div class="pr">${money(p.price)}<span class="mrp">${money(p.mrp)}</span></div>
@@ -1148,10 +1426,11 @@ function smallCardHtml(p){
   </div>`;
 }
 function bigCardHtml(p){
+  const status = stockStatus(p);
   return `<div class="pcard-lg" data-open="${p.id}">
-    <div class="tile ${tileOf(p)} ${p.image?'has-img':''}">
+    <div class="tile ${tileOf(p)} ${firstImageOf(p)?'has-img img-loading':''} ${status!=='active'?'unavailable':''}">
       <div class="veg"><i></i></div>
-      ${p.tag?`<span class="tag">${p.tag}</span>`:''}
+      ${status==='active'&&p.tag?`<span class="tag">${p.tag}</span>`:stockBadgeHtml(p)}
       ${tileMedia(p)}
     </div>
     <div class="body">
@@ -1163,8 +1442,9 @@ function bigCardHtml(p){
   </div>`;
 }
 function ymkCardHtml(p){
+  const status = stockStatus(p);
   return `<div class="ymk-card" data-open="${p.id}">
-    <div class="tile ${tileOf(p)} ${p.image?'has-img':''}">${tileMedia(p)}</div>
+    <div class="tile ${tileOf(p)} ${firstImageOf(p)?'has-img img-loading':''} ${status!=='active'?'unavailable':''}">${stockBadgeHtml(p)}${tileMedia(p)}</div>
     <div class="body"><div class="nm">${escapeHtml(p.name)}</div><div class="pr">${money(p.price)}</div></div>
   </div>`;
 }
@@ -1198,7 +1478,7 @@ function renderHome(){
 function renderCatStrip(){
   $('#catStrip').innerHTML = CATEGORIES.map(c=>`
     <div class="cat-strip-item" data-goto-cat="${c.id}">
-      <div class="ic ${c.image?'has-img':''}">${catMedia(c)}</div>
+      <div class="ic ${c.image?'has-img img-loading':''}">${catMedia(c)}</div>
       <div class="lb">${escapeHtml(c.name)}</div>
     </div>`).join('');
 }
@@ -1240,16 +1520,17 @@ $('#homeSearchClear').addEventListener('click', ()=>{
 function renderCategoryTab(){
   $('#catSidebar').innerHTML = CATEGORIES.map(c=>`
     <div class="cat-item ${c.id===activeCat?'active':''}" data-cat="${c.id}">
-      <div class="ic ${c.image?'has-img':''}">${catMedia(c)}</div>
+      <div class="ic ${c.image?'has-img img-loading':''}">${catMedia(c)}</div>
       <div class="lb">${c.name}</div>
     </div>`).join('');
   renderCatContent();
 }
 function renderCatContent(){
   const c = catMap[activeCat];
+  if (!c){ $('#catContent').innerHTML = ''; return; }
   const list = PRODUCTS.filter(p=>p.cat===activeCat);
   $('#catContent').innerHTML = `
-    <div class="cat-content-title">${c.icon} ${c.name}</div>
+    <div class="cat-content-title">${c.icon||''} ${escapeHtml(c.name)}</div>
     <div class="cat-content-count">${list.length} products available</div>
     <div class="cat-grid" id="catGrid"></div>`;
   $('#catGrid').innerHTML = list.map(bigCardHtml).join('');
@@ -1290,23 +1571,26 @@ $('#catSidebar').addEventListener('click', e=>{
 });
 
 /* ================= PRODUCT DETAIL SCREEN ================= */
-function openProduct(id){
+function openProduct(id, isLiveRefresh){
   currentProductId = id;
   const p = prodMap[id];
+  if (!p) return;
   $('#overlayProductTitle');
   $('#screenProduct .overlay-title').textContent = p.name;
 
-  const shots = p.image
-    ? [{cap:'Farm Fresh', img:p.image}]
+  const gallery = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+  const shots = gallery.length
+    ? gallery.map((img,i)=>({cap: i===0?'Farm Fresh':(p.tag||catMap[p.cat]?.name||''), img}))
     : [
         {cap:'Farm Fresh', emoji:p.emoji},
         {cap:p.tag||'Pure Quality', emoji:p.emoji},
-        {cap:catMap[p.cat].name, emoji:p.emoji},
+        {cap:catMap[p.cat]?.name||'', emoji:p.emoji},
       ];
-  $('#pdSlider').innerHTML = shots.map(s=>`<div class="pd-slide ${tileOf(p)} ${s.img?'has-img':''}">${s.img?`<img src="${s.img}" alt="${escapeHtml(p.name)}" loading="lazy">`:`<span>${s.emoji}</span>`}<span class="cap">${s.cap}</span></div>`).join('');
+  const status = stockStatus(p);
+  $('#pdSlider').innerHTML = shots.map(s=>`<div class="pd-slide ${tileOf(p)} ${s.img?'has-img img-loading':''}">${s.img?`<img src="${s.img}" alt="${escapeHtml(p.name)}" loading="lazy">`:`<span>${s.emoji}</span>`}<span class="cap">${s.cap}</span>${status!=='active'?stockBadgeHtml(p):''}</div>`).join('');
   $('#pdDots').innerHTML = shots.map((_,i)=>`<i class="${i===0?'active':''}"></i>`).join('');
   const slider = $('#pdSlider');
-  slider.scrollLeft = 0;
+  if (!isLiveRefresh) slider.scrollLeft = 0;
   slider.onscroll = ()=>{
     const idx = Math.round(slider.scrollLeft/slider.clientWidth);
     $$('#pdDots i').forEach((d,i)=>d.classList.toggle('active', i===idx));
@@ -1332,16 +1616,27 @@ function openProduct(id){
   $('#ymkRow').innerHTML = pool.slice(0,8).map(ymkCardHtml).join('');
 
   refreshCartBadges();
-  $('#screenProduct').classList.add('show');
+  if (!isLiveRefresh) $('#screenProduct').classList.add('show');
 }
 function renderPdQty(){
   if (!currentProductId) return;
-  const q = cartQtyOf(currentProductId);
+  const p = prodMap[currentProductId];
+  const status = p ? stockStatus(p) : 'active';
   const area = $('#pdQtyArea');
+  const addBtn = $('#pdAddBtn');
+  if (status!=='active'){
+    area.innerHTML = `<span style="color:var(--danger); font-size:12.5px; font-weight:700;">${status==='coming_soon'?'Coming Soon':'Out of Stock'}</span>`;
+    addBtn.disabled = true; addBtn.textContent = status==='coming_soon'?'Coming Soon':'Out of Stock';
+    return;
+  }
+  addBtn.disabled = false; addBtn.textContent = 'Add to Cart';
+  const q = cartQtyOf(currentProductId);
   if (q<=0){ area.innerHTML = `<span style="color:var(--ink-mute); font-size:12.5px; font-weight:600;">Not added yet</span>`; }
   else { area.innerHTML = `<div class="stepper-pill" style="width:96px;"><button data-dec="${currentProductId}">−</button><div class="qv">${q}</div><button data-inc="${currentProductId}">+</button></div>`; }
 }
 $('#pdAddBtn').addEventListener('click', ()=>{
+  const p = prodMap[currentProductId];
+  if (!p || stockStatus(p)!=='active') return;
   addToCart(currentProductId,1);
   refreshAllCtas(); refreshCartBadges();
   showToast('Item cart mein add kar diya gaya ✅');
@@ -1367,7 +1662,7 @@ function renderCart(){
     const p = prodMap[c.id];
     const datesHtml = c.dates.length ? `<div class="date-chips-mini">${c.dates.slice().sort().map(d=>`<span class="date-chip-mini">${fmtDate(d)}</span>`).join('')}</div>` : '';
     html += `<div class="cart-item">
-      <div class="tile ${tileOf(p)} ${p.image?'has-img':''}">${tileMedia(p)}</div>
+      <div class="tile ${tileOf(p)} ${firstImageOf(p)?'has-img img-loading':''}">${tileMedia(p)}</div>
       <div class="mid">
         <div class="nm">${escapeHtml(p.name)}</div>
         <div class="un">${escapeHtml(p.unit)}</div>
@@ -1392,11 +1687,11 @@ function renderCart(){
 }
 $('#cartBody').addEventListener('click', e=>{
   const inc = e.target.closest('[data-cinc]');
-  if (inc){ const i=+inc.getAttribute('data-cinc'); cart[i].qty++; saveCart(); refreshCartBadges(); renderCart(); return; }
+  if (inc){ const i=+inc.getAttribute('data-cinc'); cart[i].qty++; saveCart(); refreshCartBadges(); renderCart(); refreshAllCtas(); return; }
   const dec = e.target.closest('[data-cdec]');
-  if (dec){ const i=+dec.getAttribute('data-cdec'); cart[i].qty--; if(cart[i].qty<=0) cart.splice(i,1); saveCart(); refreshCartBadges(); renderCart(); return; }
+  if (dec){ const i=+dec.getAttribute('data-cdec'); cart[i].qty--; if(cart[i].qty<=0) cart.splice(i,1); saveCart(); refreshCartBadges(); renderCart(); refreshAllCtas(); return; }
   const rm = e.target.closest('[data-rm]');
-  if (rm){ const i=+rm.getAttribute('data-rm'); cart.splice(i,1); saveCart(); refreshCartBadges(); renderCart(); return; }
+  if (rm){ const i=+rm.getAttribute('data-rm'); cart.splice(i,1); saveCart(); refreshCartBadges(); renderCart(); refreshAllCtas(); return; }
   const sc = e.target.closest('[data-sched]');
   if (sc){ openSchedule(+sc.getAttribute('data-sched')); return; }
 });
@@ -1638,6 +1933,7 @@ async function finalizeOrder(cust){
   cart = []; saveCart(); refreshCartBadges();
   $('#screenCart').classList.remove('show');
   renderCart();
+  refreshAllCtas();
   $('#orderSuccess').classList.add('show');
   try{
     const custKey = await syncOrderToChart(cust, order);
@@ -1645,6 +1941,23 @@ async function finalizeOrder(cust){
     await pushOrderToFirebase(order);
   }
   catch(e){ console.error('Chart sync failed', e); }
+  decrementStockForOrder(items);
+}
+
+/* Deducts each item's ordered qty (× number of delivery dates) from its
+   live Firebase stock count via a transaction, so two customers ordering
+   the last units at the same moment can never both succeed. Products with
+   no stock tracking (stock === null) are skipped entirely. Runs after the
+   order is already confirmed to the customer — this only affects future
+   availability, never blocks the order that was just placed. */
+function decrementStockForOrder(items){
+  items.forEach(it=>{
+    const qtyOrdered = it.qty * it.dates.length;
+    runTransaction(ref(db,'catalog/products/'+it.productId+'/stock'), current=>{
+      if (typeof current !== 'number') return current; // not stock-tracked
+      return Math.max(0, current - qtyOrdered);
+    }).catch(e=> console.error('Stock decrement failed for', it.productId, e));
+  });
 }
 
 async function syncOrderToChart(cust, order){
@@ -1812,7 +2125,7 @@ function renderOrders(){
           <button data-stop="${oi}:${ii}:${di}">${dd.stopped?'Resume':'Stop'}</button>
         </div>`).join('');
       return `<div class="oi-row" data-item="${oi}:${ii}">
-        <div class="tile ${p?tileOf(p):''} ${p&&p.image?'has-img':''}">${tileMedia(p)}</div>
+        <div class="tile ${p?tileOf(p):''} ${p&&firstImageOf(p)?'has-img img-loading':''}">${tileMedia(p)}</div>
         <div class="mid">
           <div class="nm">${escapeHtml(it.name)}</div>
           <div class="qp">${it.qty} × ${money(it.price)} · ${escapeHtml(it.unit)}</div>
@@ -1821,7 +2134,7 @@ function renderOrders(){
         <button class="row-del-btn del-item-btn" data-delete-item="${oi}:${ii}" title="Product hataayein"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       </div>`;
     }).join('');
-    return `<div class="order-card" data-order="${oi}">
+    return `<div class="order-card" data-order="${o.id}">
       <div class="order-head" data-toggle="${oi}">
         <div class="l"><div class="id">Order #${o.id}</div><div class="dt">${new Date(o.placedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})} · ${o.items.length} item(s)</div></div>
         <div class="r"><span class="order-status">Scheduled</span><div class="amt">${money(orderEffectiveTotal(o))}</div><span class="chev">▾</span></div>
@@ -1937,12 +2250,62 @@ $('#ordersList').addEventListener('click', async e=>{
 });
 
 /* ================= BILL ================= */
+/* Groups every scheduled delivery date (across all orders/items) into a
+   date -> {items[], total} map, so the person can see exactly what was
+   purchased on any given day, not just order-by-order totals. */
+function buildDayWiseMap(){
+  const map = new Map();
+  orders.forEach(o=>{
+    o.items.forEach(it=>{
+      (it.dates||[]).forEach(d=>{
+        if (!map.has(d.date)) map.set(d.date, { items:[], total:0 });
+        const day = map.get(d.date);
+        day.items.push({ name: it.name, unit: it.unit, qty: it.qty, price: it.price, stopped: d.stopped });
+        if (!d.stopped) day.total += it.price*it.qty;
+      });
+    });
+  });
+  return map;
+}
+function renderBillDayWise(){
+  const wrap = $('#billDayWise');
+  const map = buildDayWiseMap();
+  const dateList = [...map.keys()].sort().reverse();
+  if (dateList.length===0){
+    wrap.innerHTML = `<div class="bill-empty"><span class="ic">📅</span><div class="t">Abhi koi purchase history nahi hai</div></div>`;
+    return;
+  }
+  wrap.innerHTML = dateList.map(iso=>{
+    const day = map.get(iso);
+    const itemsHtml = day.items.map(it=>`
+      <div class="oi-row">
+        <div class="mid" style="flex:1;">
+          <div class="nm">${escapeHtml(it.name)}${it.stopped?' <span style="color:var(--danger); font-weight:700; font-size:9.5px;">(Stopped)</span>':''}</div>
+          <div class="qp">${it.qty} × ${money(it.price)} · ${escapeHtml(it.unit||'')}</div>
+        </div>
+        <div class="amt" style="font-weight:800; font-family:'JetBrains Mono'; font-size:12.5px; ${it.stopped?'text-decoration:line-through; opacity:.5;':''}">${money(it.price*it.qty)}</div>
+      </div>`).join('');
+    return `<div class="order-card" data-daycard="${iso}">
+      <div class="order-head" data-toggle-day="${iso}">
+        <div class="l"><div class="id">${fmtDateLong(iso)}</div><div class="dt">${day.items.length} item(s)</div></div>
+        <div class="r"><div class="amt">${money(day.total)}</div><span class="chev">▾</span></div>
+      </div>
+      <div class="order-body"><div class="order-body-in">${itemsHtml}</div></div>
+    </div>`;
+  }).join('');
+}
+$('#billDayWise').addEventListener('click', e=>{
+  const head = e.target.closest('[data-toggle-day]');
+  if (!head) return;
+  head.closest('.order-card').classList.toggle('open');
+});
 function renderBill(){
   const total = orders.reduce((s,o)=>s+orderEffectiveTotal(o),0);
   $('#billHero').innerHTML = `
     <div class="lbl">TOTAL BILL AMOUNT</div>
     <div class="amt">${money(total)}</div>
     <div class="sub">${orders.length} order(s) placed till date</div>`;
+  renderBillDayWise();
   const list = $('#billList');
   if (orders.length===0){
     list.innerHTML = `<div class="bill-empty"><span class="ic">🧾</span><div class="t">Koi bill nahi hai</div></div>`;
@@ -2037,8 +2400,22 @@ function openConfirm(title, text, onOk){
   $('#confirmText').textContent = text;
   $('#confirmOverlay').classList.add('show');
   const okBtn = $('#confirmOkBtn'), cancelBtn = $('#confirmCancelBtn');
-  const cleanup = ()=>{ $('#confirmOverlay').classList.remove('show'); okBtn.onclick=null; cancelBtn.onclick=null; };
-  okBtn.onclick = ()=>{ onOk(); cleanup(); };
+  const okOrigTxt = okBtn.textContent;
+  const cleanup = ()=>{ $('#confirmOverlay').classList.remove('show'); okBtn.onclick=null; cancelBtn.onclick=null; okBtn.disabled=false; cancelBtn.disabled=false; okBtn.textContent=okOrigTxt; };
+  // onOk may be async (Firebase deletes/updates) — if it returns a promise,
+  // the dialog now stays open with a spinner on Confirm until it settles,
+  // instead of vanishing instantly and leaving the person unsure whether
+  // the action actually went through.
+  okBtn.onclick = async ()=>{
+    const result = onOk();
+    if (result && typeof result.then === 'function'){
+      okBtn.disabled = true; cancelBtn.disabled = true;
+      okBtn.innerHTML = '<span class="spinner"></span>';
+      try{ await result; } finally { cleanup(); }
+    } else {
+      cleanup();
+    }
+  };
   cancelBtn.onclick = cleanup;
 }
 $('#confirmOverlay').addEventListener('click', e=>{ if (e.target.id==='confirmOverlay') e.currentTarget.classList.remove('show'); });
@@ -2086,12 +2463,26 @@ async function resumeSession(){
   // already established by the time the person reaches the login card —
   // this is what removes most of the "waiting with no feedback" feeling.
   get(ref(db,'deliveryBoys')).catch(()=>{});
+  // Seed the live catalog on a fresh database, then subscribe — this is
+  // what makes admin.html's edits (stock, price, images, categories,
+  // banners) show up here in real time.
+  ensureCatalogSeeded().finally(attachCatalogListeners);
   resumeSession();
-  // Preloader hides once the shell has actually painted, with a small
-  // minimum so it never just flashes.
-  requestAnimationFrame(()=>{
-    setTimeout(()=>{ const pl=$('#appPreloader'); if (pl) pl.classList.add('hide'); }, 350);
-  });
+  /* Keep the skeleton until the live catalog is ready. The inline timeout
+     above changes this same screen into the illustrated Network issue state
+     if Firebase/network never responds. */
+  let preloaderMinDone = false;
+  setTimeout(()=>{
+    preloaderMinDone = true;
+    if (window.__finishAppPreloader) window.__finishAppPreloader();
+  }, 650);
+
+  window.__finishAppPreloader = function(){
+    if (!preloaderMinDone || !catalogReady.categories || !catalogReady.products) return;
+    const pl = $('#appPreloader');
+    if (pl) pl.classList.add('hide');
+    if (window.__networkLoadingTimer) clearTimeout(window.__networkLoadingTimer);
+  };
 })();
 </script>
 </body>
