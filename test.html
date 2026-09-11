@@ -457,7 +457,7 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 #bottomNav button.active .nic{transform:translateY(-1px) scale(1.08);}
 #bottomNav button.active::before{content:'';position:absolute; top:6px; width:28px; height:28px; border-radius:10px; background:var(--grad-brand); opacity:.9; z-index:-1; animation:navPop .32s var(--ease-spring);}
 @keyframes navPop{from{transform:scale(.5); opacity:0;} to{transform:scale(1); opacity:.9;}}
-#whatsappBtn{position:absolute; right:16px; bottom:calc(var(--nav-h) + 22px + var(--safe-b)); width:52px; height:52px; border-radius:50%; background:#25D366; border:none; box-shadow:0 12px 26px rgba(37,211,102,.42); z-index:52; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff;}
+#whatsappBtn{position:absolute; right:16px; bottom:calc(var(--nav-h) + 22px + var(--safe-b)); width:52px; height:52px; border-radius:50%; background:#236b22; border:none; box-shadow:0 12px 26px rgba(37,211,102,.42); z-index:52; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff;}
 #whatsappBtn:active{transform:scale(.92);}
 
 /* ---- sheets (profile / schedule) ---- */
@@ -650,7 +650,7 @@ body{font-size:14px;background:#EEF1EB;}
   border-radius:13px;
 }
 .logo-circle.has-img{
-  background:#2c6602;
+  background:#236b22;
   border:1px solid #DDE9D8;
 }
 .logo-circle.has-img img{width:84%;height:84%;margin:8%;object-fit:contain;}
@@ -678,6 +678,9 @@ body{font-size:14px;background:#EEF1EB;}
 }
 .icon-btn:hover{background:#EFF5EC;border-color:transparent;}
 .cart-top-btn{margin-left:1px;}
+.profile-top-btn{margin-left:0;color:#1E5F25;background:#F1F6EE;border:1px solid #E0E9DC;}
+.profile-top-btn:hover{background:#E7F2E4;border-color:#CFE0C9;}
+.profile-top-btn svg{width:20px;height:20px;}
 .icon-btn .badge{
   top:-1px;right:-2px;
   min-width:17px;height:17px;
@@ -763,7 +766,7 @@ body{font-size:14px;background:#EEF1EB;}
 }
 .grid-4{
   grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:9px;
+  gap:25px;
   margin-bottom:12px;
 }
 .pcard-sm{
@@ -829,9 +832,9 @@ body{font-size:14px;background:#EEF1EB;}
 .banner-promo .tx b{font-size:13.5px;}
 .banner-promo .tx span{font-size:10.5px;}
 .grid-2{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px 11px;
-  margin-bottom:19px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:25px 25px;
+  margin-bottom:25px;
 }
 .pcard-lg{
   border-radius:16px;
@@ -855,16 +858,16 @@ body{font-size:14px;background:#EEF1EB;}
 #bottomNav{
   left:10px;right:10px;bottom:calc(9px + var(--safe-b));
   height:62px;
-  background:rgb(255 255 255 / 0%);
+  background:rgba(255, 255, 255, 0);
   border:1px solid #E2E7E0;
   border-radius:18px;
   box-shadow:0 10px 30px rgba(27,47,31,.12);
   backdrop-filter:blur(18px);
 }
 #bottomNav button{
-  color:#002a0e;
-  gap:7px;
-  font-size:11px;
+  color:#2d302e;
+  gap:4px;
+  font-size:9px;
 }
 #bottomNav button .nic{font-size:17px;}
 #bottomNav button.active{
@@ -1085,6 +1088,314 @@ body{font-size:14px;background:#EEF1EB;}
 }
 .cart-total-row.grand span:last-child{color:#1E6425;}
 
+
+/* =========================================================
+   FINAL MICRO-INTERACTION POLISH
+   - smoother profile/sheet entrance + exit
+   - smaller bottom navigation
+   - WhatsApp button docked beside nav
+   ========================================================= */
+.sheet-overlay{
+  display:flex;
+  visibility:hidden;
+  pointer-events:none;
+  opacity:0;
+  transition:
+    opacity .34s cubic-bezier(.22,.61,.36,1),
+    visibility 0s linear .34s,
+    backdrop-filter .34s ease;
+  background:rgba(12,20,14,.34);
+  backdrop-filter:blur(0px);
+  -webkit-backdrop-filter:blur(0px);
+}
+.sheet-overlay.show{
+  display:flex;
+  visibility:visible;
+  pointer-events:auto;
+  opacity:1;
+  transition:
+    opacity .34s cubic-bezier(.22,.61,.36,1),
+    visibility 0s linear 0s,
+    backdrop-filter .34s ease;
+  background:rgba(12,20,14,.42);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+.sheet{
+  transform:translate3d(0,42px,0) scale(.985);
+  opacity:.88;
+  will-change:transform,opacity;
+  transition:
+    transform .42s cubic-bezier(.16,1,.3,1),
+    opacity .28s ease;
+  box-shadow:0 -18px 46px rgba(20,32,22,.18);
+}
+.sheet-overlay.show .sheet{
+  transform:translate3d(0,0,0) scale(1);
+  opacity:1;
+}
+.sheet-handle{
+  transition:transform .42s cubic-bezier(.16,1,.3,1), opacity .28s ease;
+}
+.sheet-overlay:not(.show) .sheet-handle{opacity:0;transform:scaleX(.72);}
+.sheet-overlay.show .sheet-handle{opacity:1;transform:scaleX(1);}
+.profile-card-hero,
+.profile-row,
+.profile-sheet-actions{
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .28s ease, transform .42s cubic-bezier(.16,1,.3,1);
+}
+.sheet-overlay.show .profile-card-hero{opacity:1;transform:none;transition-delay:.06s;}
+.sheet-overlay.show .profile-row:nth-of-type(2){opacity:1;transform:none;transition-delay:.10s;}
+.sheet-overlay.show .profile-row:nth-of-type(3){opacity:1;transform:none;transition-delay:.13s;}
+.sheet-overlay.show .profile-row:nth-of-type(4){opacity:1;transform:none;transition-delay:.16s;}
+.sheet-overlay.show .profile-row:nth-of-type(5){opacity:1;transform:none;transition-delay:.19s;}
+.sheet-overlay.show .profile-sheet-actions{opacity:1;transform:none;transition-delay:.22s;}
+.login-prompt,
+.login-prompt .btn{
+  transition:opacity .28s ease, transform .42s cubic-bezier(.16,1,.3,1);
+}
+.sheet-overlay:not(.show) .login-prompt{opacity:0;transform:translateY(8px);}
+.sheet-overlay.show .login-prompt{opacity:1;transform:none;}
+
+/* Compact bottom navigation so the WhatsApp shortcut can sit alongside it. */
+#bottomNav{
+  left:10px;
+  right:68px;
+  bottom:calc(9px + var(--safe-b));
+  height:56px;
+  border-radius:17px;
+  box-shadow:0 9px 24px rgba(27,47,31,.10);
+}
+#bottomNav button{
+  gap:3px;
+  font-size:8.5px;
+}
+#bottomNav button .nic{font-size:16px;}
+#bottomNav button .nic svg{width:19px;height:19px;}
+#bottomNav button.active::before{
+  top:5px;
+  width:27px;
+  height:27px;
+  border-radius:9px;
+}
+#whatsappBtn{
+  right:11px;
+  bottom:calc(15px + var(--safe-b));
+  width:46px;
+  height:46px;
+  border-radius:15px;
+  box-shadow:0 8px 18px rgba(37,115,55,.22);
+}
+#whatsappBtn svg{width:21px;height:21px;}
+
+@media(max-width:370px){
+  #bottomNav{right:64px;height:54px;}
+  #whatsappBtn{width:44px;height:44px;right:9px;bottom:calc(14px + var(--safe-b));}
+}
+
+
+/* ============================================================
+   BILL — UNIFIED, LOW-CLUTTER PURCHASE VIEW
+   One screen, two simple views: Timeline and Orders.
+   ============================================================ */
+.bill-viewbar{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  padding:4px;
+  margin:0 0 12px;
+  background:#EEF2EC;
+  border:1px solid #DEE7DA;
+  border-radius:12px;
+}
+.bill-view-btn{
+  min-height:34px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:#6E7B70;
+  font:inherit;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+  transition:all .2s var(--ease);
+}
+.bill-view-btn.active{
+  background:#fff;
+  color:#1F5C28;
+  box-shadow:0 2px 8px rgba(30,78,37,.10);
+}
+.bill-panel-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:10px;
+  margin:5px 2px 10px;
+}
+.bill-panel-title{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:16px;
+  color:#18231A;
+}
+.bill-panel-sub{
+  color:#849087;
+  font-size:10.5px;
+  line-height:1.4;
+}
+.bill-timeline-card,.bill-order-card{
+  background:#fff;
+  border:1px solid #E1E8DF;
+  border-radius:15px;
+  margin-bottom:10px;
+  box-shadow:0 2px 10px rgba(23,45,28,.045);
+  overflow:hidden;
+}
+.bill-timeline-head,.bill-order-head{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 13px;
+  border:0;
+  background:#fff;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.bill-timeline-head:active,.bill-order-head:active{background:#F8FAF7;}
+.bill-date-main,.bill-order-main{min-width:0;}
+.bill-date-title,.bill-order-title{
+  font-size:12.5px;
+  font-weight:800;
+  color:#1E2A20;
+  line-height:1.25;
+}
+.bill-date-meta,.bill-order-meta{
+  margin-top:2px;
+  font-size:10px;
+  color:#87928A;
+}
+.bill-head-right{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex:none;
+}
+.bill-head-amount{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12.5px;
+  font-weight:800;
+  color:#234E29;
+}
+.bill-chevron{
+  color:#9CA79F;
+  font-size:12px;
+  transition:transform .25s var(--ease);
+}
+.bill-timeline-card.open .bill-chevron,.bill-order-card.open .bill-chevron{transform:rotate(180deg);}
+.bill-card-body{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .32s var(--ease);
+}
+.bill-timeline-card.open .bill-card-body,.bill-order-card.open .bill-card-body{max-height:1600px;}
+.bill-items-wrap{
+  padding:0 12px 11px;
+  border-top:1px solid #EEF2ED;
+}
+.bill-item-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  padding:10px 1px;
+  border-bottom:1px solid #EEF2ED;
+}
+.bill-item-row:last-child{border-bottom:0;}
+.bill-item-name{
+  font-size:11.5px;
+  font-weight:800;
+  color:#27332A;
+  line-height:1.3;
+}
+.bill-item-meta{
+  margin-top:3px;
+  font-size:9.5px;
+  color:#89948C;
+  line-height:1.45;
+}
+.bill-item-meta .order-ref{color:#5A6A5E;font-weight:700;}
+.bill-item-side{text-align:right;}
+.bill-item-amount{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  font-weight:800;
+  color:#29372D;
+}
+.bill-status-chip{
+  display:inline-flex;
+  margin-top:4px;
+  padding:3px 7px;
+  border-radius:999px;
+  font-size:8.5px;
+  font-weight:800;
+}
+.bill-status-chip.active{background:#EAF5E7;color:#2F6B35;}
+.bill-status-chip.stopped{background:#F8E5E1;color:#A24B3A;}
+.bill-day-total{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:9px;
+  padding:9px 10px;
+  border-radius:10px;
+  background:#F4F8F2;
+  color:#46604A;
+  font-size:10px;
+  font-weight:800;
+}
+.bill-day-total strong{
+  color:#24582B;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+}
+.bill-order-card .bill-order-head{padding-right:10px;}
+.bill-order-tools{display:flex;align-items:center;gap:6px;}
+.bill-order-tools .row-del-btn{width:28px;height:28px;}
+.bill-order-items{padding-bottom:7px;}
+.bill-empty-modern{
+  background:#fff;
+  border:1px dashed #D9E3D6;
+  border-radius:15px;
+  padding:34px 20px;
+  text-align:center;
+}
+.bill-empty-modern .ic{font-size:38px;display:block;margin-bottom:10px;}
+.bill-empty-modern .t{font-weight:800;color:#223025;font-size:14px;margin-bottom:4px;}
+.bill-empty-modern .s{font-size:11px;color:#87928A;line-height:1.5;}
+.bill-summary-strip{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin:0 0 12px;
+}
+.bill-stat{
+  background:#fff;
+  border:1px solid #E1E8DF;
+  border-radius:11px;
+  padding:9px 8px;
+}
+.bill-stat .v{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;color:#204D27;}
+.bill-stat .k{font-size:8.8px;color:#87928A;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+@media(max-width:370px){
+  .bill-summary-strip{gap:5px;}
+  .bill-stat{padding:8px 7px;}
+  .bill-stat .k{font-size:8.2px;}
+}
 </style>
 </head>
 <body>
@@ -1220,7 +1531,12 @@ body{font-size:14px;background:#EEF1EB;}
       <button class="icon-btn cart-top-btn" id="cartBtn" aria-label="Cart">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="badge" id="cartBadge">0</span>
       </button>
-      <button class="icon-btn" id="profileBtn" aria-label="Profile" style="display:none"></button>
+      <button class="icon-btn profile-top-btn" id="profileBtn" aria-label="Profile" title="Profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="3.5"></circle>
+          <path d="M5 21c.8-4.2 3.2-6.3 7-6.3s6.2 2.1 7 6.3"></path>
+        </svg>
+      </button>
     </header>
 
     <main id="mainScroll">
@@ -1291,10 +1607,12 @@ body{font-size:14px;background:#EEF1EB;}
       <!-- ---- BILL TAB ---- -->
       <section class="tab-pane" id="tab-bill">
         <div class="bill-hero" id="billHero"></div>
-        <div class="section-row"><div class="section-label">📅 Day-wise Purchase</div></div>
-        <div id="billDayWise"></div>
-        <div class="section-row" style="margin-top:6px;"><div class="section-label">Order-wise Breakdown</div></div>
-        <div id="billList"></div>
+        <div class="bill-viewbar" aria-label="Purchase details view">
+          <button class="bill-view-btn active" data-bill-view="timeline">Timeline</button>
+          <button class="bill-view-btn" data-bill-view="orders">Orders</button>
+        </div>
+        <div id="billSummary"></div>
+        <div id="billContent"></div>
       </section>
 
     </main>
@@ -2790,76 +3108,173 @@ $('#ordersList').addEventListener('click', async e=>{
 });
 
 /* ================= BILL ================= */
-/* Groups every scheduled delivery date (across all orders/items) into a
-   date -> {items[], total} map, so the person can see exactly what was
-   purchased on any given day, not just order-by-order totals. */
+let billView = 'timeline';
+
 function buildDayWiseMap(){
   const map = new Map();
   orders.forEach(o=>{
     o.items.forEach(it=>{
       (it.dates||[]).forEach(d=>{
-        if (!map.has(d.date)) map.set(d.date, { items:[], total:0 });
+        if (!map.has(d.date)) map.set(d.date, {items:[], total:0});
         const day = map.get(d.date);
-        day.items.push({ name: it.name, unit: it.unit, qty: it.qty, price: it.price, stopped: d.stopped });
-        if (!d.stopped) day.total += it.price*it.qty;
+        const liveAmount = d.stopped ? 0 : it.price * it.qty;
+        day.items.push({
+          name:it.name,
+          unit:it.unit,
+          qty:it.qty,
+          price:it.price,
+          stopped:!!d.stopped,
+          orderId:o.id,
+          orderDate:o.placedAt
+        });
+        day.total += liveAmount;
       });
     });
   });
   return map;
 }
-function renderBillDayWise(){
-  const wrap = $('#billDayWise');
+
+function billItemRowHtml(it){
+  const amount = it.price * it.qty;
+  return `<div class="bill-item-row">
+    <div>
+      <div class="bill-item-name">${escapeHtml(it.name)}</div>
+      <div class="bill-item-meta">${it.qty} × ${money(it.price)} · ${escapeHtml(it.unit||'')} · <span class="order-ref">Order #${escapeHtml(it.orderId)}</span></div>
+    </div>
+    <div class="bill-item-side">
+      <div class="bill-item-amount" style="${it.stopped?'text-decoration:line-through;opacity:.45;':''}">${money(amount)}</div>
+      <span class="bill-status-chip ${it.stopped?'stopped':'active'}">${it.stopped?'Stopped':'Included'}</span>
+    </div>
+  </div>`;
+}
+
+function renderBillTimeline(){
+  const wrap = $('#billContent');
   const map = buildDayWiseMap();
-  const dateList = [...map.keys()].sort().reverse();
-  if (dateList.length===0){
-    wrap.innerHTML = `<div class="bill-empty"><span class="ic">📅</span><div class="t">Abhi koi purchase history nahi hai</div></div>`;
+  const dates = [...map.keys()].sort().reverse();
+  if (!dates.length){
+    wrap.innerHTML = `<div class="bill-empty-modern"><span class="ic">🧾</span><div class="t">Abhi koi purchase nahi hai</div><div class="s">Jab aap order place karenge, yahan har delivery ki complete detail ek simple timeline mein dikhegi.</div></div>`;
     return;
   }
-  wrap.innerHTML = dateList.map(iso=>{
-    const day = map.get(iso);
-    const itemsHtml = day.items.map(it=>`
-      <div class="oi-row">
-        <div class="mid" style="flex:1;">
-          <div class="nm">${escapeHtml(it.name)}${it.stopped?' <span style="color:var(--danger); font-weight:700; font-size:9.5px;">(Stopped)</span>':''}</div>
-          <div class="qp">${it.qty} × ${money(it.price)} · ${escapeHtml(it.unit||'')}</div>
+  wrap.innerHTML = `
+    <div class="bill-panel-head">
+      <div><div class="bill-panel-title">Purchase timeline</div><div class="bill-panel-sub">Har delivery date ki items aur amount ek jagah</div></div>
+    </div>
+    ${dates.map((iso, idx)=>{
+      const day = map.get(iso);
+      return `<div class="bill-timeline-card ${idx===0?'open':''}" data-bill-day-card="${iso}">
+        <button class="bill-timeline-head" data-bill-day-toggle="${iso}" aria-expanded="${idx===0?'true':'false'}">
+          <div class="bill-date-main">
+            <div class="bill-date-title">${fmtDateLong(iso)}</div>
+            <div class="bill-date-meta">${day.items.length} item${day.items.length===1?'':'s'} · delivery date</div>
+          </div>
+          <div class="bill-head-right"><div class="bill-head-amount">${money(day.total)}</div><div class="bill-chevron">⌄</div></div>
+        </button>
+        <div class="bill-card-body">
+          <div class="bill-items-wrap">
+            ${day.items.map(billItemRowHtml).join('')}
+            <div class="bill-day-total"><span>Amount for this delivery</span><strong>${money(day.total)}</strong></div>
+          </div>
         </div>
-        <div class="amt" style="font-weight:800; font-family:'JetBrains Mono'; font-size:12.5px; ${it.stopped?'text-decoration:line-through; opacity:.5;':''}">${money(it.price*it.qty)}</div>
-      </div>`).join('');
-    return `<div class="order-card" data-daycard="${iso}">
-      <div class="order-head" data-toggle-day="${iso}">
-        <div class="l"><div class="id">${fmtDateLong(iso)}</div><div class="dt">${day.items.length} item(s)</div></div>
-        <div class="r"><div class="amt">${money(day.total)}</div><span class="chev">▾</span></div>
-      </div>
-      <div class="order-body"><div class="order-body-in">${itemsHtml}</div></div>
-    </div>`;
-  }).join('');
+      </div>`;
+    }).join('')}`;
 }
-$('#billDayWise').addEventListener('click', e=>{
-  const head = e.target.closest('[data-toggle-day]');
-  if (!head) return;
-  head.closest('.order-card').classList.toggle('open');
-});
+
+function renderBillOrders(){
+  const wrap = $('#billContent');
+  if (!orders.length){
+    wrap.innerHTML = `<div class="bill-empty-modern"><span class="ic">📦</span><div class="t">Abhi koi order nahi hai</div><div class="s">Aapke placed orders yahan simple summary ke saath dikhenge.</div></div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="bill-panel-head">
+      <div><div class="bill-panel-title">Order history</div><div class="bill-panel-sub">Order amount, products aur delivery dates sab ek card mein</div></div>
+    </div>
+    ${orders.map((o, oi)=>{
+      const total = orderEffectiveTotal(o);
+      const activeDates = o.items.reduce((n,it)=>n + (it.dates||[]).filter(d=>!d.stopped).length, 0);
+      return `<div class="bill-order-card ${oi===0?'open':''}" data-bill-order-card="${o.id}">
+        <button class="bill-order-head" data-bill-order-toggle="${o.id}" aria-expanded="${oi===0?'true':'false'}">
+          <div class="bill-order-main">
+            <div class="bill-order-title">Order #${escapeHtml(o.id)}</div>
+            <div class="bill-order-meta">${new Date(o.placedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})} · ${o.items.length} item${o.items.length===1?'':'s'} · ${activeDates} active date${activeDates===1?'':'s'}</div>
+          </div>
+          <div class="bill-head-right">
+            <div class="bill-order-tools"><div class="bill-head-amount">${money(total)}</div><div class="bill-chevron">⌄</div></div>
+          </div>
+        </button>
+        <div class="bill-card-body">
+          <div class="bill-items-wrap bill-order-items">
+            ${o.items.map(it=>{
+              const active = (it.dates||[]).filter(d=>!d.stopped).length;
+              const stopped = (it.dates||[]).filter(d=>d.stopped).length;
+              const dates = (it.dates||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)).map(d=>fmtDate(d.date)).join(', ');
+              return `<div class="bill-item-row">
+                <div>
+                  <div class="bill-item-name">${escapeHtml(it.name)}</div>
+                  <div class="bill-item-meta">${it.qty} × ${money(it.price)} · ${escapeHtml(it.unit||'')} · <span class="order-ref">${dates||'No date'}</span></div>
+                  ${stopped?`<div class="bill-item-meta" style="color:#A24B3A;">${stopped} stopped date${stopped===1?'':'s'} · ${active} active</div>`:''}
+                </div>
+                <div class="bill-item-side"><div class="bill-item-amount">${money(it.price*it.qty*active)}</div><span class="bill-status-chip ${active?'active':'stopped'}">${active?'Active':'Stopped'}</span></div>
+              </div>`;
+            }).join('')}
+            <div class="bill-day-total"><span>Current order total</span><strong>${money(total)}</strong></div>
+            <button class="row-del-btn" data-delete-order="${oi}" title="Order hataayein" style="margin:8px 0 0 auto;width:32px;height:32px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+function renderBillView(){
+  $$('#tab-bill .bill-view-btn').forEach(b=>b.classList.toggle('active', b.dataset.billView===billView));
+  if (billView==='orders') renderBillOrders();
+  else renderBillTimeline();
+}
+
 function renderBill(){
   const total = orders.reduce((s,o)=>s+orderEffectiveTotal(o),0);
+  const dayMap = buildDayWiseMap();
+  const deliveryDates = dayMap.size;
   $('#billHero').innerHTML = `
-    <div class="lbl">TOTAL BILL AMOUNT</div>
+    <div class="lbl">CURRENT BILL</div>
     <div class="amt">${money(total)}</div>
-    <div class="sub">${orders.length} order(s) placed till date</div>`;
-  renderBillDayWise();
-  const list = $('#billList');
-  if (orders.length===0){
-    list.innerHTML = `<div class="bill-empty"><span class="ic">🧾</span><div class="t">Koi bill nahi hai</div></div>`;
+    <div class="sub">${orders.length} order${orders.length===1?'':'s'} · ${deliveryDates} delivery date${deliveryDates===1?'':'s'}</div>`;
+  $('#billSummary').innerHTML = `<div class="bill-summary-strip">
+      <div class="bill-stat"><div class="v">${orders.length}</div><div class="k">Orders</div></div>
+      <div class="bill-stat"><div class="v">${deliveryDates}</div><div class="k">Delivery dates</div></div>
+      <div class="bill-stat"><div class="v">${orders.reduce((s,o)=>s+o.items.length,0)}</div><div class="k">Items</div></div>
+    </div>`;
+  renderBillView();
+}
+
+$('#tab-bill').addEventListener('click', e=>{
+  const viewBtn = e.target.closest('[data-bill-view]');
+  if (viewBtn){
+    billView = viewBtn.getAttribute('data-bill-view');
+    renderBillView();
     return;
   }
-  list.innerHTML = orders.map((o,oi)=>`
-    <div class="bill-row">
-      <div class="l"><div class="dt">Order #${o.id}</div><div class="it">${new Date(o.placedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'})} · ${o.items.length} item(s)</div></div>
-      <div class="r"><div class="amt">${money(orderEffectiveTotal(o))}</div><button class="row-del-btn" data-delete-order="${oi}" title="Order hataayein"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div>
-    </div>`).join('');
-}
-$('#billList').addEventListener('click', e=>{
+  const dayToggle = e.target.closest('[data-bill-day-toggle]');
+  if (dayToggle){
+    const card = dayToggle.closest('.bill-timeline-card');
+    const open = card.classList.toggle('open');
+    dayToggle.setAttribute('aria-expanded', open?'true':'false');
+    return;
+  }
+  const orderToggle = e.target.closest('[data-bill-order-toggle]');
+  if (orderToggle){
+    const card = orderToggle.closest('.bill-order-card');
+    const open = card.classList.toggle('open');
+    orderToggle.setAttribute('aria-expanded', open?'true':'false');
+    return;
+  }
   const delBtn = e.target.closest('[data-delete-order]');
-  if (delBtn) deleteOrder(Number(delBtn.getAttribute('data-delete-order')), delBtn.closest('.bill-row'));
+  if (delBtn){
+    deleteOrder(Number(delBtn.getAttribute('data-delete-order')), delBtn.closest('.bill-order-card'));
+  }
 });
 
 /* ================= TAB SWITCHING ================= */
