@@ -2134,30 +2134,10 @@ const SEED_CATEGORIES = [
   {id:'breakfast', name:'Breakfast', icon:'🍳', image:'', tile:'tile-breakfast', order:3},
 ];
 
-const SEED_PRODUCTS = [
-  {id:'p1', name:'A2 Gir Gau Milk', cat:'dairy', unit:'500 ml ', price:34, mrp:38, emoji:'🥛', image:'', tag:'Bestseller', popular:true, desc:'Farm-fresh full-cream cow milk, delivered daily straight from our godham. Rich, creamy and pasteurised for complete purity — no water, no preservatives.'},
-  {id:'p2', name:'Toned Milk', cat:'dairy', unit:'500 ml Pouch', price:28, mrp:31, emoji:'🥛', image:'', popular:true, desc:'Light and easy-to-digest toned milk, perfect for everyday tea and cooking. Sourced fresh every morning from local farmers.'},
-  {id:'p3', name:'Fresh Paneer', cat:'dairy', unit:'200 g Block', price:90, mrp:100, emoji:'🧀', image:'', tag:'Fresh', popular:true, desc:'Soft, spongy paneer made fresh daily using traditional methods. High in protein, perfect for your favourite sabzi or paratha.'},
-  {id:'p4', name:'Curd (Dahi)', cat:'dairy', unit:'400 g Tub', price:45, mrp:50, emoji:'🥣', image:'', popular:true, desc:'Thick, set curd made from pure cow milk — probiotic-rich and naturally fermented for a smooth, tangy taste.'},
-  {id:'p5', name:'Desi Cow Ghee', cat:'dairy', unit:'500 ml Jar', price:399, mrp:449, emoji:'🍯', image:'', tag:'Bestseller', popular:true, featured:true, desc:'Hand-churned bilona desi ghee from pure cow milk, slow-cooked over wood fire for authentic aroma and taste — just like dadi maa used to make.'},
-  {id:'p6', name:'Chaas (Buttermilk)', cat:'dairy', unit:'200 ml Pouch', price:15, mrp:18, emoji:'🥛', image:'', popular:true, desc:'Refreshing spiced buttermilk made fresh daily — great for digestion and perfect on a hot afternoon.'},
-  {id:'p7', name:'White Butter', cat:'dairy', unit:'100 g Pack', price:85, mrp:95, emoji:'🧈', image:'', featured:true, desc:'Fresh, unsalted white butter churned the traditional way. No additives, no colour — just pure malai goodness.'},
-  {id:'p8', name:'Khoya (Mawa)', cat:'dairy', unit:'250 g Pack', price:150, mrp:170, emoji:'🍮', image:'', popular:true, desc:'Fresh khoya made by slow-reducing pure milk — ideal for sweets, gujiya and festive cooking.'},
-  {id:'p9', name:'Panchgavya Ghee', cat:'pooja', unit:'200 ml Bottle', price:149, mrp:169, emoji:'🪔', image:'', tag:'Pooja', featured:true, desc:'Special ghee prepared for havan and pooja rituals as per traditional methods. Pure and sacred, made with devotion.'},
-  {id:'p10', name:'Ganga Jal', cat:'pooja', unit:'500 ml Bottle', price:49, mrp:59, emoji:'💧', image:'', desc:'Sacred Ganga jal, sealed for purity — for daily pooja and auspicious occasions.'},
-  {id:'p11', name:'Upla (Cow Dung Cake)', cat:'pooja', unit:'Pack of 10', price:99, mrp:110, emoji:'🔥', image:'', desc:'Sun-dried cow dung cakes for havan and religious ceremonies, made from pure godham cows.'},
-  {id:'p12', name:'Havan Samagri Kit', cat:'pooja', unit:'250 g Kit', price:199, mrp:229, emoji:'🕯️', image:'', tag:'New', desc:'Complete havan samagri kit with sacred herbs and ingredients for a traditional home havan.'},
-  {id:'p13', name:'Cow Ghee Diya Set', cat:'pooja', unit:'Pack of 12', price:129, mrp:145, emoji:'🪔', image:'', desc:'Ready-to-light diyas made with pure cow ghee — perfect for aarti and festive decoration.'},
-  {id:'p14', name:'Ghee & Honey Hamper', cat:'gift', unit:'Gift Box', price:599, mrp:699, emoji:'🎁', image:'', tag:'Gifting', featured:true, desc:'A thoughtfully curated hamper with premium desi ghee and raw forest honey — perfect for festivals and celebrations.'},
-  {id:'p15', name:'Festive Sweets Box', cat:'gift', unit:'500 g Box', price:349, mrp:399, emoji:'🍬', image:'', desc:'Assorted traditional mithai made with pure desi ghee, packed fresh for gifting on special occasions.'},
-  {id:'p16', name:'Dairy Delight Combo', cat:'gift', unit:'Combo Pack', price:499, mrp:559, emoji:'🎁', image:'', desc:'A combo of paneer, ghee and butter — a wholesome gift for loved ones who value purity.'},
-  {id:'p17', name:'Premium Ghee Gift Jar', cat:'gift', unit:'1 L Jar', price:749, mrp:849, emoji:'🏺', image:'', tag:'Premium', desc:'Elegant 1-litre jar of bilona desi ghee, beautifully packaged — a gift that says pure and premium.'},
-  {id:'p18', name:'Kesar Flavoured Milk', cat:'breakfast', unit:'200 ml Bottle', price:25, mrp:29, emoji:'🥛', image:'', tag:'New', desc:'Chilled saffron-flavoured milk, lightly sweetened — a delicious start to your morning.'},
-  {id:'p19', name:'Sweetened Curd Cup', cat:'breakfast', unit:'100 g Cup', price:20, mrp:24, emoji:'🍮', image:'', desc:'Ready-to-eat sweetened curd cups, perfect for a quick and healthy breakfast bite.'},
-  {id:'p20', name:'Butter Toast Spread', cat:'breakfast', unit:'100 g Pack', price:60, mrp:68, emoji:'🧈', image:'', desc:'Creamy, spreadable butter made for your morning toast — smooth texture, rich taste.'},
-  {id:'p21', name:'Paneer Bhurji Mix', cat:'breakfast', unit:'250 g Pack', price:120, mrp:135, emoji:'🍳', image:'', desc:'Fresh crumbled paneer with mild spices, ready to cook for a protein-rich breakfast in minutes.'},
-  {id:'p22', name:'Masala Chaas', cat:'breakfast', unit:'200 ml Pouch', price:18, mrp:21, emoji:'🥤', image:'', desc:'Spiced buttermilk with roasted cumin and mint — light, cooling and great to start the day.'},
-].map(p=>({ ...p, images:p.image?[p.image]:[], stock:null, comingSoon:false }));
+/* Products are NEVER hardcoded in this file — they live only in Firebase
+   (catalog/products), managed entirely from admin.html or the Firebase
+   console. This app just reads them live; it never seeds or writes
+   product data. */
 
 const SEED_BANNERS_OBJ = [
   {grad:'linear-gradient(135deg,#2F5A03,#122601)', image:'', eyebrow:'PURE & FRESH', title:'Pure A2 Cow Milk, Now Available', sub:'Asli swaad, seedha godham se — har subah fresh.', order:0},
@@ -2166,10 +2146,12 @@ const SEED_BANNERS_OBJ = [
   {grad:'linear-gradient(135deg,#4C8C1C,#1D4501)', image:'', eyebrow:'FESTIVE GIFTING', title:'Shuddhta Ka Tohfa Bhejein', sub:'Premium hampers apno ke liye, is tyohaar.', order:3},
 ];
 
-/* Live catalog state — populated from Firebase, falls back to the seed
-   arrays above until the first snapshot arrives. */
+/* Live catalog state — populated from Firebase. Categories and banners
+   fall back to the seed arrays above until the first snapshot arrives;
+   products have no local fallback at all — they start empty and only
+   ever come from the live Firebase listener below. */
 let CATEGORIES = SEED_CATEGORIES;
-let PRODUCTS = SEED_PRODUCTS;
+let PRODUCTS = [];
 let BANNERS = SEED_BANNERS_OBJ;
 let catMap = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
 let prodMap = Object.fromEntries(PRODUCTS.map(p=>[p.id,p]));
@@ -2189,14 +2171,26 @@ function stockStatus(p){
 function stockLeft(p){ return typeof p.stock === 'number' ? p.stock : Infinity; }
 
 let catalogSeeded = false;
+/* Seeds ONLY categories and banners into Firebase the very first time the
+   app runs against an empty database, and only the piece that's actually
+   missing — each checked and written independently. Products are
+   intentionally never seeded here: catalog/products is populated solely
+   via admin.html (or directly in the Firebase console), so this file
+   never contains real product data, hardcoded or otherwise. */
 async function ensureCatalogSeeded(){
   try{
-    const snap = await get(ref(db,'catalog/products'));
-    if (snap.exists()) return; // already has live data — never overwrite it
-    const catObj = Object.fromEntries(SEED_CATEGORIES.map(c=>[c.id,c]));
-    const prodObj = Object.fromEntries(SEED_PRODUCTS.map(p=>[p.id,p]));
-    const banObj = Object.fromEntries(SEED_BANNERS_OBJ.map((b,i)=>[`b${i+1}`,b]));
-    await set(ref(db,'catalog'), { categories:catObj, products:prodObj, banners:banObj });
+    const [catSnap, banSnap] = await Promise.all([
+      get(ref(db,'catalog/categories')),
+      get(ref(db,'catalog/banners')),
+    ]);
+    if (!catSnap.exists()){
+      const catObj = Object.fromEntries(SEED_CATEGORIES.map(c=>[c.id,c]));
+      await set(ref(db,'catalog/categories'), catObj);
+    }
+    if (!banSnap.exists()){
+      const banObj = Object.fromEntries(SEED_BANNERS_OBJ.map((b,i)=>[`b${i+1}`,b]));
+      await set(ref(db,'catalog/banners'), banObj);
+    }
   } catch(e){ console.error('Catalog seed failed', e); }
 }
 
