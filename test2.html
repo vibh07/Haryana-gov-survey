@@ -2099,15 +2099,6 @@ const CHART_PRODUCT_KEY = {
   p1:'milk', p2:'milk', p3:'paneer', p4:'curd', p5:'ghee', p6:'chach', p7:'butter'
 };
 
-/* Milk products (anything mapped to the chart's 'milk' key) are sold in
-   half-litre steps, so their quantity picker starts at 0.5 and moves in
-   0.5 increments instead of the usual whole-unit start/step of 1.
-   NOTE: CHART_PRODUCT_KEY only covers the original 6 seed product ids
-   (p1..p7). Real catalog products come from Firebase with admin-assigned
-   ids that never match those, so id-based lookup silently failed for the
-   live catalog (every product fell back to a step of 1, including milk).
-   Detect "is this milk" from the product's own name instead, which works
-   for both the seed data and whatever the admin actually configures. */
 function isMilkProduct(p){
   if (!p || !p.name) return false;
   const n = p.name.toLowerCase();
@@ -2118,15 +2109,9 @@ function isMilkProduct(p){
 function qtyStepOf(id){ return isMilkProduct(prodMap[id]) ? 0.5 : 1; }
 
 /* ================= DATA ================= */
-const WHATSAPP_NUMBER = "919999999999"; // TODO: replace with real business WhatsApp number
+const WHATSAPP_NUMBER = "919990033116"; // TODO: replace with real business WhatsApp number
 
-/* ---- CATALOG NOW LIVES IN FIREBASE (catalog/categories, catalog/products,
-   catalog/banners) so admin.html can control stock, pricing, images,
-   categories and banners in real time without touching this file. The
-   arrays below are only the ONE-TIME SEED written to Firebase the very
-   first time the app runs against an empty database — after that, this
-   app always renders from whatever is live in Firebase. Edit everything
-   from admin.html going forward. */
+
 const SEED_CATEGORIES = [
   {id:'dairy', name:'Dairy', icon:'🥛', image:'', tile:'tile-dairy', order:0},
   {id:'pooja', name:'Pooja', icon:'🪔', image:'', tile:'tile-pooja', order:1},
@@ -2134,10 +2119,7 @@ const SEED_CATEGORIES = [
   {id:'breakfast', name:'Breakfast', icon:'🍳', image:'', tile:'tile-breakfast', order:3},
 ];
 
-/* Products are NEVER hardcoded in this file — they live only in Firebase
-   (catalog/products), managed entirely from admin.html or the Firebase
-   console. This app just reads them live; it never seeds or writes
-   product data. */
+
 
 const SEED_BANNERS_OBJ = [
   {grad:'linear-gradient(135deg,#2F5A03,#122601)', image:'', eyebrow:'PURE & FRESH', title:'Pure A2 Cow Milk, Now Available', sub:'Asli swaad, seedha godham se — har subah fresh.', order:0},
@@ -2146,10 +2128,7 @@ const SEED_BANNERS_OBJ = [
   {grad:'linear-gradient(135deg,#4C8C1C,#1D4501)', image:'', eyebrow:'FESTIVE GIFTING', title:'Shuddhta Ka Tohfa Bhejein', sub:'Premium hampers apno ke liye, is tyohaar.', order:3},
 ];
 
-/* Live catalog state — populated from Firebase. Categories and banners
-   fall back to the seed arrays above until the first snapshot arrives;
-   products have no local fallback at all — they start empty and only
-   ever come from the live Firebase listener below. */
+
 let CATEGORIES = SEED_CATEGORIES;
 let PRODUCTS = [];
 let BANNERS = SEED_BANNERS_OBJ;
@@ -2171,12 +2150,7 @@ function stockStatus(p){
 function stockLeft(p){ return typeof p.stock === 'number' ? p.stock : Infinity; }
 
 let catalogSeeded = false;
-/* Seeds ONLY categories and banners into Firebase the very first time the
-   app runs against an empty database, and only the piece that's actually
-   missing — each checked and written independently. Products are
-   intentionally never seeded here: catalog/products is populated solely
-   via admin.html (or directly in the Firebase console), so this file
-   never contains real product data, hardcoded or otherwise. */
+
 async function ensureCatalogSeeded(){
   try{
     const [catSnap, banSnap] = await Promise.all([
