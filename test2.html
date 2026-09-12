@@ -1022,9 +1022,13 @@ body{font-size:14px;background:#EEF1EB;}
    Every product surface uses the same visual language so Home, Search,
    Categories and Featured products never feel like different apps.
    ================================================================ */
-.grid-4,.grid-2,.cat-grid{
+.grid-4,.grid-2{
   grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   gap:18px 8px !important;
+}
+.cat-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:20px 9px !important;
 }
 .pcard-sm,.pcard-lg{
   border-radius:14px !important;
