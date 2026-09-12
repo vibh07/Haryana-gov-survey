@@ -562,12 +562,35 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .confirm-actions{display:flex; gap:10px;}
 .confirm-actions .btn{flex:1;}
 
-/* ---- order success animation ---- */
-#orderSuccess{position:absolute;inset:0;background:radial-gradient(circle at 50% 25%,#F1F9EA 0,#F8F9F6 38%,#fff 100%);z-index:1500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;overflow:hidden}
+/* ---- order success animation (premium) ----
+   NOTE: the old version referenced `animation:txtIn …` on the kicker,
+   h2, p and button, but no `@keyframes txtIn` existed anywhere in this
+   file. Since that keyframes name never resolved, the browser silently
+   dropped the animation and those elements stayed frozen at their base
+   `opacity:0` forever — so only the checkmark box + orbit dots (which use
+   real, defined keyframes) ever appeared. That was the "stuck" screen. */
+#orderSuccess{position:absolute;inset:0;background:radial-gradient(circle at 50% 22%,#F1F9EA 0,#F8F9F6 40%,#fff 100%);z-index:1500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;overflow:hidden}
 #orderSuccess.show{display:flex;animation:successBgIn .45s ease-out both}@keyframes successBgIn{from{opacity:0}to{opacity:1}}
 .success-orbit{position:absolute;width:230px;height:230px;border:1px solid rgba(55,130,49,.12);border-radius:50%;animation:orbitSpin 10s linear infinite}.success-orbit:before,.success-orbit:after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:#77B85D;box-shadow:0 0 0 7px rgba(119,184,93,.08)}.success-orbit:before{top:16px;left:45px}.success-orbit:after{right:18px;bottom:48px;background:#E4A42C;box-shadow:0 0 0 7px rgba(228,164,44,.08)}@keyframes orbitSpin{to{transform:rotate(360deg)}}
-.success-ring{position:relative;width:108px;height:108px;border-radius:34px;background:linear-gradient(145deg,#3F8F3A,#17642B);display:flex;align-items:center;justify-content:center;margin-bottom:22px;box-shadow:0 22px 48px rgba(30,104,43,.28);transform:scale(.65) rotate(-8deg);animation:successRing .65s cubic-bezier(.2,1.35,.3,1) .08s forwards}.success-ring:before{content:'';position:absolute;inset:7px;border-radius:28px;border:1px solid rgba(255,255,255,.25)}@keyframes successRing{to{transform:scale(1) rotate(0)}}.success-ring svg{width:52px;height:52px;position:relative;z-index:2}.success-ring path{stroke-dasharray:48;stroke-dashoffset:48;animation:drawTick .55s .43s cubic-bezier(.2,.8,.2,1) forwards}@keyframes drawTick{to{stroke-dashoffset:0}}
-#orderSuccess .success-kicker{font-size:10px;font-weight:850;letter-spacing:.16em;text-transform:uppercase;color:#3E8738;margin-bottom:7px;opacity:0;animation:txtIn .4s .52s var(--ease) forwards}#orderSuccess h2{font-family:'Fraunces';font-size:27px;line-height:1.05;margin-bottom:9px;opacity:0;animation:txtIn .4s .58s var(--ease) forwards}#orderSuccess p{font-size:13px;color:var(--ink-soft);line-height:1.6;max-width:290px;margin-bottom:24px;opacity:0;animation:txtIn .4s .66s var(--ease) forwards}#orderSuccess .btn{opacity:0;animation:txtIn .4s .75s var(--ease) forwards;max-width:235px;border-radius:14px;box-shadow:0 12px 26px rgba(30,93,37,.22)}
+/* confetti burst — spans generated fresh in JS every time the screen shows,
+   each with random --cx/--cy/--cr so the burst never looks identical twice */
+.success-confetti{position:absolute;inset:0;pointer-events:none;z-index:1}
+.success-confetti span{position:absolute;top:50%;left:50%;width:7px;height:6px;opacity:0;transform:translate(-50%,-50%);animation:confettiBurst 1.15s cubic-bezier(.16,.72,.28,1) forwards}
+@keyframes confettiBurst{0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) rotate(0) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) translate(var(--cx),var(--cy)) rotate(var(--cr)) scale(.4)}}
+/* soft radiating glow pulse that sits behind the checkmark box */
+.success-ring-wrap{position:relative;width:108px;height:108px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;z-index:2}
+.success-glow{position:absolute;inset:0;border-radius:34px;z-index:0;opacity:0;animation:glowPulse 1.7s ease-out .55s 2}
+@keyframes glowPulse{0%{opacity:.9;box-shadow:0 0 0 0 rgba(58,128,3,.38)}100%{opacity:0;box-shadow:0 0 0 32px rgba(58,128,3,0)}}
+.success-ring{position:relative;width:108px;height:108px;border-radius:34px;background:linear-gradient(145deg,#4FA83F,#155A21);display:flex;align-items:center;justify-content:center;box-shadow:0 22px 48px rgba(21,90,33,.32),inset 0 1px 0 rgba(255,255,255,.25);transform:scale(.55) rotate(-10deg);animation:successRing .68s cubic-bezier(.2,1.4,.3,1) .08s forwards;z-index:2}
+.success-ring:before{content:'';position:absolute;inset:7px;border-radius:28px;border:1px solid rgba(255,255,255,.28)}
+.success-ring:after{content:'';position:absolute;inset:-2px;border-radius:36px;background:linear-gradient(145deg,rgba(255,255,255,.55),transparent 60%);opacity:0;mix-blend-mode:overlay;animation:sheenSweep 1.05s ease .52s forwards}
+@keyframes successRing{to{transform:scale(1) rotate(0)}}
+@keyframes sheenSweep{0%{opacity:0}35%{opacity:.9}100%{opacity:0}}
+.success-ring svg{width:52px;height:52px;position:relative;z-index:2}
+.success-ring path{stroke-dasharray:48;stroke-dashoffset:48;animation:drawTick .55s .45s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes drawTick{to{stroke-dashoffset:0}}
+@keyframes txtIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+#orderSuccess .success-kicker{font-size:10px;font-weight:850;letter-spacing:.16em;text-transform:uppercase;color:#3E8738;margin-bottom:7px;opacity:0;animation:txtIn .45s .58s var(--ease) forwards}#orderSuccess h2{font-family:'Fraunces';font-size:27px;line-height:1.05;margin-bottom:9px;opacity:0;animation:txtIn .45s .66s var(--ease) forwards}#orderSuccess p{font-size:13px;color:var(--ink-soft);line-height:1.6;max-width:290px;margin-bottom:24px;opacity:0;animation:txtIn .45s .74s var(--ease) forwards}#orderSuccess .btn{opacity:0;animation:txtIn .45s .84s var(--ease) forwards;max-width:235px;border-radius:14px;box-shadow:0 12px 26px rgba(30,93,37,.22)}
 html,body{background:#EEF1EB;}
 body{font-size:14px;background:#EEF1EB;}
 #shell{
@@ -1000,7 +1023,7 @@ body{font-size:14px;background:#EEF1EB;}
    Categories and Featured products never feel like different apps.
    ================================================================ */
 .grid-4,.grid-2,.cat-grid{
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   gap:18px 8px !important;
 }
 .pcard-sm,.pcard-lg{
@@ -1177,7 +1200,7 @@ body{font-size:14px;background:#EEF1EB;}
 .network-state-retry{border:0;border-radius:12px;background:#1E5D25;color:#fff;min-height:43px;padding:0 18px;font:inherit;font-size:12px;font-weight:800;box-shadow:0 8px 18px rgba(30,93,37,.2);}
 
 /* Final compact product-card polish */
-.pcard-sm .product-unit,.pcard-lg .product-unit{width:auto;max-width:none;flex:1 1 auto;min-width:0;padding:6px 7px;font-size:9px;white-space:nowrap;overflow:visible;text-overflow:clip;}
+.pcard-sm .product-unit,.pcard-lg .product-unit{width:auto;flex:1 1 auto;min-width:0;padding:6px 7px;font-size:9px;white-space:nowrap;overflow:visible;text-overflow:clip;}
 .pcard-sm .add-btn,.pcard-lg .add-btn{width:56px!important;min-width:56px!important;height:38px!important;min-height:38px!important;padding:5px 7px!important;font-size:10px!important;border-radius:11px!important;flex:0 0 56px;}
 .pcard-sm .stepper-pill,.pcard-lg .stepper-pill{width:56px!important;min-width:56px;height:38px!important;flex:0 0 56px;}
 .pcard-sm .stepper-pill button,.pcard-lg .stepper-pill button{width:18px!important;height:38px!important;}
@@ -1897,7 +1920,11 @@ body{font-size:14px;background:#EEF1EB;}
   <!-- ---- ORDER SUCCESS ---- -->
   <div id="orderSuccess">
     <div class="success-orbit" aria-hidden="true"></div>
-    <div class="success-ring"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="success-confetti" id="successConfetti" aria-hidden="true"></div>
+    <div class="success-ring-wrap">
+      <div class="success-glow" aria-hidden="true"></div>
+      <div class="success-ring"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
     <div class="success-kicker">ORDER CONFIRMED</div>
     <h2>Shuddhta ka order ready! ✨</h2>
     <p>Aapka order successfully schedule ho gaya hai. Fresh delivery aapke selected dates par pahunchegi.</p>
@@ -1941,6 +1968,37 @@ function waitForFirebaseConnection(timeoutMs=5000){
   });
 }
 function setNetworkBusy(on){const btn=$('#placeOrderBtn');if(!btn)return;btn.disabled=on;if(on)btn.innerHTML='<span class="spinner"></span> Checking connection…';else btn.innerHTML='Proceed to Pay <span aria-hidden="true">→</span>';}
+
+/* `navigator.onLine` and Firebase's own `.info/connected` value can both
+   keep reporting "online" for several seconds (sometimes much longer)
+   after data/wifi is actually cut — they reflect the last known interface
+   / socket state, not a live check. That's why the app could still "place
+   orders" for a little while right after toggling mobile data off. This
+   does an actual network round-trip (a tiny, uncached request) with a
+   short timeout, so a dead connection is caught immediately instead of
+   waiting for the OS/SDK to notice on their own. */
+function probeInternet(timeoutMs=4000){
+  return new Promise(resolve=>{
+    if (navigator.onLine === false){ resolve(false); return; }
+    let settled = false;
+    const done = ok => { if (settled) return; settled = true; resolve(ok); };
+    const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    const timer = setTimeout(()=>{ if (ctrl) ctrl.abort(); done(false); }, timeoutMs);
+    fetch('https://www.gstatic.com/generate_204', {
+      mode:'no-cors', cache:'no-store', signal: ctrl ? ctrl.signal : undefined
+    }).then(()=>{ clearTimeout(timer); done(true); })
+      .catch(()=>{ clearTimeout(timer); done(false); });
+  });
+}
+
+/* Full pre-order gate: real probe first (catches the "data just turned
+   off" case immediately), then confirm Firebase itself is reachable
+   before letting the order proceed. Throws 'OFFLINE' if either fails. */
+async function verifyRealInternet(){
+  const reachable = await probeInternet(4000);
+  if (!reachable) throw new Error('OFFLINE');
+  await waitForFirebaseConnection(5000);
+}
 
 
 /* Slow/flaky mobile networks can leave a Firebase call pending for a long
@@ -2036,6 +2094,24 @@ function catMedia(c){
 const CHART_PRODUCT_KEY = {
   p1:'milk', p2:'milk', p3:'paneer', p4:'curd', p5:'ghee', p6:'chach', p7:'butter'
 };
+
+/* Milk products (anything mapped to the chart's 'milk' key) are sold in
+   half-litre steps, so their quantity picker starts at 0.5 and moves in
+   0.5 increments instead of the usual whole-unit start/step of 1.
+   NOTE: CHART_PRODUCT_KEY only covers the original 6 seed product ids
+   (p1..p7). Real catalog products come from Firebase with admin-assigned
+   ids that never match those, so id-based lookup silently failed for the
+   live catalog (every product fell back to a step of 1, including milk).
+   Detect "is this milk" from the product's own name instead, which works
+   for both the seed data and whatever the admin actually configures. */
+function isMilkProduct(p){
+  if (!p || !p.name) return false;
+  const n = p.name.toLowerCase();
+  if (!/\bmilk\b/.test(n)) return false;                 // must say "milk"
+  if (/butter\s*milk|chaas|flavou?red/.test(n)) return false; // exclude buttermilk/chaas/flavoured milk
+  return true;
+}
+function qtyStepOf(id){ return isMilkProduct(prodMap[id]) ? 0.5 : 1; }
 
 /* ================= DATA ================= */
 const WHATSAPP_NUMBER = "919999999999"; // TODO: replace with real business WhatsApp number
@@ -2140,8 +2216,8 @@ function attachCatalogListeners(){
     catMap = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
     if (!catMap[activeCat] && CATEGORIES.length) activeCat = CATEGORIES[0].id;
     catalogSeeded = true;
-    refreshCatalogUI();
     markCatalogReady('categories');
+    refreshCatalogUI();
   }, err=>{
     console.error('Categories load failed', err);
     window.__showNetworkError && window.__showNetworkError(); window.__showGlobalNetworkError && window.__showGlobalNetworkError();
@@ -2150,8 +2226,8 @@ function attachCatalogListeners(){
     const val = snap.val();
     PRODUCTS = val ? Object.entries(val).map(([id,p])=>({...p, id})) : [];
     prodMap = Object.fromEntries(PRODUCTS.map(p=>[p.id,p]));
-    refreshCatalogUI();
     markCatalogReady('products');
+    refreshCatalogUI();
   }, err=>{
     console.error('Products load failed', err);
     window.__showNetworkError && window.__showNetworkError(); window.__showGlobalNetworkError && window.__showGlobalNetworkError();
@@ -2168,6 +2244,14 @@ function attachCatalogListeners(){
 /* Re-renders whichever screens are currently visible so a live catalog
    change is reflected immediately without losing scroll position elsewhere. */
 function refreshCatalogUI(){
+  // Don't paint anything until the FIRST real snapshot of both categories
+  // AND products has arrived. Categories and products are two independent
+  // Firebase listeners that resolve at slightly different times — painting
+  // after only one has responded meant the screen briefly rendered a mix of
+  // real data + the still-in-memory hardcoded seed catalog (whichever side
+  // hadn't loaded yet), which is exactly the wrong "flash" screen users saw
+  // for a second before the real catalog fully took over.
+  if (!(catalogReady.categories && catalogReady.products)) return;
   renderHome();
   renderCategoryTab();
   if (currentProductId && prodMap[currentProductId]) openProduct(currentProductId, true);
@@ -2598,11 +2682,11 @@ function refreshAllCtas(){
 /* ================= EVENT DELEGATION: product open + add/inc/dec ================= */
 document.addEventListener('click', (e)=>{
   const addBtn = e.target.closest('[data-add]');
-  if (addBtn){ addToCart(addBtn.getAttribute('data-add'),1); refreshAllCtas(); showToast('Cart mein add ho gaya'); return; }
+  if (addBtn){ const id=addBtn.getAttribute('data-add'); addToCart(id, qtyStepOf(id)); refreshAllCtas(); showToast('Cart mein add ho gaya'); return; }
   const incBtn = e.target.closest('[data-inc]');
-  if (incBtn){ const id=incBtn.getAttribute('data-inc'); setQty(id, cartQtyOf(id)+1); refreshAllCtas(); return; }
+  if (incBtn){ const id=incBtn.getAttribute('data-inc'); setQty(id, cartQtyOf(id)+qtyStepOf(id)); refreshAllCtas(); return; }
   const decBtn = e.target.closest('[data-dec]');
-  if (decBtn){ const id=decBtn.getAttribute('data-dec'); setQty(id, cartQtyOf(id)-1); refreshAllCtas(); return; }
+  if (decBtn){ const id=decBtn.getAttribute('data-dec'); setQty(id, cartQtyOf(id)-qtyStepOf(id)); refreshAllCtas(); return; }
   const openCard = e.target.closest('[data-open]');
   if (openCard && !e.target.closest('[data-add],[data-inc],[data-dec]')){ openProduct(openCard.getAttribute('data-open')); return; }
   const showMore = e.target.closest('[data-showmore]');
@@ -2617,12 +2701,22 @@ $('#catSidebar').addEventListener('click', e=>{
 });
 
 /* ================= PRODUCT DETAIL SCREEN ================= */
-function openProduct(id, isLiveRefresh){
-  if (!isLiveRefresh){
+/* `mode` has three meaningful states, which the old code collapsed into one
+   boolean and that's what broke tapping a product open:
+     - undefined  -> a real tap: kick off the loading skeleton, then re-enter
+                     with mode:'reveal' once it's ready to actually build+show.
+     - 'reveal'   -> skeleton is done; build the page AND slide it into view.
+     - true       -> a silent background refresh (e.g. admin changed a live
+                     price/stock while this product happens to be the last
+                     one the person viewed) — update the data in place only,
+                     never force the screen open if they've navigated away. */
+function openProduct(id, mode){
+  if (!mode){
     productReturnTab = activeTab;
-    startRouteLoading('product', ()=>openProduct(id, true));
+    startRouteLoading('product', ()=>openProduct(id, 'reveal'));
     return;
   }
+  const isBackgroundRefresh = (mode === true);
   currentProductId = id;
   const p = prodMap[id];
   if (!p) return;
@@ -2641,7 +2735,7 @@ function openProduct(id, isLiveRefresh){
   $('#pdSlider').innerHTML = shots.map(s=>`<div class="pd-slide ${tileOf(p)} ${s.img?'has-img img-loading':''}">${s.img?`<img src="${s.img}" alt="${escapeHtml(p.name)}" loading="lazy">`:`<span>${s.emoji}</span>`}<span class="cap">${s.cap}</span>${status!=='active'?stockBadgeHtml(p):''}</div>`).join('');
   $('#pdDots').innerHTML = shots.map((_,i)=>`<i class="${i===0?'active':''}"></i>`).join('');
   const slider = $('#pdSlider');
-  if (!isLiveRefresh) slider.scrollLeft = 0;
+  if (!isBackgroundRefresh) slider.scrollLeft = 0;
   slider.onscroll = ()=>{
     const idx = Math.round(slider.scrollLeft/slider.clientWidth);
     $$('#pdDots i').forEach((d,i)=>d.classList.toggle('active', i===idx));
@@ -2667,7 +2761,7 @@ function openProduct(id, isLiveRefresh){
   $('#ymkRow').innerHTML = pool.slice(0,8).map(ymkCardHtml).join('');
 
   refreshCartBadges();
-  if (!isLiveRefresh) $('#screenProduct').classList.add('show');
+  if (!isBackgroundRefresh) $('#screenProduct').classList.add('show');
 }
 function renderPdQty(){
   if (!currentProductId) return;
@@ -2688,7 +2782,7 @@ function renderPdQty(){
 $('#pdAddBtn').addEventListener('click', ()=>{
   const p = prodMap[currentProductId];
   if (!p || stockStatus(p)!=='active') return;
-  addToCart(currentProductId,1);
+  addToCart(currentProductId, qtyStepOf(currentProductId));
   refreshAllCtas(); refreshCartBadges();
   showToast('Item cart mein add kar diya gaya ✅');
 });
@@ -2758,9 +2852,9 @@ function renderCart(){
 }
 $('#cartBody').addEventListener('click', e=>{
   const inc = e.target.closest('[data-cinc]');
-  if (inc){ const i=+inc.getAttribute('data-cinc'); cart[i].qty++; saveCart(); refreshCartBadges(); renderCart(); refreshAllCtas(); return; }
+  if (inc){ const i=+inc.getAttribute('data-cinc'); cart[i].qty += qtyStepOf(cart[i].id); saveCart(); refreshCartBadges(); renderCart(); refreshAllCtas(); return; }
   const dec = e.target.closest('[data-cdec]');
-  if (dec){ const i=+dec.getAttribute('data-cdec'); cart[i].qty--; if(cart[i].qty<=0) cart.splice(i,1); saveCart(); refreshCartBadges(); renderCart(); refreshAllCtas(); return; }
+  if (dec){ const i=+dec.getAttribute('data-cdec'); cart[i].qty -= qtyStepOf(cart[i].id); if(cart[i].qty<=0) cart.splice(i,1); saveCart(); refreshCartBadges(); renderCart(); refreshAllCtas(); return; }
   const rm = e.target.closest('[data-rm]');
   if (rm){ const i=+rm.getAttribute('data-rm'); cart.splice(i,1); saveCart(); refreshCartBadges(); renderCart(); refreshAllCtas(); return; }
   const sc = e.target.closest('[data-sched]');
@@ -2840,7 +2934,7 @@ $('#placeOrderBtn').addEventListener('click',async()=>{
   if(cart.length===0||$('#placeOrderBtn').disabled)return;
   if(!(customer&&customer.phone)){openCheckoutSheet('order');return;}
   setNetworkBusy(true);
-  try{await waitForFirebaseConnection(5000);hideGlobalNetworkIssue();await finalizeOrder(customer);}
+  try{await verifyRealInternet();hideGlobalNetworkIssue();await finalizeOrder(customer);}
   catch(e){console.error('Order connection check failed',e);showGlobalNetworkIssue();showToast('Internet connection nahi hai. Order place nahi hua.');}
   finally{setNetworkBusy(false);}
 });
@@ -2964,7 +3058,7 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
   loginBusy = false;
   $('#loginCard').classList.remove('busy');
   if (checkoutMode==='order'){
-    try{ await waitForFirebaseConnection(5000); hideGlobalNetworkIssue(); await finalizeOrder(customer); }
+    try{ await verifyRealInternet(); hideGlobalNetworkIssue(); await finalizeOrder(customer); }
     catch(e){ console.error('Order after login connection check failed',e); showGlobalNetworkIssue(); showToast('Internet connection nahi hai. Order place nahi hua.'); }
   } else if (checkoutMode==='login'){
     showToast(matchedCustomerKey ? 'Welcome back, '+customer.name+'! 👋' : 'Login safaltapoorvak ho gaya ✅');
@@ -2993,6 +3087,31 @@ async function upsertCustomerInFirebase(rec, existingKey){
    same Firebase database the delivery chart reads — mapped dairy items land
    directly in that day's scheduled quantities, everything else goes into the
    day's note, so the whole order is visible in deliverychart.html. */
+/* Fills #successConfetti with a fresh burst of particles every time the
+   success screen shows — random angle/distance/rotation per span so it
+   never looks like a static, mechanical animation. */
+function spawnSuccessConfetti(){
+  const host = $('#successConfetti');
+  if (!host) return;
+  host.innerHTML = '';
+  const colors = ['#3A8003','#E4A42C','#1D4501','#77B85D','#F1F9EA'];
+  const n = 18;
+  for (let i=0;i<n;i++){
+    const s = document.createElement('span');
+    const angle = (Math.PI*2*i/n) + (Math.random()*0.5 - 0.25);
+    const dist = 65 + Math.random()*60;
+    const cx = Math.cos(angle)*dist;
+    const cy = Math.sin(angle)*dist - 18; // slight upward bias
+    s.style.setProperty('--cx', cx.toFixed(0)+'px');
+    s.style.setProperty('--cy', cy.toFixed(0)+'px');
+    s.style.setProperty('--cr', Math.round(Math.random()*360)+'deg');
+    s.style.background = colors[i % colors.length];
+    s.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    s.style.animationDelay = (0.26 + Math.random()*0.16).toFixed(2)+'s';
+    host.appendChild(s);
+  }
+}
+
 async function finalizeOrder(cust){
   await waitForFirebaseConnection(5000);
   const items=cart.map(c=>{const p=prodMap[c.id];return{productId:c.id,name:p.name,unit:p.unit,price:p.price,qty:c.qty,dates:(c.dates.length?c.dates:[todayISO()]).map(d=>({date:d,stopped:false}))};});
@@ -3000,7 +3119,14 @@ async function finalizeOrder(cust){
   const order={id:'AG'+Date.now().toString().slice(-8),placedAt:new Date().toISOString(),total,custId:cust.id||null,items};
   const custKey=await syncOrderToChart(cust,order); if(custKey)order.custId=custKey;
   await pushOrderToFirebase(order);
-  orders.unshift(order);saveOrders();cart=[];saveCart();refreshCartBadges();$('#screenCart').classList.remove('show');renderCart();refreshAllCtas();$('#orderSuccess').classList.add('show');decrementStockForOrder(items);
+  // NOTE: attachOrdersListener() is already streaming customers/{id}/webOrders
+  // in real time, and Firebase's local write-echo can rebuild `orders` from
+  // that listener before this line even runs. Unconditionally unshifting here
+  // used to add the SAME order a second time -> duplicate cards, and every
+  // total/bill figure derived from `orders` got double-counted along with it.
+  // Guard by id so we only add it locally if the listener hasn't already.
+  if(!orders.some(o=>o.id===order.id)) orders.unshift(order);
+  saveOrders();cart=[];saveCart();refreshCartBadges();$('#screenCart').classList.remove('show');renderCart();refreshAllCtas();spawnSuccessConfetti();$('#orderSuccess').classList.add('show');decrementStockForOrder(items);
 }
 
 /* Deducts each item's ordered qty (× number of delivery dates) from its
@@ -3480,7 +3606,7 @@ $('#tab-bill').addEventListener('click', e=>{
 });
 
 /* ================= ROUTE / SCREEN TRANSITIONS ================= */
-const ROUTE_DELAY = 2200;
+const ROUTE_DELAY = 1000;
 let routeTimer = null;
 let routeBusy = false;
 function routeSkeleton(kind){
