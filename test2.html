@@ -2815,9 +2815,9 @@ function renderCart(){
   </div>
   <div class="cart-total-card">
     <div class="cart-total-row"><span>Items total</span><span>${money(subtotal)}</span></div>
-    <div class="cart-total-row"><span>Delivery charges</span><span>${subtotal>=99?'Free': '₹2'}</span></div>
+    <div class="cart-total-row"><span>Delivery charges</span><span>${subtotal>=99?'Free': '₹10'}</span></div>
     <div class="cart-total-row"><span>Packaging charges</span><span>₹0</span></div>
-    <div class="cart-total-row grand"><span>Total payable</span><span>${money(subtotal + (subtotal>=99?0:1) + 0)}</span></div>
+    <div class="cart-total-row grand"><span>Total payable</span><span>${money(subtotal + (subtotal>=99?0:10) + 0)}</span></div>
   </div>
   <div class="cart-note-wrap"><textarea id="cartNote" placeholder="Add a note for delivery (optional)…"></textarea></div>`;
   body.innerHTML = html;
