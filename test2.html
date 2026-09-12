@@ -2811,11 +2811,11 @@ function renderCart(){
   const subtotal = cartSubtotal();
   html += `<div class="cart-delivery-status">
     <div class="status-icon">🚚</div>
-    <div><b>Delivery in a days</b><span>Your order will be delivered fresh</span></div>
+    <div><b>Delivery within 24 hr</b><span>Your order will be delivered fresh</span></div>
   </div>
   <div class="cart-total-card">
     <div class="cart-total-row"><span>Items total</span><span>${money(subtotal)}</span></div>
-    <div class="cart-total-row"><span>Delivery charges</span><span>${subtotal>=99?'Free': '₹1'}</span></div>
+    <div class="cart-total-row"><span>Delivery charges</span><span>${subtotal>=99?'Free': '₹2'}</span></div>
     <div class="cart-total-row"><span>Packaging charges</span><span>₹0</span></div>
     <div class="cart-total-row grand"><span>Total payable</span><span>${money(subtotal + (subtotal>=99?0:1) + 0)}</span></div>
   </div>
