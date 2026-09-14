@@ -36,7 +36,7 @@
      surface across the app now derives from a single brand green
      (#2c6602) instead of the old mixed brown/black/bronze tones. ---- */
   --cream:#F8F7F4; --paper:#F1EFE9; --card:#FFFFFF; --card-2:#F5F4F0;
-  --ink:#17160F; --ink-soft:#6E6D64; --ink-mute:#A7A59A;
+  --ink:#17160F; --ink-soft:#6E6D64; --ink-mute:#78766B; /* darkened from #A7A59A: original gave ~2.5:1 contrast on white/cream, failing WCAG AA (4.5:1) for the labels, unit text and empty-state copy that use it. #78766B gives ~4.5:1+. */
   --line:#E7E5DD;
   --brand:#2C6602; --brand-dark:#1D4501; --brand-light:#E3EEDA;
   --saffron:#2C6602; --saffron-dark:#1D4501; --saffron-light:#E3EEDA;
@@ -82,7 +82,7 @@ img{display:block; max-width:100%;}
    own emoji-centering background gets neutralised and the <img> fills it
    edge-to-edge instead; everything else about the layout is unchanged. */
 .tile.has-img, .pd-slide.has-img, .cat-item .ic.has-img{background:var(--card-2) !important; font-size:0; overflow:hidden;}
-.tile.has-img img, .pd-slide.has-img img, .cat-item .ic.has-img img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .35s var(--ease);}
+.tile.has-img img, .pd-slide.has-img img, .cat-item .ic.has-img img{width:70%; height:100%; object-fit:cover; display:block; transition:transform .35s var(--ease);}
 .pcard-sm:hover .tile.has-img img, .pcard-lg:hover .tile.has-img img{transform:scale(1.07);}
 .pcard-lg .tile{overflow:hidden;}
 .logo-circle.has-img{background:#1d4501;}
@@ -220,6 +220,10 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .btn-sm{padding:9px 13px; font-size:12.5px; min-height:36px;}
 .btn-block{width:100%;}
 .spinner{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite; flex-shrink:0;}
+/* visually hidden but screen-reader-accessible text — paired with every
+   spinner-only button below so the loading state is never silent for
+   screen readers, matching the same spinner markup used everywhere else. */
+.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* ============ LOGO ============ */
@@ -469,8 +473,13 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
    live-tracking bar appears, so its position stays predictable. */
 
 /* ============ LIVE DELIVERY TRACKING — floating bar (slim, centered) ============ */
-#liveTrackBar{position:absolute; left:16px; right:16px; bottom:calc(var(--nav-h) + 12px + var(--safe-b)); z-index:53; display:none; align-items:center; gap:9px; max-width:340px; margin:0 auto; background:linear-gradient(135deg,#3D8A04 0%,#1D4501 100%); border:1px solid rgba(255,255,255,.14); border-radius:999px; padding:6px 7px 6px 6px; box-shadow:0 10px 22px rgba(20,50,4,.32), 0 2px 6px rgba(20,50,4,.2); cursor:pointer; animation:trackBarIn .32s var(--ease); transition:transform .3s var(--ease), opacity .3s var(--ease);}
+#liveTrackBar{position:absolute; left:16px; right:16px; bottom:calc(var(--nav-h) + 12px + var(--safe-b)); z-index:53; display:none; align-items:center; gap:9px; max-width:340px; margin:0 auto; background:linear-gradient(135deg,#3D8A04 0%,#1D4501 100%); border:1px solid rgba(255,255,255,.14); border-radius:999px; padding:6px 7px 6px 6px; box-shadow:0 10px 22px rgba(20,50,4,.32), 0 2px 6px rgba(20,50,4,.2); cursor:pointer; animation:trackBarIn .32s var(--ease); transition:transform .32s var(--ease), opacity .32s var(--ease);}
 #liveTrackBar.show{display:flex;}
+/* Smooth close: instead of the bar being yanked away instantly (old
+   classList.remove('show') just set display:none with no transition), we
+   fade+slide it out first via .closing, then only flip display:none once
+   that transition has actually finished — see dismissArrivedTracking(). */
+#liveTrackBar.closing{opacity:0; transform:translateY(14px) scale(.96); pointer-events:none;}
 @keyframes trackBarIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;}}
 .ltb-avatar{position:relative; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.16); border:1.5px solid rgba(255,255,255,.28); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
 .ltb-avatar .dot{position:absolute; right:-2px; bottom:-2px; width:9px; height:9px; border-radius:50%; background:#4ADE80; border:2px solid #1D4501; animation:ltbPulse 1.6s ease-in-out infinite;}
@@ -480,6 +489,11 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .ltb-sub{font-size:9.5px; opacity:.82; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;}
 .ltb-cta{flex-shrink:0; display:flex; align-items:center; gap:3px; font-size:10px; font-weight:800; color:#fff; background:rgba(255,255,255,.18); padding:7px 10px 7px 11px; border-radius:999px; letter-spacing:.01em;}
 .ltb-cta svg{width:11px; height:11px; display:block;}
+/* Small "x" — only shown once a delivery is marked Arrived, so the
+   customer can dismiss the bar right away instead of waiting for the
+   auto-hide countdown or opening the full screen. */
+.ltb-close{flex-shrink:0; width:22px; height:22px; border-radius:50%; border:none; background:rgba(255,255,255,.18); color:#fff; font-size:11px; font-weight:800; display:none; align-items:center; justify-content:center; cursor:pointer; line-height:1;}
+.ltb-close.show{display:flex;}
 
 /* ---- scroll-aware nav: bottom nav, WhatsApp FAB and the live-tracking
    bar slide down out of the way while scrolling through content, and
@@ -506,18 +520,50 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .track-live-chip.is-live .dot{background:#2FAE3F; animation:ltbPulse 1.6s ease-in-out infinite;}
 .track-live-chip.is-wait{background:#FDF1DC; color:#93650C;}
 .track-live-chip.is-wait .dot{background:#F0A93C;}
+.track-live-chip.is-done{background:#E3F5DE; color:#1D6B2A;}
+.track-live-chip.is-done .dot{background:#2FAE3F; animation:none;}
 
-#trackMapWrap{position:relative; flex:1; min-height:0; background:#E7E5DD;}
+/* Map area is now a permanent dark-theme surface (CARTO dark-matter tiles,
+   set in ensureTrackMap()) so the map itself is ALWAYS visible behind
+   whatever status card is showing — waiting / live / arrived — instead of
+   being fully hidden behind an opaque light card like before. */
+#trackMapWrap{position:relative; flex:1; min-height:0; background:#e8eaed;}
 #trackMap{position:absolute; inset:0;}
-.track-eta-pill{position:absolute; top:12px; left:50%; transform:translateX(-50%); background:var(--card); padding:7px 16px 7px 8px; border-radius:999px; box-shadow:var(--shadow-md); font-weight:800; font-size:12px; color:var(--ink); display:flex; align-items:center; gap:8px; white-space:nowrap;}
-.track-eta-pill .eic{width:26px; height:26px; border-radius:50%; background:var(--grad-brand); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;}
+.track-eta-pill{position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.97); padding:5px 12px 5px 6px; border-radius:999px; box-shadow:0 4px 14px rgba(0,0,0,.16); font-weight:700; font-size:10.5px; color:var(--ink); display:flex; align-items:center; gap:6px; white-space:nowrap; z-index:4; max-width:calc(100% - 24px); overflow:hidden;}
+.track-eta-pill span:not(.eic){overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.track-eta-pill .eic{width:20px; height:20px; border-radius:50%; background:var(--grad-brand); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; flex-shrink:0;}
 .track-eta-pill b{color:var(--brand-dark); font-weight:800;}
-.track-map-loading{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:var(--cream); font-size:12px; color:var(--ink-soft); font-weight:600;}
-.track-map-loading .spinner{border-color:rgba(29,69,1,.16); border-top-color:var(--brand);}
-.track-map-empty{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; background:var(--cream); padding:30px; text-align:center;}
-.track-map-empty .ic{font-size:34px;}
-.track-map-empty .t{font-weight:800; font-size:13.5px;}
-.track-map-empty .s{font-size:11.5px; color:var(--ink-soft); max-width:260px;}
+.track-map-loading{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:#e8eaed; font-size:12px; color:rgba(0,0,0,.55); font-weight:600; z-index:3;}
+.track-map-loading .spinner{border-color:rgba(0,0,0,.12); border-top-color:var(--brand);}
+/* Waiting card — deliberately NOT a full inset cover anymore: it's a
+   compact floating card near the bottom of the map so the dark map (with
+   the customer's own pin, and the delivery partner's last-known pin if we
+   have one, online or not) stays visible behind it at all times. */
+.track-map-empty{position:absolute; left:70px; right:70px; bottom:12px; display:flex; align-items:center; gap:3px; background:rgba(255,255,255,.96); backdrop-filter:blur(6px); border-radius:18px; padding:3px 7px; text-align:left; box-shadow:0 12px 26px rgba(0,0,0,.28); z-index:4; transition:opacity .25s var(--ease), transform .25s var(--ease);}
+.track-map-empty .ic{font-size:21px; flex-shrink:0;}
+.track-map-empty .t{font-weight:800; font-size:8.5px; color:var(--ink);}
+.track-map-empty .s{font-size:8.5px; color:var(--ink-soft); margin-top:2px; line-height:1.35;}
+/* Delivery-partner marker when they're assigned but currently offline /
+   no recent GPS fix — shown dimmed (no pulse, no route line) so the
+   customer can still see roughly where the partner last was. */
+.track-boy-marker-wrap.offline .track-boy-pin{filter:grayscale(1) brightness(.85); opacity:.75;}
+.track-boy-marker-wrap.offline .track-boy-pulse{display:none;}
+/* "Arrived / Delivered" panel — shown instead of the empty/loading cards
+   once the admin marks today's delivery complete. Stays up for a few
+   seconds (or until the customer taps Close) with the order recap, then
+   fades+slides out smoothly instead of the screen just vanishing. */
+.track-map-arrived{position:absolute; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:rgba(255,255,255,.96); padding:30px; text-align:center; z-index:5; opacity:1; transform:none; transition:opacity .35s var(--ease), transform .35s var(--ease);}.track-map-arrived.show{display:flex;}
+.track-map-arrived.closing{opacity:0; transform:scale(.96);}
+.track-arrived-check{width:60px; height:60px; border-radius:50%; background:var(--grad-brand); color:#fff; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 10px 24px rgba(29,69,1,.5); animation:arrivedPop .45s var(--ease-spring);}
+@keyframes arrivedPop{0%{transform:scale(0); opacity:0;}60%{transform:scale(1.15); opacity:1;}100%{transform:scale(1);}}
+.track-arrived-title{font-weight:800; font-size:16px; color:#17160F;}
+.track-arrived-sub{font-size:11.5px; color:#6E6D64; max-width:260px;}
+.track-order-detail{width:100%; max-width:280px; background:#F5F4F0; border:1px solid #E7E5DD; border-radius:14px; padding:10px 14px; text-align:left; max-height:140px; overflow-y:auto;}
+.track-order-detail .od-row{display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid #E7E5DD; font-size:11.5px; color:#17160F;}
+.track-order-detail .od-row:last-child{border-bottom:none;}
+.track-order-detail .od-qty{color:#6E6D64; flex-shrink:0;}
+.track-arrived-timer{font-size:10px; color:#78766B; font-weight:600;}
+.track-arrived-close{margin-top:4px; background:var(--grad-brand); color:#fff; font-weight:800; font-size:12.5px; padding:10px 26px; border-radius:999px; border:none; cursor:pointer;}
 
 /* custom markers */
 .track-boy-marker-wrap{position:relative; width:34px; height:34px;}
@@ -1685,6 +1731,53 @@ body{font-size:14px;background:#EEF1EB;}
   .bill-stat{padding:8px 7px;}
   .bill-stat .k{font-size:8.2px;}
 }
+/* Live tracking order items */
+.track-order-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 0;
+}
+
+.track-order-item + .track-order-item {
+  border-top: 1px solid var(--line);
+}
+
+.track-order-item-image {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  object-fit: cover;
+}
+
+.track-order-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.track-order-item-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.track-order-item-meta {
+  font-size: 10px;
+  color: var(--ink-mute);
+  margin-top: 4px;
+}
+
+.track-order-item-qty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--brand-dark);
+  flex-shrink: 0;
+}
 </style>
 </head>
 <body>
@@ -1741,7 +1834,7 @@ body{font-size:14px;background:#EEF1EB;}
       </svg>
     </div>
     <div class="network-error-title">Network issue</div>
-    <div class="network-error-text">Page load nahi ho paayi. Internet connection check karke dobara try karein.</div>
+    <div class="network-error-text">Page couldn't load. Please check your internet connection and try again.</div>
     <button class="network-retry" id="networkRetry">Retry connection</button>
   </div>
 </div>
@@ -1800,7 +1893,7 @@ body{font-size:14px;background:#EEF1EB;}
     </svg>
   </div>
   <div class="network-state-title">Network issue</div>
-  <div class="network-state-text">Internet connection ya server response available nahi hai. Connection check karke dobara try karein.</div>
+  <div class="network-state-text">No internet connection or server response available. Please check your connection and try again.</div>
   <button class="network-state-retry" id="networkStateRetry">Retry connection</button>
 </div>
 
@@ -1809,15 +1902,15 @@ body{font-size:14px;background:#EEF1EB;}
   <div id="loginScreen">
     <div class="login-scroll">
       <div class="sheet-handle"></div>
-      <button id="loginCloseBtn" style="position:absolute; top:10px; right:16px; width:28px; height:28px; border:none; border-radius:50%; background:var(--card-2); color:var(--ink-soft); font-size:13px; cursor:pointer;">✕</button>
+      <button id="loginCloseBtn" aria-label="Close" style="position:absolute; top:10px; right:16px; width:28px; height:28px; border:none; border-radius:50%; background:var(--card-2); color:var(--ink-soft); font-size:13px; cursor:pointer;">✕</button>
       <div class="login-brand">
         <div class="logo-circle" style="width:38px;height:38px;"><span style="font-size:14px;">A</span></div>
         <div class="txt">Anadi Godham<span>FARM FRESH DAIRY, DAILY</span></div>
       </div>
       <div class="login-tag">Shuddh doodh, ghee aur pooja samagri — seedha aapke ghar</div>
       <div class="login-card" id="loginCard">
-        <div class="login-h" id="loginHeading">Order karne ke liye 👋</div>
-        <div class="login-sub" id="loginSub">Bas apna mobile number daalein — agar aap pehle se registered hain, to baaki details apne aap aa jayengi.</div>
+        <div class="login-h" id="loginHeading">To place your order 👋</div>
+        <div class="login-sub" id="loginSub">Just enter your mobile number — if you're already registered, the rest of your details will fill in automatically.</div>
 
         <div class="field" id="loginPhoneField">
           <label>Mobile Number</label>
@@ -1959,16 +2052,17 @@ body{font-size:14px;background:#EEF1EB;}
     <div id="liveTrackBar">
       <div class="ltb-avatar">🛵<span class="dot"></span></div>
       <div class="ltb-mid">
-        <div class="ltb-title" id="ltbTitle">Aapka delivery partner nikal chuka hai</div>
-        <div class="ltb-sub" id="ltbSub">Live location dekh rahe hain…</div>
+        <div class="ltb-title" id="ltbTitle">Your delivery partner is on the way</div>
+        <div class="ltb-sub" id="ltbSub">Fetching live location…</div>
       </div>
-      <div class="ltb-cta">Track<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="ltb-cta" id="ltbCta">Track<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+      <button class="ltb-close" id="ltbClose" aria-label="Close">✕</button>
     </div>
 
     <!-- ---- OVERLAY: LIVE ORDER TRACKING ---- -->
     <div class="overlay-screen" id="trackOrderScreen">
       <div class="overlay-header">
-        <button class="overlay-back" id="trackBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="overlay-back" id="trackBack" aria-label="Go back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
         <div class="overlay-title">
           <div class="t1-row"><span class="t1">Live Tracking</span><span class="track-live-chip" id="trackLiveChip"><span class="dot"></span><span id="trackLiveChipTxt">Live</span></span></div>
           <span class="t2" id="trackDateHeader">Today's delivery</span>
@@ -1977,11 +2071,22 @@ body{font-size:14px;background:#EEF1EB;}
       <div id="trackMapWrap">
         <div id="trackMap"></div>
         <div class="track-eta-pill" id="trackEtaPill" style="display:none;"><span class="eic">🛵</span><span id="trackEtaPillTxt">— min away</span></div>
-        <div class="track-map-loading" id="trackMapLoading"><div class="spinner"></div>Live location load ho rahi hai…</div>
+        <div class="track-map-loading" id="trackMapLoading"><div class="spinner"></div>Loading live location…</div>
         <div class="track-map-empty" id="trackMapEmpty" style="display:none;">
           <span class="ic">📍</span>
-          <div class="t">Live location abhi available nahi hai</div>
-          <div class="s">Delivery partner ka GPS thodi der mein connect hoga — yeh screen apne aap update ho jaayegi.</div>
+          <div>
+            <div class="t" id="trackMapEmptyTitle">Live location isn't available right now</div>
+            <div class="s" id="trackMapEmptySub">Your delivery partner's GPS will connect shortly — this screen will update automatically.</div>
+          </div>
+        </div>
+        <!-- ---- ARRIVED / DELIVERED panel ---- -->
+        <div class="track-map-arrived" id="trackMapArrived">
+          <div class="track-arrived-check">✓</div>
+          <div class="track-arrived-title">Delivered! 🎉</div>
+                    <div class="track-arrived-sub">Your order has been delivered successfully</div>
+          <div class="track-order-detail" id="trackOrderDetail"></div>
+                    <button class="track-arrived-close" id="trackArrivedCloseBtn">Close</button>
+          <div class="track-arrived-timer" id="trackArrivedTimer"></div>
         </div>
       </div>
       <div class="track-bottom-card">
@@ -1990,15 +2095,22 @@ body{font-size:14px;background:#EEF1EB;}
           <div class="track-step" data-step="out"><div class="sic">🛵</div><div class="sl">Out for delivery</div></div>
           <div class="track-step" data-step="arriving"><div class="sic">📍</div><div class="sl">Arriving</div></div>
         </div>
-        <div class="track-stats-row">
+                <div class="track-stats-row">
           <div class="track-stat-card"><span class="sic">⏱️</span><div><div class="lbl">Estimated arrival</div><div class="val" id="trackEtaDetail">—</div></div></div>
           <div class="track-stat-card"><span class="sic">📏</span><div><div class="lbl">Distance away</div><div class="val" id="trackDistDetail">—</div></div></div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-size:11.5px; font-weight:800; color:var(--ink);">Order details</span>
+            <span id="trackOrderCount" style="font-size:10px; font-weight:700; color:var(--ink-mute);"></span>
+          </div>
+          <div id="trackOrderItems" style="background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:4px 12px; max-height:150px; overflow-y:auto;"></div>
         </div>
         <div class="track-partner-row">
           <div class="track-partner-avatar">🛵</div>
           <div class="track-partner-mid">
             <div class="track-partner-name" id="trackPartnerName">Delivery Partner</div>
-            <div class="track-partner-sub" id="trackPartnerSub">Aapki fresh delivery le kar aa rahe hain</div>
+            <div class="track-partner-sub" id="trackPartnerSub">Bringing your fresh delivery to you</div>
           </div>
           <div class="track-actions">
             <a class="track-chat-btn" id="trackChatBtn" href="#" style="display:none;" aria-label="Message delivery partner on WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.9 9.9 0 0 0 4.84 1.23h.01c5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2zm5.87 14.14c-.25.7-1.45 1.37-2 1.46-.51.08-1.15.11-1.86-.12-.43-.14-.98-.32-1.68-.63-2.96-1.28-4.89-4.27-5.04-4.47-.15-.2-1.2-1.6-1.2-3.06 0-1.45.76-2.16 1.03-2.46.27-.3.6-.37.8-.37h.57c.18 0 .43-.07.67.51.25.6.85 2.08.92 2.23.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.4-.44.53-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.02 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.08.18-.2.75-.87.95-1.17.2-.3.4-.25.67-.15.27.1 1.73.82 2.03.97.3.15.5.22.57.35.08.13.08.75-.17 1.45z"/></svg></a>
@@ -2006,16 +2118,16 @@ body{font-size:14px;background:#EEF1EB;}
           </div>
         </div>
         <div class="track-meta-row"><span>Delivery date</span><span id="trackDateDetail">—</span></div>
-        <div class="track-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Yeh ek estimate hai, traffic aur route ke hisaab se badal sakta hai. Delivery complete hone ke baad live location dikhna band ho jaayega.</div>
+        <div class="track-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>This is an estimate and may change based on traffic and route. Live location will stop showing once the delivery is complete.</div>
       </div>
     </div>
 
     <!-- ---- OVERLAY: PRODUCT DETAIL ---- -->
     <div class="overlay-screen" id="screenProduct">
       <div class="overlay-header">
-        <button class="overlay-back" id="pdBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="overlay-back" id="pdBack" aria-label="Go back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
         <div class="overlay-title">Product</div>
-        <button class="icon-btn" id="pdCartBtn" style="width:38px;height:38px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="badge" id="pdCartBadge">0</span></button>
+        <button class="icon-btn" id="pdCartBtn" aria-label="View cart" style="width:38px;height:38px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="badge" id="pdCartBadge">0</span></button>
       </div>
       <div class="overlay-body">
         <div class="pd-slider" id="pdSlider"></div>
@@ -2050,7 +2162,7 @@ body{font-size:14px;background:#EEF1EB;}
     <!-- ---- OVERLAY: CART ---- -->
     <div class="overlay-screen" id="screenCart">
       <div class="overlay-header">
-        <button class="overlay-back" id="cartBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="overlay-back" id="cartBack" aria-label="Go back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
         <div class="overlay-title">My Cart</div>
       </div>
       <div class="overlay-body" style="padding:16px 14px 10px;" id="cartBody"></div>
@@ -2073,10 +2185,10 @@ body{font-size:14px;background:#EEF1EB;}
     <div class="sheet">
       <div class="sheet-handle"></div>
       <div style="font-weight:800; font-size:15.5px; margin-bottom:2px;" id="schedTitle">Schedule Delivery</div>
-      <div style="font-size:11.5px; color:var(--ink-soft); margin-bottom:16px;">Kripya woh dinank chunein jinpar yeh item deliver ho.</div>
+      <div style="font-size:11.5px; color:var(--ink-soft); margin-bottom:16px;">Please select the dates on which this item should be delivered.</div>
       <div class="cal-head">
         <div class="m" id="calMonthLabel">September 2026</div>
-        <div class="cal-nav"><button id="calPrev">←</button><button id="calNext">→</button></div>
+        <div class="cal-nav"><button id="calPrev" aria-label="Previous month">←</button><button id="calNext" aria-label="Next month">→</button></div>
       </div>
       <div class="cal-dow"><div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div></div>
       <div class="cal-grid" id="calGrid"></div>
@@ -2111,11 +2223,10 @@ body{font-size:14px;background:#EEF1EB;}
     </div>
     <div class="success-kicker">ORDER CONFIRMED</div>
     <h2>Shuddhta ka order ready! ✨</h2>
-    <p>Aapka order successfully schedule ho gaya hai. Fresh delivery aapke selected dates par pahunchegi.</p>
+    <p>Your order has been scheduled successfully. Fresh delivery will arrive on your selected dates.</p>
     <button class="btn btn-primary btn-block" id="successContinueBtn">View My Orders&nbsp; →</button>
   </div>
 
-  <div class="loading-full" id="bootLoading" style="display:none;"><div class="spinner"></div></div>
   <div class="toast" id="toast"></div>
 </div>
 
@@ -2486,6 +2597,19 @@ function distanceKmHaversine(lat1, lon1, lat2, lon2){
 }
 const TRACK_ROAD_FACTOR = 1.3; // same "sane default" used for road-distance estimates elsewhere in this system
 function estimatedRoadKmForTrack(lat1, lon1, lat2, lon2){ return distanceKmHaversine(lat1, lon1, lat2, lon2) * TRACK_ROAD_FACTOR; }
+/* A GPS fix is only trusted if it's a real number AND not (0,0) — Firebase
+   number fields default to 0 (not null/undefined) when a field was never
+   actually written, and 0,0 sits in the ocean off West Africa. Without this
+   check, a delivery boy record that has "lat"/"lng" keys present but not
+   yet populated with a real fix was passing the old `!= null` check and
+   getting haversine'd against the customer's real address — producing the
+   wildly-wrong "thousands of km away" distance readings customers saw. */
+function isValidLatLng(lat, lng){
+  return typeof lat === 'number' && typeof lng === 'number' &&
+    Number.isFinite(lat) && Number.isFinite(lng) &&
+    !(lat === 0 && lng === 0) &&
+    Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+}
 
 /* True if any order/item has TODAY scheduled, active (not stopped, not
    admin-rejected). This is what "an order is live today" means for tracking. */
@@ -2500,9 +2624,198 @@ function hasActiveDeliveryToday(){
   }
   return false;
 }
+const SUBSCRIPTION_QTY_KEYS = ['milk','paneer','ghee','chach','butter','curd'];
+/* True if the customer's admin-managed standing subscription (set directly
+   on the delivery chart, not through this app's own order flow) has any
+   quantity scheduled for today. `overrides/{today}` fully replaces
+   `defaultProducts` for that date when present (same rule the chart-sync
+   write uses), so an override of all-zero means today was paused. */
+function hasActiveSubscriptionToday(){
+  if (!customer) return false;
+  const source = todayOverride || customer.defaultProducts;
+  if (!source) return false;
+  return SUBSCRIPTION_QTY_KEYS.some(k => (source[k]||0) > 0);
+}
+/* Nearest active (not stopped/rejected) scheduled date that is TODAY or
+   later, across every order/item. Used so a delivery scheduled for a
+   future date (kal/parso) still gets a status shown right away instead of
+   only ever appearing once that date actually becomes "today". Returns
+   null when there's no upcoming scheduled date at all. */
+function nextActiveDeliveryDate(){
+  const today = todayISO();
+  let best = null;
+  for (const o of orders){
+    for (const it of (o.items||[])){
+      for (const d of (it.dates||[])){
+        if (d.date >= today && !d.stopped && !isDateRejected(o, d.date)){
+          if (!best || d.date < best) best = d.date;
+        }
+      }
+    }
+  }
+  return best;
+}
+/* Builds the "order detail" list shown on the Arrived panel — every item
+   delivered today, from this app's own orders, falling back to the
+   admin-set standing subscription (defaultProducts/overrides) for
+   customers who don't place orders through the app at all. */
+/* Returns delivery items for the requested date.
+   Also resolves product images from the live product catalogue. */
+function todaysDeliveryItems(dateStr = todayISO()) {
+  const items = [];
+
+  orders.forEach(o => {
+    (o.items || []).forEach(it => {
+      (it.dates || []).forEach(d => {
+
+        if (
+          d.date === dateStr &&
+          !d.stopped &&
+          !isDateRejected(o, d.date)
+        ) {
+          const product = prodMap[it.productId] || {};
+
+          items.push({
+            name: it.name || product.name || 'Item',
+            unit: it.unit || product.unit || '',
+            qty: it.qty || 1,
+
+            // Use saved order image first,
+            // otherwise get image from current product catalogue.
+            image: it.image || product.image || ''
+          });
+        }
+
+      });
+    });
+  });
+
+  /* Standing subscription fallback:
+     Only use it for today's date. */
+  if (!items.length && dateStr === todayISO() && customer) {
+
+    const source = todayOverride || customer.defaultProducts;
+
+    if (source) {
+      SUBSCRIPTION_QTY_KEYS.forEach(k => {
+
+        const qty = source[k] || 0;
+
+        if (qty > 0) {
+          const product = Object.values(prodMap)
+            .find(p => p.id === k);
+
+          items.push({
+            name: product?.name ||
+              k.charAt(0).toUpperCase() + k.slice(1),
+
+            unit: product?.unit || '',
+            qty,
+            image: product?.image || ''
+          });
+        }
+
+      });
+    }
+  }
+
+  return items;
+}
+/* Renders the live Order Details list on the main tracking screen (not
+   just the Arrived panel) — product name, unit, quantity and the
+   delivery date, same information Blinkit shows during live tracking. */
+/* Renders live tracking order details:
+   product image + name + unit + delivery date + quantity */
+function renderTrackOrderItems(dateForList) {
+
+  const host = document.getElementById('trackOrderItems');
+  const countEl = document.getElementById('trackOrderCount');
+
+  if (!host) return;
+
+  const items = todaysDeliveryItems(
+    dateForList || todayISO()
+  );
+
+  if (countEl) {
+    countEl.textContent = items.length
+      ? `${items.length} item${items.length === 1 ? '' : 's'}`
+      : '';
+  }
+
+  if (!items.length) {
+    host.innerHTML = `
+      <div style="
+        padding:12px 2px;
+        font-size:11px;
+        color:var(--ink-mute);
+        text-align:center;
+      ">
+        No item details available
+      </div>
+    `;
+    return;
+  }
+
+  host.innerHTML = items.map((it, i) => {
+
+    const imageHtml = it.image
+      ? `
+        <img
+          class="track-order-item-image"
+          src="${escapeHtml(it.image)}"
+          alt="${escapeHtml(it.name)}"
+          onerror="this.style.display='none';"
+        >
+      `
+      : `
+        <div
+          class="track-order-item-image"
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:25px;
+          "
+        >
+          🥛
+        </div>
+      `;
+
+    return `
+      <div class="track-order-item">
+
+        ${imageHtml}
+
+        <div class="track-order-item-info">
+
+          <div class="track-order-item-name">
+            ${escapeHtml(it.name)}
+          </div>
+
+          <div class="track-order-item-meta">
+            ${escapeHtml(it.unit || '')}
+            ${dateForList
+              ? ' · Delivery: ' + fmtDate(dateForList)
+              : ''
+            }
+          </div>
+
+        </div>
+
+        <div class="track-order-item-qty">
+          ×${it.qty}
+        </div>
+
+      </div>
+    `;
+
+  }).join('');
+}
 /* Central eligibility check — returns a state object describing what the
-   floating bar / tracking popup should show right now, or null when nothing
-   should be shown at all (no active delivery today, or already delivered).
+   floating bar / tracking popup should show right now, or null when
+   absolutely nothing should be shown (no order at all, today or upcoming,
+   and today's delivery — if any — was already dismissed after Arrived).
    state:
      'live'          → partner is online with a GPS fix AND we're past the
                        shift's tracking-start hour → show the real map.
@@ -2510,29 +2823,64 @@ function hasActiveDeliveryToday(){
                        gone online / sent a GPS fix yet.
      'waiting_time'  → order is confirmed for today, but it's still before
                        the shift's tracking-start hour (6 AM / 4 PM).
-*/
+     'arrived'       → today's delivery was just marked completed — shows
+                       the order recap, then closes itself (or the
+                       customer closes it).
+     'scheduled'     → nothing active today, but there IS an active order
+                       for a future date — shown so the customer always
+                       sees a status, no matter which day the order is for.
+   Every state (except 'scheduled') also carries `boy` — the assigned
+   partner's live record, if any — plus `boyOnline`/`boyHasFix` so the map
+   can always plot the partner's last-known pin, online or offline. */
 function getLiveTrackInfo(){
   if (!customer || !customer.id) return null;
+  const boy = customer.assignedTo ? deliveryBoysMap[customer.assignedTo] : null;
+  const boyOnline = isBoyOnline(boy);
+  const boyHasFix = !!boy && isValidLatLng(boy.lat, boy.lng);
   // `status` is only meaningful for TODAY — it gets set to 'completed' by
   // the delivery app once the boy marks today's drop done, but nothing
   // resets it back to 'pending' at the start of a new day. Without this
   // date check, a customer delivered on, say, Monday would have the bar
   // permanently hidden on every later day too, even with an active
-  // delivery scheduled — so only let it block the bar if completedAt
+  // delivery scheduled — so only let it affect things if completedAt
   // actually falls on today's date.
-  if (customer.status === 'completed' && customer.completedAt && toISO(new Date(customer.completedAt)) === todayISO()) return null;
-  if (!hasActiveDeliveryToday()) return null;
-  const windowOpen = isWithinTrackingWindow(customer.shift);
-  const boy = customer.assignedTo ? deliveryBoysMap[customer.assignedTo] : null;
-  const boyLive = windowOpen && isBoyOnline(boy) && boy && boy.lat != null && boy.lng != null;
-  return {
-    state: boyLive ? 'live' : (windowOpen ? 'waiting_boy' : 'waiting_time'),
-    boy
-  };
+  const completedToday = customer.status === 'completed' && customer.completedAt && toISO(new Date(customer.completedAt)) === todayISO();
+  if (completedToday){
+    const key = customer.id + ':' + todayISO();
+    if (arrivedDismissedKey === key) return null; // customer already closed/auto-dismissed this one
+    return { state: 'arrived', boy, boyOnline, boyHasFix, completedAt: customer.completedAt, dismissKey: key };
+  }
+  // Covers BOTH a one-off order placed through this app today AND a
+  // standing admin-set subscription active today — a customer can have
+  // either, and previously only the former was checked.
+  if (hasActiveDeliveryToday() || hasActiveSubscriptionToday()){
+    const windowOpen = isWithinTrackingWindow(customer.shift);
+    const boyLive = windowOpen && boyOnline && boyHasFix;
+    return {
+      state: boyLive ? 'live' : (windowOpen ? 'waiting_boy' : 'waiting_time'),
+      boy, boyOnline, boyHasFix
+    };
+  }
+  // No live delivery today — but "kisi bhi din ka order ho, status show
+  // ho": if there's a confirmed date coming up, still surface a status
+  // instead of showing nothing at all.
+  const nextDate = nextActiveDeliveryDate();
+  if (nextDate) return { state: 'scheduled', boy, boyOnline, boyHasFix, date: nextDate };
+  return null;
 }
 function trackStartLabel(shift){ return shift === 'evening' ? '4 PM' : '6 AM'; }
 
 let trackScreenOpen = false;
+// Which delivery (customerId:date) the customer has already dismissed the
+// Arrived panel for — persisted so a page refresh right after dismissing
+// doesn't bring the panel right back. Cleared automatically once the day
+// rolls over (completedToday stops matching, see getLiveTrackInfo above).
+let arrivedDismissedKey = localStorage.getItem('ag_arrived_dismissed') || null;
+function persistArrivedDismissed(key){ arrivedDismissedKey = key; localStorage.setItem('ag_arrived_dismissed', key); }
+// Guards against re-arming the 5s auto-dismiss timer on every 30s poll —
+// only ever scheduled once per delivery.
+let arrivedTimerStartedFor = null;
+const ARRIVED_AUTO_DISMISS_MS = 5000;
 let trackMapInstance = null;
 let trackBoyMarker = null;
 let trackDestMarker = null;
@@ -2545,63 +2893,126 @@ function refreshLiveTrackBar(){
   const bar = $('#liveTrackBar');
   if (!bar) return;
   const info = getLiveTrackInfo();
+  const closeBtn = $('#ltbClose');
   if (!info){
-    bar.classList.remove('show');
-    $('#app') && $('#app').classList.remove('has-track-bar');
+    hideLiveTrackBarAnimated();
     return;
   }
   const name = (info.boy && info.boy.name) ? info.boy.name : 'Aapka delivery partner';
   const dot = bar.querySelector('.dot');
+  if (closeBtn) closeBtn.classList.remove('show');
   if (info.state === 'live'){
-    $('#ltbTitle').textContent = `${name} aapki delivery le kar aa rahe hain`;
-    $('#ltbSub').textContent = trackEtaText(info.boy) || 'Live location dekh rahe hain…';
+    $('#ltbTitle').textContent = `${name} is bringing your delivery`;
+    $('#ltbSub').textContent = trackEtaText(info.boy) || 'Fetching live location…';
     if (dot) dot.style.background = '#4ADE80';
   } else if (info.state === 'waiting_boy'){
-    $('#ltbTitle').textContent = 'Order confirm ho gaya hai 🎉';
-    $('#ltbSub').textContent = `${name} jald hi live honge — location ka wait kar rahe hain…`;
+    $('#ltbTitle').textContent = 'Order confirmed 🎉';
+    $('#ltbSub').textContent = `${name} will be live soon — waiting for their location…`;
+    if (dot) dot.style.background = '#F5B94D';
+  } else if (info.state === 'arrived'){
+    $('#ltbTitle').textContent = 'Delivered! 🎉';
+    $('#ltbSub').textContent = 'Aapka order deliver ho gaya hai';
+    if (dot) dot.style.background = '#4ADE80';
+    if (closeBtn) closeBtn.classList.add('show');
+    scheduleArrivedAutoDismiss(info.dismissKey);
+  } else if (info.state === 'scheduled'){
+        $('#ltbTitle').textContent = 'Order confirmed 🎉';
+    $('#ltbSub').textContent = `Delivery scheduled for ${fmtDate(info.date)}`;
     if (dot) dot.style.background = '#F5B94D';
   } else {
-    $('#ltbTitle').textContent = 'Order confirm ho gaya hai 🎉';
-    $('#ltbSub').textContent = `Live tracking ${trackStartLabel(customer.shift)} se shuru hogi`;
+        $('#ltbTitle').textContent = 'Order confirmed 🎉';
+    $('#ltbSub').textContent = `Live tracking starts from ${trackStartLabel(customer.shift)}`;
     if (dot) dot.style.background = '#F5B94D';
   }
+  bar.classList.remove('closing');
   bar.classList.add('show');
   $('#app') && $('#app').classList.add('has-track-bar');
 }
+/* Fades+slides the floating bar out instead of yanking it away instantly
+   (the old classList.remove('show') set display:none with zero
+   transition — that abrupt cut is exactly the "gayab ho jata hai" the bar
+   used to do). Only animates if the bar is actually showing. */
+function hideLiveTrackBarAnimated(){
+  const bar = $('#liveTrackBar');
+  if (!bar || !bar.classList.contains('show')) return;
+  bar.classList.add('closing');
+  setTimeout(()=>{
+    bar.classList.remove('show','closing');
+    $('#app') && $('#app').classList.remove('has-track-bar');
+  }, 320);
+}
 // Ticks the bar/popup on a timer too — this is what catches the clock
 // crossing the shift's tracking-start hour without needing any new data.
-setInterval(()=>{ refreshLiveTrackBar(); if (trackScreenOpen) updateTrackScreen(); }, 30000);
+setInterval(()=>{ if (customer && customer.id) attachTodayOverrideListener(customer.id); refreshLiveTrackBar(); if (trackScreenOpen) updateTrackScreen(); }, 30000);
 
 function trackEtaText(boy){
-  if (!boy || customer.lat == null || customer.lng == null || boy.lat == null || boy.lng == null) return null;
+  if (!boy || !isValidLatLng(customer.lat, customer.lng) || !isValidLatLng(boy.lat, boy.lng)) return null;
   const km = estimatedRoadKmForTrack(boy.lat, boy.lng, customer.lat, customer.lng);
   const mins = Math.max(1, Math.round((km / AVG_DELIVERY_SPEED_KMPH) * 60));
-  return `${mins} min mein pahunch sakte hain · ${km < 1 ? Math.round(km*1000)+' m' : km.toFixed(1)+' km'} door`;
+  return `Arriving in ${mins} min · ${km < 1 ? Math.round(km*1000)+' m' : km.toFixed(1)+' km'} away`;
 }
 
-/* Toggles the small LIVE / Waiting chip in the header. */
+/* Once the delivery is marked Arrived, gives the customer 5 seconds to see
+   the recap before it closes itself — but only ever arms ONE timer per
+   delivery (arrivedTimerStartedFor guards against the 30s poll re-arming
+   it every tick), and a manual tap on Close/✕ short-circuits it early. */
+function scheduleArrivedAutoDismiss(key){
+  if (!key || arrivedTimerStartedFor === key) return;
+  arrivedTimerStartedFor = key;
+  startArrivedCountdown();
+  setTimeout(()=>{ dismissArrivedTracking(key); }, ARRIVED_AUTO_DISMISS_MS);
+}
+let arrivedCountdownInterval = null;
+function startArrivedCountdown(){
+  clearInterval(arrivedCountdownInterval);
+  let remaining = Math.ceil(ARRIVED_AUTO_DISMISS_MS/1000);
+  const tick = ()=>{ const el = $('#trackArrivedTimer'); if (el) el.textContent = remaining > 0 ? `Closing automatically in ${remaining}s` : ''; remaining--; };
+  tick();
+  arrivedCountdownInterval = setInterval(()=>{
+    if (remaining < 0){ clearInterval(arrivedCountdownInterval); return; }
+    tick();
+  }, 1000);
+}
+/* Manual "cancel"/close OR the 5s auto-dismiss both land here — remembers
+   (per device) that this delivery's Arrived panel was handled, fades the
+   panel + bar out smoothly, and closes the full-screen tracker if open. */
+function dismissArrivedTracking(key){
+  clearInterval(arrivedCountdownInterval);
+  persistArrivedDismissed(key);
+  const arrivedEl = $('#trackMapArrived');
+  if (arrivedEl && arrivedEl.classList.contains('show')){
+    arrivedEl.classList.add('closing');
+    setTimeout(()=> arrivedEl.classList.remove('show','closing'), 360);
+  }
+  hideLiveTrackBarAnimated();
+  if (trackScreenOpen) setTimeout(()=> closeTrackScreen(), 220);
+  refreshLiveTrackBar();
+}
+
+/* Toggles the small LIVE / Waiting / Delivered chip in the header. */
 function setTrackLiveChip(state){
   const chip = $('#trackLiveChip'), txt = $('#trackLiveChipTxt');
   if (!chip) return;
-  chip.classList.remove('is-live','is-wait');
+  chip.classList.remove('is-live','is-wait','is-done');
   if (state === 'live'){ chip.classList.add('is-live'); if (txt) txt.textContent = 'Live'; }
-  else { chip.classList.add('is-wait'); if (txt) txt.textContent = 'Waiting'; }
+  else if (state === 'arrived'){ chip.classList.add('is-done'); if (txt) txt.textContent = 'Delivered'; }
+  else { chip.classList.add('is-wait'); if (txt) txt.textContent = state === 'scheduled' ? 'Upcoming' : 'Waiting'; }
 }
 /* Drives the 3-step progress tracker (Confirmed → Out for delivery →
    Arriving) to match the current tracking state. */
 function setTrackSteps(state){
   const steps = $$('#trackSteps .track-step');
   if (!steps.length) return;
-  const order = ['confirmed','out','arriving'];
-  let activeIdx = 0; // waiting_time → just confirmed
+  let activeIdx = 0; // waiting_time / scheduled → just confirmed
   if (state === 'waiting_boy') activeIdx = 1;      // out for delivery (in progress)
   if (state === 'live') activeIdx = 2;             // arriving now
+  if (state === 'arrived') activeIdx = 3;          // every step done
   steps.forEach((el,i)=>{
     el.classList.remove('done','active');
-    if (i < activeIdx) el.classList.add('done');
+    if (state === 'arrived' || i < activeIdx) el.classList.add('done');
     else if (i === activeIdx) el.classList.add(state==='live' ? 'active' : (i===0 ? 'done' : 'active'));
   });
-  if (state !== 'live') steps[0].classList.add('done');
+  if (state !== 'live' && state !== 'arrived') steps[0].classList.add('done');
 }
 
 function openTrackScreen(){
@@ -2609,114 +3020,200 @@ function openTrackScreen(){
   if (!info) return; // bar shouldn't be visible/clickable if this happens, but guard anyway
   trackScreenOpen = true;
   $('#trackOrderScreen').classList.add('show');
-  $('#trackDateHeader').textContent = `${fmtDateLong(todayISO())} · ${customer.shift==='evening' ? '🌆 Evening Shift' : '🌅 Morning Shift'}`;
+  const headerDate = info.state === 'scheduled' ? info.date : todayISO();
+  $('#trackDateHeader').textContent = `${fmtDateLong(headerDate)} · ${customer.shift==='evening' ? '🌆 Evening Shift' : '🌅 Morning Shift'}`;
   $('#trackPartnerName').textContent = (info.boy && info.boy.name) ? info.boy.name : 'Delivery Partner';
   const callBtn = $('#trackCallBtn'), chatBtn = $('#trackChatBtn');
-  if (info.boy && info.boy.phone){
+  if (info.boy && info.boy.phone && info.state !== 'scheduled'){
     callBtn.href = 'tel:'+info.boy.phone; callBtn.style.display = 'flex';
     if (chatBtn){ chatBtn.href = `https://wa.me/91${info.boy.phone}`; chatBtn.style.display = 'flex'; }
   } else {
     callBtn.style.display = 'none';
     if (chatBtn) chatBtn.style.display = 'none';
   }
-  $('#trackDateDetail').textContent = fmtDate(todayISO());
+  $('#trackDateDetail').textContent = fmtDate(headerDate);
   ensureTrackMap();
   updateTrackScreen();
 }
 function closeTrackScreen(){
   trackScreenOpen = false;
+  clearInterval(arrivedCountdownInterval);
   $('#trackOrderScreen').classList.remove('show');
 }
 
+/* Free CARTO "dark-matter" vector style — no API key required — so the
+   tracking map is dark-themed instead of the old light "liberty" style,
+   and stays visible behind every card (waiting/arrived/scheduled), not
+   just during live tracking. Also wires up a dashed route-line source
+   used to draw the direction between partner and customer once the
+   partner is actually online (see updateRouteLine()). */
 function ensureTrackMap(){
   if (trackMapInstance || typeof maplibregl === 'undefined') return;
   trackMapInstance = new maplibregl.Map({
     container: 'trackMap',
-    style: 'https://tiles.openfreemap.org/styles/liberty', // free vector tiles, no API key
+    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
     center: (customer.lat != null && customer.lng != null) ? [customer.lng, customer.lat] : [77.2090, 28.6139],
     zoom: 12,
     attributionControl: false
   });
-  trackMapInstance.addControl(new maplibregl.AttributionControl({ compact: true }));
-  trackMapInstance.on('load', ()=> updateTrackScreen());
+  trackMapInstance.on('load', ()=>{
+    if (!trackMapInstance.getSource('track-route')){
+      trackMapInstance.addSource('track-route', { type:'geojson', data:{ type:'Feature', geometry:{ type:'LineString', coordinates:[] } } });
+      trackMapInstance.addLayer({
+        id:'track-route-line', type:'line', source:'track-route',
+        layout:{ 'line-cap':'round', 'line-join':'round', visibility:'none' },
+        paint:{ 'line-color':'#4ADE80', 'line-width':3.5, 'line-dasharray':[0.1,1.8], 'line-opacity':.9 }
+      });
+    }
+    updateTrackScreen();
+  });
 }
 
-/* Draws/updates the popup for whichever state we're in — waiting card
-   (before the shift's cutoff, or partner not online yet) or the full live
-   map with both markers once tracking genuinely starts. Only ever shows
-   THIS customer's own address — never any other customer's location. */
+/* Draws (or hides) the dashed direction line between the delivery
+   partner's live position and the customer's address — only shown once
+   the partner is genuinely online with a fresh GPS fix, per "direction
+   show jab delivery boy online ho". */
+function updateRouteLine(boy){
+  if (!trackMapInstance || !trackMapInstance.getLayer || !trackMapInstance.getLayer('track-route-line')) return;
+  const show = boy && isBoyOnline(boy) && isValidLatLng(boy.lat, boy.lng) && isValidLatLng(customer.lat, customer.lng);
+  if (show){
+    trackMapInstance.getSource('track-route').setData({ type:'Feature', geometry:{ type:'LineString', coordinates:[[boy.lng, boy.lat],[customer.lng, customer.lat]] } });
+    trackMapInstance.setLayoutProperty('track-route-line','visibility','visible');
+  } else {
+    trackMapInstance.setLayoutProperty('track-route-line','visibility','none');
+  }
+}
+
+/* Draws/updates the popup for whichever state we're in — Arrived recap,
+   waiting card (before the shift's cutoff, partner not online yet, or a
+   future-dated order), or the full live map with both markers + direction
+   line once tracking genuinely starts. The map itself (dark-themed) stays
+   visible behind every one of these states. Only ever shows THIS
+   customer's own address — never any other customer's location. */
 function updateTrackScreen(){
   if (!trackScreenOpen) return;
   const info = getLiveTrackInfo();
-  const loadingEl = $('#trackMapLoading'), emptyEl = $('#trackMapEmpty'), etaPill = $('#trackEtaPill');
+  renderTrackOrderItems(info && info.state==='scheduled' ? info.date : todayISO());
+  const loadingEl = $('#trackMapLoading'), emptyEl = $('#trackMapEmpty'), arrivedEl = $('#trackMapArrived'), etaPill = $('#trackEtaPill');
   if (!info){
-    // Delivery just got marked completed while this screen was open — close
-    // it out gracefully instead of showing a dead map.
+    // Nothing left to track (record/order was removed) — close with the
+    // screen's own smooth slide-out rather than just vanishing.
     closeTrackScreen();
-    showToast('Yeh delivery deliver ho chuki hai, ab track karne layak nahi hai');
+        showToast('Tracking is no longer available');
     return;
   }
+
+  if (info.state === 'arrived'){
+    loadingEl.style.display = 'none';
+    emptyEl.style.display = 'none';
+    etaPill.style.display = 'none';
+    setTrackLiveChip('arrived');
+    setTrackSteps('arrived');
+    $('#trackPartnerSub').textContent = 'Delivery complete';
+    $('#trackEtaDetail').textContent = 'Delivered';
+    $('#trackDistDetail').textContent = '0 m';
+    const list = $('#trackOrderDetail');
+    if (list){
+      const items = todaysDeliveryItems();
+      list.innerHTML = items.length
+        ? items.map(it=>`<div class="od-row"><span>${escapeHtml(it.name)}${it.unit? ' · '+escapeHtml(it.unit):''}</span><span class="od-qty">×${it.qty}</span></div>`).join('')
+        : '<div class="od-row"><span>Order details</span><span class="od-qty">—</span></div>';
+    }
+    if (arrivedEl && !arrivedEl.classList.contains('show')){
+      arrivedEl.classList.remove('closing');
+      arrivedEl.classList.add('show');
+    }
+    scheduleArrivedAutoDismiss(info.dismissKey);
+    if (trackMapInstance && trackMapInstance.loaded && trackMapInstance.loaded() && customer.lat != null && customer.lng != null){
+      placeDestMarker();
+      trackMapInstance.easeTo({ center: [customer.lng, customer.lat], zoom: 13, duration: 400 });
+    }
+    updateRouteLine(null);
+    return;
+  }
+  if (arrivedEl) arrivedEl.classList.remove('show','closing');
+
   setTrackLiveChip(info.state);
   setTrackSteps(info.state);
+
+  // Delivery-partner marker: plotted whenever we have ANY last-known fix —
+  // online (bright, pulsing, route line drawn below) or offline (dimmed,
+  // static, no route) — "map dikhe chahe delivery boy online ho ya
+  // offline". Not applicable to 'scheduled' (nothing to plot yet).
+  const boy = info.boy;
+  if (trackMapInstance && trackMapInstance.loaded && trackMapInstance.loaded() && info.state !== 'scheduled' && boy && isValidLatLng(boy.lat, boy.lng)){
+    if (!trackBoyMarker){
+      const el = document.createElement('div');
+      el.className = 'track-boy-marker-wrap';
+      el.innerHTML = '<span class="track-boy-pulse"></span><span class="track-boy-pin">🛵</span>';
+      trackBoyMarker = new maplibregl.Marker({ element: el }).setLngLat([boy.lng, boy.lat]).addTo(trackMapInstance);
+    } else {
+      trackBoyMarker.setLngLat([boy.lng, boy.lat]);
+    }
+    trackBoyMarker.getElement().classList.toggle('offline', !info.boyOnline);
+  } else if (trackBoyMarker){
+    trackBoyMarker.remove();
+    trackBoyMarker = null;
+  }
 
   if (info.state !== 'live'){
     loadingEl.style.display = 'none';
     etaPill.style.display = 'none';
     emptyEl.style.display = 'flex';
-    const icon = emptyEl.querySelector('.ic'), title = emptyEl.querySelector('.t'), sub = emptyEl.querySelector('.s');
-    if (info.state === 'waiting_time'){
+    const icon = emptyEl.querySelector('.ic'), title = $('#trackMapEmptyTitle'), sub = $('#trackMapEmptySub');
+        if (info.state === 'waiting_time'){
       if (icon) icon.textContent = '⏰';
-      if (title) title.textContent = `Live tracking ${trackStartLabel(customer.shift)} se shuru hogi`;
-      if (sub) sub.textContent = 'Aapka order confirm ho chuka hai. Delivery partner nikalte hi yahaan unki live location dikhne lagegi.';
-      $('#trackPartnerSub').textContent = 'Aapki fresh delivery le kar aane wale hain';
-    } else {
+      if (title) title.textContent = `Live tracking starts from ${trackStartLabel(customer.shift)}`;
+      if (sub) sub.textContent = 'Order confirmed. Live location will show here once the partner turns on GPS.';
+      $('#trackPartnerSub').textContent = 'Bringing your fresh delivery to you';
+    } else if (info.state === 'waiting_boy'){
       if (icon) icon.textContent = '🛵';
-      if (title) title.textContent = 'Delivery partner jald hi live honge';
-      if (sub) sub.textContent = 'Live tracking window shuru ho chuki hai — partner ke GPS on karte hi unki location yahaan dikhegi. Yeh screen apne aap update ho jaayegi.';
-      $('#trackPartnerSub').textContent = 'GPS on karte hi live honge';
+      if (title) title.textContent = boy && boy.name ? `${boy.name} is currently offline` : 'Delivery partner will be live soon';
+      if (sub) sub.textContent = "Live position will appear here as soon as the partner's GPS turns on — this screen updates automatically.";
+      $('#trackPartnerSub').textContent = 'Will be live once GPS turns on';
+    } else { // scheduled
+      if (icon) icon.textContent = '📅';
+      if (title) title.textContent = `Delivery scheduled for ${fmtDate(info.date)}`;
+      if (sub) sub.textContent = 'Live tracking will appear here automatically once the delivery day/shift begins.';
+      $('#trackPartnerSub').textContent = 'Upcoming delivery';
     }
-    $('#trackEtaDetail').textContent = info.state === 'waiting_time' ? `${trackStartLabel(customer.shift)} se` : 'Jald hi';
+    $('#trackEtaDetail').textContent = info.state === 'waiting_time' ? `From ${trackStartLabel(customer.shift)}`
+      : info.state === 'scheduled' ? fmtDate(info.date) : 'Soon';
     $('#trackDistDetail').textContent = '—';
     // Still center the map on the customer's own address (if known) so the
-    // screen doesn't look totally empty while waiting — this is also where
-    // the customer's own delivery-address pin lives, with its persistent
-    // "you are here" pulse so it never reads as a dead/static marker.
+    // dark map behind the card never looks totally empty — this is also
+    // where the customer's own delivery-address pin lives, with its
+    // persistent "you are here" pulse so it never reads as a dead/static
+    // icon.
     if (trackMapInstance && trackMapInstance.loaded && trackMapInstance.loaded() && customer.lat != null && customer.lng != null){
       placeDestMarker();
       trackMapInstance.easeTo({ center: [customer.lng, customer.lat], zoom: 13, duration: 400 });
     }
+    updateRouteLine(null);
     return;
   }
 
   emptyEl.style.display = 'none';
   if (!trackMapInstance || !trackMapInstance.loaded()){ loadingEl.style.display = 'flex'; return; }
   loadingEl.style.display = 'none';
-  $('#trackPartnerSub').textContent = 'Aapki fresh delivery le kar aa rahe hain';
-
-  const boy = info.boy;
-  if (!trackBoyMarker){
-    const el = document.createElement('div');
-    el.className = 'track-boy-marker-wrap';
-    el.innerHTML = '<span class="track-boy-pulse"></span><span class="track-boy-pin">🛵</span>';
-    trackBoyMarker = new maplibregl.Marker({ element: el }).setLngLat([boy.lng, boy.lat]).addTo(trackMapInstance);
-  } else {
-    trackBoyMarker.setLngLat([boy.lng, boy.lat]);
-  }
+  $('#trackPartnerSub').textContent = 'Bringing your fresh delivery to you';
 
   const bounds = new maplibregl.LngLatBounds().extend([boy.lng, boy.lat]);
-  if (customer.lat != null && customer.lng != null){
+  if (isValidLatLng(customer.lat, customer.lng)){
     placeDestMarker();
     bounds.extend([customer.lng, customer.lat]);
     const km = estimatedRoadKmForTrack(boy.lat, boy.lng, customer.lat, customer.lng);
     const mins = Math.max(1, Math.round((km / AVG_DELIVERY_SPEED_KMPH) * 60));
     $('#trackEtaDetail').textContent = `~${mins} min`;
     $('#trackDistDetail').textContent = km < 1 ? Math.round(km*1000)+' m' : km.toFixed(1)+' km';
-    $('#trackEtaPillTxt').textContent = `${mins} min door`;
+        $('#trackEtaPillTxt').textContent = `${mins} min away`;
     etaPill.style.display = 'flex';
+    updateRouteLine(boy);
   } else {
     etaPill.style.display = 'none';
-    $('#trackEtaDetail').textContent = 'Address pin set nahi hai';
+    $('#trackEtaDetail').textContent = 'Address pin not set';
     $('#trackDistDetail').textContent = '—';
+    updateRouteLine(null);
   }
   trackMapInstance.fitBounds(bounds, { padding: 70, maxZoom: 15, duration: 500 });
 }
@@ -2833,16 +3330,51 @@ let custListenerAttachedFor = null;
 let custListenerRef = null;
 let ordersListenerAttachedFor = null;
 let ordersListenerRef = null;
+let overrideListenerAttachedFor = null; // `${custId}:${date}` — date-scoped, see attachTodayOverrideListener
+let overrideListenerRef = null;
+let todayOverride = null; // customers/{id}/overrides/{today} snapshot, or null if none set
 
-/* Detaches any live listeners from a previous session — called on logout
-   and before attaching a new customer's listeners, so switching accounts
-   on the same device (or logging out) never keeps streaming someone
-   else's orders/bill into view. */
+/* Detaches any live listeners from a previous session AND wipes the
+   previous customer's orders/tracking state — called on logout and before
+   attaching a new customer's listeners, so switching accounts on the same
+   device never keeps showing someone else's orders, bill, or tracking bar,
+   even for the brief moment before the new customer's own Firebase data
+   streams in. (Previously this only detached the listener refs — the old
+   `orders` array itself was left in place until the new listener's first
+   callback overwrote it, which could briefly show the PREVIOUS customer's
+   tracking bar under the NEW customer's login.) */
 function detachSessionListeners(){
   if (custListenerRef){ off(custListenerRef); custListenerRef = null; }
   if (ordersListenerRef){ off(ordersListenerRef); ordersListenerRef = null; }
+  if (overrideListenerRef){ off(overrideListenerRef); overrideListenerRef = null; }
   custListenerAttachedFor = null;
   ordersListenerAttachedFor = null;
+  overrideListenerAttachedFor = null;
+  todayOverride = null;
+  orders = []; saveOrders(); renderOrders(); renderBill(); refreshRejectionBadge();
+  closeTrackScreen(); refreshLiveTrackBar();
+}
+
+/* Many customers never place an order through this web app at all — the
+   admin sets their daily milk/paneer/etc. quota directly on the delivery
+   chart (customers/{id}/defaultProducts, optionally overridden per-date at
+   customers/{id}/overrides/{date}). hasActiveDeliveryToday() only knows
+   about this app's own webOrders, so those customers' tracking bar was
+   silently never showing even with a real delivery scheduled for today.
+   This listens to just today's override doc (re-attached whenever the id
+   or the date changes) so getLiveTrackInfo() can also see that. */
+function attachTodayOverrideListener(id){
+  if (!id) return;
+  const date = todayISO();
+  const key = id + ':' + date;
+  if (overrideListenerAttachedFor === key) return;
+  if (overrideListenerRef) off(overrideListenerRef);
+  overrideListenerAttachedFor = key;
+  overrideListenerRef = ref(db, 'customers/'+id+'/overrides/'+date);
+  onValue(overrideListenerRef, snap=>{
+    todayOverride = snap.val() || null;
+    refreshLiveTrackBar();
+  });
 }
 
 function attachCustomerListener(id){
@@ -2853,9 +3385,7 @@ function attachCustomerListener(id){
   onValue(custListenerRef, snap=>{
     if (!snap.exists()){
       customer = null; saveCustomer(); detachSessionListeners();
-      orders = []; saveOrders(); renderOrders(); renderBill(); refreshRejectionBadge();
-      closeTrackScreen(); refreshLiveTrackBar();
-      showToast('Aapka account admin dwara hata diya gaya hai');
+      showToast('Your account has been removed by the admin');
       if ($('#profileSheetOverlay').classList.contains('show')) openProfileSheet();
       return;
     }
@@ -2878,6 +3408,7 @@ function attachCustomerListener(id){
     refreshLiveTrackBar();
   });
   attachOrdersListener(id);
+  attachTodayOverrideListener(id);
 }
 
 /* Mirrors customers/{id}/webOrders in real time into the local `orders`
@@ -2916,8 +3447,8 @@ function attachOrdersListener(id){
     if (freshKeys.length){
       const [orderId, dateStr] = freshKeys[0].split('::');
       const label = freshKeys.length===1
-        ? `Order #${orderId} ki ${fmtDate(dateStr)} ki delivery reject ho gayi hai ❗`
-        : `${freshKeys.length} deliveries reject ho gayi hain ❗ My Orders mein dekhein`;
+        ? `Delivery for Order #${orderId} on ${fmtDate(dateStr)} was rejected ❗`
+        : `${freshKeys.length} deliveries were rejected ❗ Check My Orders`;
       showToast(label);
     }
     refreshRejectionBadge();
@@ -2945,6 +3476,18 @@ async function removeOrderFromFirebase(order){
 /* ================= HELPERS ================= */
 const $ = s=>document.querySelector(s);
 $('#liveTrackBar').addEventListener('click', openTrackScreen);
+// Quick manual dismiss ("mai aaram se cancel kr du") right from the bar,
+// without needing to open the full screen first — only visible/relevant
+// once a delivery is in the 'arrived' state (see refreshLiveTrackBar()).
+$('#ltbClose') && $('#ltbClose').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const info = getLiveTrackInfo();
+  if (info && info.state === 'arrived' && info.dismissKey) dismissArrivedTracking(info.dismissKey);
+});
+$('#trackArrivedCloseBtn') && $('#trackArrivedCloseBtn').addEventListener('click', ()=>{
+  const info = getLiveTrackInfo();
+  if (info && info.state === 'arrived' && info.dismissKey) dismissArrivedTracking(info.dismissKey);
+});
 $('#trackBack').addEventListener('click', closeTrackScreen);
 const $$ = s=>[...document.querySelectorAll(s)];
 function pad(n){ return n<10 ? '0'+n : ''+n; }
@@ -3037,20 +3580,20 @@ function refreshCartBadges(){
 function addToCart(id, qty=1){
   const p = prodMap[id];
   if (stockStatus(p)!=='active'){
-    showToast(stockStatus(p)==='coming_soon' ? 'Yeh product jald hi aa raha hai' : 'Yeh product abhi stock mein nahi hai');
+    showToast(stockStatus(p)==='coming_soon' ? 'This product is coming soon' : 'This product is currently out of stock');
     return;
   }
   let it = cart.find(c=>c.id===id);
   const current = it ? it.qty : 0;
   const capped = Math.min(current+qty, stockLeft(p));
-  if (capped<=current){ showToast('Available stock khatam ho gaya hai'); return; }
+  if (capped<=current){ showToast('No more stock available'); return; }
   if (it) it.qty = capped;
   else cart.push({id, qty:capped, dates:[]});
   saveCart(); refreshCartBadges();
 }
 function setQty(id, qty){
   const p = prodMap[id];
-  if (qty>0 && qty>stockLeft(p)){ showToast('Available stock khatam ho gaya hai'); qty = stockLeft(p); }
+  if (qty>0 && qty>stockLeft(p)){ showToast('No more stock available'); qty = stockLeft(p); }
   let it = cart.find(c=>c.id===id);
   if (!it) { if (qty>0) addToCart(id, qty); return; }
   if (qty<=0){ cart = cart.filter(c=>c.id!==id); }
@@ -3073,13 +3616,13 @@ function ctaMarkup(id, size){ // size: 'sm' or 'lg'
   }
   const q = cartQtyOf(id);
   if (q<=0){
-    return `<button class="${size==='sm'?'mini-add':'add-btn'}" data-add="${id}">ADD</button>`;
+    return `<button class="${size==='sm'?'mini-add':'add-btn'}" data-add="${id}" aria-label="Add ${p?escapeHtml(p.name||''):'item'} to cart">ADD</button>`;
   }
   const atLimit = q >= stockLeft(p);
   if (size==='sm'){
-    return `<div class="mini-stepper"><button data-dec="${id}">−</button><div class="qv">${q}</div><button data-inc="${id}" ${atLimit?'disabled':''}>+</button></div>`;
+    return `<div class="mini-stepper"><button data-dec="${id}" aria-label="Decrease quantity">−</button><div class="qv">${q}</div><button data-inc="${id}" aria-label="Increase quantity" ${atLimit?'disabled':''}>+</button></div>`;
   }
-  return `<div class="stepper-pill"><button data-dec="${id}">−</button><div class="qv">${q}</div><button data-inc="${id}" ${atLimit?'disabled':''}>+</button></div>`;
+  return `<div class="stepper-pill"><button data-dec="${id}" aria-label="Decrease quantity">−</button><div class="qv">${q}</div><button data-inc="${id}" aria-label="Increase quantity" ${atLimit?'disabled':''}>+</button></div>`;
 }
 
 /* ================= RENDER: HOME ================= */
@@ -3268,7 +3811,7 @@ function refreshAllCtas(){
 /* ================= EVENT DELEGATION: product open + add/inc/dec ================= */
 document.addEventListener('click', (e)=>{
   const addBtn = e.target.closest('[data-add]');
-  if (addBtn){ const id=addBtn.getAttribute('data-add'); addToCart(id, qtyStepOf(id)); refreshAllCtas(); showToast('Cart mein add ho gaya'); return; }
+  if (addBtn){ const id=addBtn.getAttribute('data-add'); addToCart(id, qtyStepOf(id)); refreshAllCtas(); showToast('Added to cart'); return; }
   const incBtn = e.target.closest('[data-inc]');
   if (incBtn){ const id=incBtn.getAttribute('data-inc'); setQty(id, cartQtyOf(id)+qtyStepOf(id)); refreshAllCtas(); return; }
   const decBtn = e.target.closest('[data-dec]');
@@ -3366,14 +3909,14 @@ function renderPdQty(){
   if (stockEl) stockEl.innerHTML = stockLeftHtml(p, 'margin-bottom:10px;');
   const q = cartQtyOf(currentProductId);
   if (q<=0){ area.innerHTML = `<span style="color:var(--ink-mute); font-size:12.5px; font-weight:600;">Not added yet</span>`; }
-  else { area.innerHTML = `<div class="stepper-pill" style="width:96px;"><button data-dec="${currentProductId}">−</button><div class="qv">${q}</div><button data-inc="${currentProductId}">+</button></div>`; }
+  else { area.innerHTML = `<div class="stepper-pill" style="width:96px;"><button data-dec="${currentProductId}" aria-label="Decrease quantity">−</button><div class="qv">${q}</div><button data-inc="${currentProductId}" aria-label="Increase quantity">+</button></div>`; }
 }
 $('#pdAddBtn').addEventListener('click', ()=>{
   const p = prodMap[currentProductId];
   if (!p || stockStatus(p)!=='active') return;
   addToCart(currentProductId, qtyStepOf(currentProductId));
   refreshAllCtas(); refreshCartBadges();
-  showToast('Item cart mein add kar diya gaya ✅');
+  showToast('Item added to cart ✅');
 });
 $('#pdBack').addEventListener('click', ()=>{
   startRouteLoading(productReturnTab || 'home', ()=>{ $('#screenProduct').classList.remove('show'); switchTab(productReturnTab || 'home', true); refreshAllCtas(); });
@@ -3397,7 +3940,7 @@ $('#cartBtn').addEventListener('click', openCart);
 function renderCart(){
   const body = $('#cartBody');
   if (cart.length===0){
-    body.innerHTML = `<div class="cart-empty"><span class="ic">🛒</span><div class="t">Cart khali hai</div><div class="s">Kuch fresh dairy products add karein aur order schedule karein.</div></div>`;
+    body.innerHTML = `<div class="cart-empty"><span class="ic">🛒</span><div class="t">Your cart is empty</div><div class="s">Add some fresh dairy products and schedule your order.</div></div>`;
     $('#cartFooter').style.display='none';
     return;
   }
@@ -3417,13 +3960,13 @@ function renderCart(){
         <div class="un">${escapeHtml(p.unit)}</div>
         ${stockLeftHtml(p)}
         <div class="row2">
-          <div class="stepper-pill" style="width:78px;"><button data-cdec="${idx}">−</button><div class="qv">${c.qty}</div><button data-cinc="${idx}">+</button></div>
+          <div class="stepper-pill" style="width:78px;"><button data-cdec="${idx}" aria-label="Decrease quantity">−</button><div class="qv">${c.qty}</div><button data-cinc="${idx}" aria-label="Increase quantity">+</button></div>
           <div class="pr">${money(p.price*c.qty)}</div>
         </div>
         <button class="sched-btn ${c.dates.length?'has-dates':''}" data-sched="${idx}">📅 ${c.dates.length ? c.dates.length+' date(s) scheduled — edit' : 'Schedule Order'}</button>
         ${datesHtml}
       </div>
-      <button class="cart-rm" data-rm="${idx}">✕</button>
+      <button class="cart-rm" data-rm="${idx}" aria-label="Remove item">✕</button>
     </div>`;
   });
   const subtotal = cartSubtotal();
@@ -3448,7 +3991,7 @@ $('#cartBody').addEventListener('click', e=>{
     const id = cart[i].id;
     const p = prodMap[id];
     const desired = cart[i].qty + qtyStepOf(id);
-    if (p && desired>stockLeft(p)){ showToast('Available stock khatam ho gaya hai'); cart[i].qty = stockLeft(p); }
+    if (p && desired>stockLeft(p)){ showToast('No more stock available'); cart[i].qty = stockLeft(p); }
     else cart[i].qty = desired;
     saveCart(); refreshCartBadges(); renderCart(); refreshAllCtas(); return;
   }
@@ -3499,7 +4042,7 @@ function renderCalendar(){
 }
 function renderCalChips(){
   const arr = [...calSelected].sort();
-  $('#calChips').innerHTML = arr.length ? arr.map(iso=>`<span class="cal-chip">${fmtDate(iso)}<button data-unchip="${iso}">✕</button></span>`).join('') : `<span style="font-size:11.5px; color:var(--ink-mute);">Koi date select nahi ki gayi</span>`;
+  $('#calChips').innerHTML = arr.length ? arr.map(iso=>`<span class="cal-chip">${fmtDate(iso)}<button data-unchip="${iso}" aria-label="Remove date ${fmtDate(iso)}">✕</button></span>`).join('') : `<span style="font-size:11.5px; color:var(--ink-mute);">No dates selected</span>`;
 }
 $('#calGrid').addEventListener('click', e=>{
   const cell = e.target.closest('[data-day]');
@@ -3523,7 +4066,7 @@ $('#calSaveBtn').addEventListener('click', ()=>{
   saveCart();
   $('#scheduleSheetOverlay').classList.remove('show');
   renderCart();
-  showToast('Delivery dates safaltapoorvak save ho gayi ✅');
+  showToast('Delivery dates saved successfully ✅');
 });
 
 /* ================= PLACE ORDER ================= */
@@ -3535,7 +4078,7 @@ $('#placeOrderBtn').addEventListener('click',async()=>{
   if(!(customer&&customer.phone)){openCheckoutSheet('order');return;}
   setNetworkBusy(true);
   try{await verifyRealInternet();hideGlobalNetworkIssue();await finalizeOrder(customer);}
-  catch(e){console.error('Order connection check failed',e);showGlobalNetworkIssue();showToast('Internet connection nahi hai. Order place nahi hua.');}
+  catch(e){console.error('Order connection check failed',e);showGlobalNetworkIssue();showToast('No internet connection. Order was not placed.');}
   finally{setNetworkBusy(false);}
 });
 
@@ -3555,8 +4098,8 @@ function openCheckoutSheet(mode){
   $('#loginCheckBtn').disabled = false;
   $('#loginCheckBtn').textContent = 'Continue →';
   $('#loginSubmitBtn').style.display = 'none';
-  $('#loginHeading').textContent = mode==='order' ? 'Order karne ke liye 👋' : (mode==='login' ? 'Welcome to Anadi Godham 👋' : 'Apni details bharein');
-  $('#loginSub').textContent = 'Bas apna mobile number daalein — agar aap pehle se registered hain, to baaki details apne aap aa jayengi.';
+  $('#loginHeading').textContent = mode==='order' ? 'To place your order 👋' : (mode==='login' ? 'Welcome to Anadi Godham 👋' : 'Fill in your details');
+  $('#loginSub').textContent = "Just enter your mobile number — if you're already registered, the rest of your details will fill in automatically.";
   $('#loginScreen').classList.add('show');
   setTimeout(()=>$('#loginPhone').focus(), 250);
 }
@@ -3570,7 +4113,7 @@ $('#loginCheckBtn').addEventListener('click', async ()=>{
   const phone = $('#loginPhone').value.trim();
   const err = $('#loginErr');
   if (phone.length!==10 || !/^[0-9]{10}$/.test(phone)){
-    err.textContent = 'Kripya sahi 10-digit mobile number daalein.';
+    err.textContent = 'Please enter a valid 10-digit mobile number.';
     err.classList.add('show');
     return;
   }
@@ -3578,7 +4121,7 @@ $('#loginCheckBtn').addEventListener('click', async ()=>{
   const btn = $('#loginCheckBtn');
   loginBusy = true;
   $('#loginCard').classList.add('busy');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true; btn.setAttribute('aria-busy','true'); btn.innerHTML = '<span class="spinner"></span><span class="sr-only">Loading…</span>';
   try{
     const match = await withTimeout(findCustomerByPhone(phone));
     $('#loginExtraFields').style.display = 'block';
@@ -3586,26 +4129,26 @@ $('#loginCheckBtn').addEventListener('click', async ()=>{
       matchedCustomerKey = match.key;
       const rec = match.rec;
       $('#loginFoundNote').style.display = 'block';
-      $('#loginFoundNote').textContent = '✅ Aap pehle se registered hain, '+(rec.name||'')+'! Details check karke order confirm karein.';
+      $('#loginFoundNote').textContent = "✅ You're already registered, "+(rec.name||'')+'! Please check your details and confirm the order.';
       $('#loginName').value = rec.name || '';
       $('#loginAddress').value = rec.address || '';
     } else {
       matchedCustomerKey = null;
       $('#loginFoundNote').style.display = 'block';
-      $('#loginFoundNote').textContent = 'Yeh naya number hai — kripya apna naam aur address ek baar bharein; agli baar sirf number se login ho jaayega.';
+      $('#loginFoundNote').textContent = 'This is a new number — please fill in your name and address once; next time you can log in with just your number.';
     }
     $('#loginPhone').disabled = true;
-    btn.style.display = 'none';
+    btn.style.display = 'none'; btn.removeAttribute('aria-busy');
     $('#loginSubmitBtn').style.display = 'flex';
     $('#loginSubmitBtn').textContent = checkoutMode==='order' ? 'Confirm & Place Order' : 'Save Details';
   } catch(e){
     console.error(e);
     const isTimeout = e && e.message === 'TIMEOUT';
     err.textContent = isTimeout
-      ? 'Network dheema lag raha hai — kripya dobara prayas karein.'
-      : 'Kuch truti ho gayi (' + (e && (e.code || e.message) || 'unknown error') + '). Kripya dobara prayas karein.';
+      ? 'Network seems slow — please try again.'
+      : 'Something went wrong (' + (e && (e.code || e.message) || 'unknown error') + '). Please try again.';
     err.classList.add('show');
-    btn.disabled = false; btn.textContent = 'Continue →';
+    btn.disabled = false; btn.removeAttribute('aria-busy'); btn.textContent = 'Continue →';
   } finally {
     loginBusy = false;
     $('#loginCard').classList.remove('busy');
@@ -3619,7 +4162,7 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
   const address = $('#loginAddress').value.trim();
   const err = $('#loginErr');
   if (!name || !address){
-    err.textContent = 'Kripya Name aur Address bharein.';
+    err.textContent = 'Please fill in your name and address.';
     err.classList.add('show');
     return;
   }
@@ -3627,7 +4170,7 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
   const btn = $('#loginSubmitBtn');
   loginBusy = true;
   $('#loginCard').classList.add('busy');
-  btn.disabled = true; const origTxt = btn.textContent; btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true; const origTxt = btn.textContent; btn.setAttribute('aria-busy','true'); btn.innerHTML = '<span class="spinner"></span><span class="sr-only">Loading…</span>';
   const rec = { name, phone, address };
   let custKey = null, full = null;
   try{
@@ -3636,7 +4179,7 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
     full = snap.val() || rec;
   } catch(e){
     console.error(e);
-    showToast(e && e.message==='TIMEOUT' ? 'Network dheema hai, phir bhi aapko login kiya ja raha hai' : 'Database se connect nahi ho paaya, phir bhi aapko login kiya ja raha hai');
+    showToast(e && e.message==='TIMEOUT' ? 'Network is slow — logging you in anyway' : "Couldn't connect to the database — logging you in anyway");
   }
   if (custKey){
     customer = {
@@ -3654,16 +4197,16 @@ $('#loginSubmitBtn').addEventListener('click', async ()=>{
   }
   saveCustomer();
   $('#loginScreen').classList.remove('show');
-  btn.disabled = false; btn.textContent = origTxt;
+  btn.disabled = false; btn.removeAttribute('aria-busy'); btn.textContent = origTxt;
   loginBusy = false;
   $('#loginCard').classList.remove('busy');
   if (checkoutMode==='order'){
     try{ await verifyRealInternet(); hideGlobalNetworkIssue(); await finalizeOrder(customer); }
-    catch(e){ console.error('Order after login connection check failed',e); showGlobalNetworkIssue(); showToast('Internet connection nahi hai. Order place nahi hua.'); }
+    catch(e){ console.error('Order after login connection check failed',e); showGlobalNetworkIssue(); showToast('No internet connection. Order was not placed.'); }
   } else if (checkoutMode==='login'){
-    showToast(matchedCustomerKey ? 'Welcome back, '+customer.name+'! 👋' : 'Login safaltapoorvak ho gaya ✅');
+    showToast(matchedCustomerKey ? 'Welcome back, '+customer.name+'! 👋' : 'Login successful ✅');
   } else {
-    showToast('Details safaltapoorvak save ho gayi ✅');
+    showToast('Details saved successfully ✅');
     openProfileSheet();
   }
 });
@@ -3714,8 +4257,30 @@ function spawnSuccessConfetti(){
 
 async function finalizeOrder(cust){
   await waitForFirebaseConnection(5000);
-  const items=cart.map(c=>{const p=prodMap[c.id];return{productId:c.id,name:p.name,unit:p.unit,price:p.price,qty:c.qty,dates:(c.dates.length?c.dates:[todayISO()]).map(d=>({date:d,stopped:false}))};});
-  const itemsTotal=items.reduce((sum,it)=>sum+it.price*it.qty*it.dates.length,0);
+
+  const items=cart.map(c=>{
+    const p=prodMap[c.id];
+
+    return{
+      productId:c.id,
+      name:p.name,
+      unit:p.unit,
+      price:p.price,
+      qty:c.qty,
+      image:p.image||'',
+
+      dates:(c.dates.length?c.dates:[todayISO()])
+        .map(d=>({
+          date:d,
+          stopped:false
+        }))
+    };
+  });
+
+  const itemsTotal=items.reduce(
+    (sum,it)=>sum+it.price*it.qty*it.dates.length,
+    0
+  );
   const deliveryCharge=deliveryChargeForItemsPerDate(items);
   const total=itemsTotal+deliveryCharge;
   const order={id:'AG'+Date.now().toString().slice(-8),placedAt:new Date().toISOString(),itemsTotal,deliveryCharge,total,custId:cust.id||null,items};
@@ -3876,7 +4441,7 @@ async function adjustChartQty(order, item, dateStr, stopping){
     const cur = existing[key] || 0;
     const next = Math.max(0, cur + (stopping ? -item.qty : item.qty));
     await update(ref(db, path), { [key]: next, updatedAt: Date.now() });
-  } catch(e){ console.error('Chart quantity sync failed', e); showToast('Order update ho gaya hai, lekin chart sync mein samasya aayi'); }
+  } catch(e){ console.error('Chart quantity sync failed', e); showToast('Order updated, but there was an issue syncing the chart'); }
 }
 
 /* True when every item of this order has this date either stopped or
@@ -3946,7 +4511,7 @@ function restoreOpenOrderIds(ids){
 function renderOrders(){
   const wrap = $('#ordersList');
   if (orders.length===0){
-    wrap.innerHTML = `<div class="orders-empty"><span class="ic">🥛</span><div class="t">Abhi koi order nahi hai</div><div>Home se products add karke apna pehla order place karein.</div></div>`;
+    wrap.innerHTML = `<div class="orders-empty"><span class="ic">🥛</span><div class="t">No orders yet</div><div>Add products from Home to place your first order.</div></div>`;
     return;
   }
   wrap.innerHTML = orders.map((o,oi)=>{
@@ -3955,7 +4520,7 @@ function renderOrders(){
       const datesHtml = it.dates.map((dd,di)=>{
         const rejected = isDateRejected(o, dd.date);
         if (rejected){
-          return `<div class="oi-date rejected" title="Yeh delivery reject kar di gayi hai">
+          return `<div class="oi-date rejected" title="This delivery was rejected">
             ${fmtDate(dd.date)}
             <span class="oi-rejected-tag">❌ Rejected</span>
           </div>`;
@@ -3965,7 +4530,7 @@ function renderOrders(){
           ${fmtDate(dd.date)}
           ${stoppable
             ? `<button data-stop="${oi}:${ii}:${di}">${dd.stopped?'Resume':'Stop'}</button>`
-            : `<button disabled title="Cutoff time nikal chuka hai — is delivery ko ab stop/resume nahi kiya ja sakta">🔒 Locked</button>`}
+            : `<button disabled title="Cutoff time has passed — this delivery can no longer be stopped or resumed" aria-label="Locked — cutoff time has passed">🔒 Locked</button>`}
         </div>`;
       }).join('');
       return `<div class="oi-row" data-item="${oi}:${ii}">
@@ -3975,7 +4540,7 @@ function renderOrders(){
           <div class="qp">${it.qty} × ${money(it.price)} · ${escapeHtml(it.unit)}</div>
           <div class="oi-dates">${datesHtml}</div>
         </div>
-        <button class="row-del-btn del-item-btn" data-delete-item="${oi}:${ii}" title="Product hataayein"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+        <button class="row-del-btn del-item-btn" data-delete-item="${oi}:${ii}" title="Remove product" aria-label="Remove product"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       </div>`;
     }).join('');
     const b = orderEffectiveBreakdown(o);
@@ -4009,7 +4574,7 @@ function orderBreakdownHtml(b){
 function deleteOrder(oi, cardEl){
   const order = orders[oi];
   if (!order) return;
-  openConfirm('Kya aap yeh order delete karna chahte hain?', 'Yeh order sthaayi roop se hata diya jaayega aur bill turant update ho jaayega.', async ()=>{
+  openConfirm('Are you sure you want to delete this order?', 'This order will be permanently deleted and the bill will update immediately.', async ()=>{
     if (cardEl){ cardEl.classList.add('removing'); await new Promise(res=>setTimeout(res, 320)); }
     const openIds = getOpenOrderIds();
     try{
@@ -4031,7 +4596,8 @@ function deleteOrder(oi, cardEl){
     renderOrders();
     restoreOpenOrderIds(openIds);
     renderBill();
-    showToast('Order safaltapoorvak delete kar diya gaya');
+    refreshLiveTrackBar();
+    showToast('Order deleted successfully');
   });
 }
 
@@ -4044,7 +4610,7 @@ function deleteOrderItem(oi, ii, rowEl){
   if (!order) return;
   const item = order.items[ii];
   if (!item) return;
-  openConfirm('Kya aap yeh product delete karna chahte hain?', `"${item.name}" is order se hata diya jaayega aur bill turant update ho jaayega.`, async ()=>{
+  openConfirm('Are you sure you want to delete this product?', `"${item.name}" will be removed from this order and the bill will update immediately.`, async ()=>{
     if (rowEl){ rowEl.classList.add('removing'); await new Promise(res=>setTimeout(res, 320)); }
     const openIds = getOpenOrderIds();
     try{
@@ -4067,7 +4633,8 @@ function deleteOrderItem(oi, ii, rowEl){
     renderOrders();
     restoreOpenOrderIds(openIds);
     renderBill();
-    showToast('Product safaltapoorvak delete kar diya gaya');
+    refreshLiveTrackBar();
+    showToast('Product deleted successfully');
   });
 }
 
@@ -4083,7 +4650,7 @@ $('#ordersList').addEventListener('click', async e=>{
     const [oi,ii,di] = stopBtn.getAttribute('data-stop').split(':').map(Number);
     const order = orders[oi], item = order.items[ii], d = item.dates[di];
     if (!isDateStoppable(d.date, customer ? customer.shift : 'morning')){
-      showToast('Cutoff time nikal chuka hai — is delivery ko ab stop/resume nahi kiya ja sakta');
+      showToast('Cutoff time has passed — this delivery can no longer be stopped or resumed');
       renderOrders();
       return;
     }
@@ -4093,7 +4660,8 @@ $('#ordersList').addEventListener('click', async e=>{
     renderOrders();
     restoreOpenOrderIds(openIds);
     renderBill();
-    showToast(d.stopped ? 'Delivery safaltapoorvak stop kar di gayi' : 'Delivery safaltapoorvak resume kar di gayi');
+    refreshLiveTrackBar();
+    showToast(d.stopped ? 'Delivery stopped successfully' : 'Delivery resumed successfully');
     try{
       await adjustChartQty(order, item, d.date, d.stopped);
       if (d.stopped){
@@ -4164,7 +4732,7 @@ function renderBillTimeline(){
   const map = buildDayWiseMap();
   const dates = [...map.keys()].sort().reverse();
   if (!dates.length){
-    wrap.innerHTML = `<div class="bill-empty-modern"><span class="ic">🧾</span><div class="t">Abhi koi purchase nahi hai</div><div class="s">Jab aap order place karenge, yahan har delivery ki complete detail ek simple timeline mein dikhegi.</div></div>`;
+    wrap.innerHTML = `<div class="bill-empty-modern"><span class="ic">🧾</span><div class="t">No purchases yet</div><div class="s">Once you place an order, every delivery's full details will show here in a simple timeline.</div></div>`;
     return;
   }
   wrap.innerHTML = `
@@ -4194,7 +4762,7 @@ function renderBillTimeline(){
 function renderBillOrders(){
   const wrap = $('#billContent');
   if (!orders.length){
-    wrap.innerHTML = `<div class="bill-empty-modern"><span class="ic">📦</span><div class="t">Abhi koi order nahi hai</div><div class="s">Aapke placed orders yahan simple summary ke saath dikhenge.</div></div>`;
+    wrap.innerHTML = `<div class="bill-empty-modern"><span class="ic">📦</span><div class="t">No orders yet</div><div class="s">Your placed orders will show here with a simple summary.</div></div>`;
     return;
   }
   wrap.innerHTML = `
@@ -4236,7 +4804,7 @@ function renderBillOrders(){
               </div>`;
             }).join('')}
             ${orderBreakdownHtml(b)}
-            <button class="row-del-btn" data-delete-order="${oi}" title="Order hataayein" style="margin:8px 0 0 auto;width:32px;height:32px;">
+            <button class="row-del-btn" data-delete-order="${oi}" title="Remove order" aria-label="Remove order" style="margin:8px 0 0 auto;width:32px;height:32px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             </button>
           </div>
@@ -4398,8 +4966,8 @@ function openProfileSheet(){
   if (!customer || !customer.id){
     c.innerHTML = `<div class="login-prompt">
       <span class="ic">👤</span>
-      <div class="t">Abhi tak login nahi hai</div>
-      <div class="s">Apna mobile number darj karke login karein — agar aap pehle se registered hain, to details apne aap aa jaayengi.</div>
+      <div class="t">You're not logged in yet</div>
+      <div class="s">Enter your mobile number to log in — if you're already registered, your details will fill in automatically.</div>
       <button class="btn btn-primary btn-block" id="goLoginBtn">Login / Add My Details</button>
     </div>`;
     $('#goLoginBtn').addEventListener('click', ()=>{
@@ -4417,7 +4985,7 @@ function openProfileSheet(){
       </div>
       <div class="profile-row"><span class="lbl">🏠 Address</span><span class="val">${escapeHtml(customer.address)}</span></div>
       <div class="profile-row"><span class="lbl">📱 Mobile</span><span class="val">+91 ${escapeHtml(customer.phone)}</span></div>
-      <div class="profile-row"><span class="lbl">🛵 Delivery Partner</span><span class="val">${partnerName ? escapeHtml(partnerName) : 'Jald hi assign hoga'}</span></div>
+      <div class="profile-row"><span class="lbl">🛵 Delivery Partner</span><span class="val">${partnerName ? escapeHtml(partnerName) : 'Will be assigned soon'}</span></div>
       <div class="profile-row"><span class="lbl">⏰ Shift</span><span class="val">${shiftLabel}</span></div>
       <div style="height:16px;"></div>
       <button class="btn btn-ghost btn-block" id="editProfileBtn" style="margin-bottom:10px;">Edit Name / Address</button>
@@ -4428,11 +4996,9 @@ function openProfileSheet(){
     });
     $('#logoutBtn').addEventListener('click', ()=>{
       $('#profileSheetOverlay').classList.remove('show');
-      openConfirm('Kya aap logout karna chahte hain?', 'Aap dobara apna mobile number darj karke turant login kar sakenge.', ()=>{
+      openConfirm('Are you sure you want to log out?', 'You can log back in anytime with your mobile number.', ()=>{
         customer = null; localStorage.removeItem('ag_customer'); detachSessionListeners();
-        orders = []; saveOrders(); renderOrders(); renderBill(); refreshRejectionBadge();
-        closeTrackScreen(); refreshLiveTrackBar();
-        showToast('Aap safaltapoorvak logout ho gaye hain');
+        showToast('You have been logged out successfully');
       });
     });
   }
@@ -4448,7 +5014,7 @@ function openConfirm(title, text, onOk){
   $('#confirmOverlay').classList.add('show');
   const okBtn = $('#confirmOkBtn'), cancelBtn = $('#confirmCancelBtn');
   const okOrigTxt = okBtn.textContent;
-  const cleanup = ()=>{ $('#confirmOverlay').classList.remove('show'); okBtn.onclick=null; cancelBtn.onclick=null; okBtn.disabled=false; cancelBtn.disabled=false; okBtn.textContent=okOrigTxt; };
+  const cleanup = ()=>{ $('#confirmOverlay').classList.remove('show'); okBtn.onclick=null; cancelBtn.onclick=null; okBtn.disabled=false; cancelBtn.disabled=false; okBtn.removeAttribute('aria-busy'); okBtn.textContent=okOrigTxt; };
   // onOk may be async (Firebase deletes/updates) — if it returns a promise,
   // the dialog now stays open with a spinner on Confirm until it settles,
   // instead of vanishing instantly and leaving the person unsure whether
@@ -4456,8 +5022,8 @@ function openConfirm(title, text, onOk){
   okBtn.onclick = async ()=>{
     const result = onOk();
     if (result && typeof result.then === 'function'){
-      okBtn.disabled = true; cancelBtn.disabled = true;
-      okBtn.innerHTML = '<span class="spinner"></span>';
+      okBtn.disabled = true; cancelBtn.disabled = true; okBtn.setAttribute('aria-busy','true');
+      okBtn.innerHTML = '<span class="spinner"></span><span class="sr-only">Loading…</span>';
       try{ await result; } finally { cleanup(); }
     } else {
       cleanup();
@@ -4469,7 +5035,7 @@ $('#confirmOverlay').addEventListener('click', e=>{ if (e.target.id==='confirmOv
 
 /* ================= WHATSAPP ================= */
 function openWhatsapp(){
-  const msg = encodeURIComponent('Hi Anadi Godham, mujhe apne order ke baare mein baat karni hai.');
+  const msg = encodeURIComponent('Hi Anadi Godham, I would like to talk about my order.');
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
 }
 $('#whatsappBtn').addEventListener('click', openWhatsapp);
