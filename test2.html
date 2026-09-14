@@ -462,49 +462,109 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 #bottomNav button.active .nic{transform:translateY(-1px) scale(1.08);}
 #bottomNav button.active::before{content:'';position:absolute; top:6px; width:28px; height:28px; border-radius:10px; background:var(--grad-brand); opacity:.9; z-index:-1; animation:navPop .32s var(--ease-spring);}
 @keyframes navPop{from{transform:scale(.5); opacity:0;} to{transform:scale(1); opacity:.9;}}
-#whatsappBtn{position:absolute; right:16px; bottom:calc(var(--nav-h) + 22px + var(--safe-b)); width:52px; height:52px; border-radius:50%; background:#236b22; border:none; box-shadow:0 12px 26px rgba(37,211,102,.42); z-index:52; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; transition:bottom .25s var(--ease);}
+#whatsappBtn{position:absolute; right:16px; bottom:calc(var(--nav-h) + 22px + var(--safe-b)); width:52px; height:52px; border-radius:50%; background:#236b22; border:none; box-shadow:0 12px 26px rgba(37,211,102,.42); z-index:52; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; transition:bottom .25s var(--ease), transform .3s var(--ease), opacity .3s var(--ease);}
 #whatsappBtn:active{transform:scale(.92);}
-/* whatsapp FAB moves up out of the way whenever the live-tracking bar is showing */
-#app.has-track-bar #whatsappBtn{bottom:calc(var(--nav-h) + 22px + 62px + var(--safe-b));}
+/* WhatsApp now docks permanently beside the bottom nav (see the compact
+   "beside nav" rules further down) — it no longer jumps up when the
+   live-tracking bar appears, so its position stays predictable. */
 
-/* ============ LIVE DELIVERY TRACKING — floating bar (Blinkit-style) ============ */
-#liveTrackBar{position:absolute; left:10px; right:10px; bottom:calc(var(--nav-h) + 10px + var(--safe-b)); z-index:53; display:none; align-items:center; gap:10px; background:var(--grad-brand); border-radius:16px; padding:9px 12px; box-shadow:0 10px 24px rgba(29,69,1,.34); cursor:pointer; animation:trackBarIn .32s var(--ease);}
+/* ============ LIVE DELIVERY TRACKING — floating bar (slim, centered) ============ */
+#liveTrackBar{position:absolute; left:16px; right:16px; bottom:calc(var(--nav-h) + 12px + var(--safe-b)); z-index:53; display:none; align-items:center; gap:9px; max-width:340px; margin:0 auto; background:linear-gradient(135deg,#3D8A04 0%,#1D4501 100%); border:1px solid rgba(255,255,255,.14); border-radius:999px; padding:6px 7px 6px 6px; box-shadow:0 10px 22px rgba(20,50,4,.32), 0 2px 6px rgba(20,50,4,.2); cursor:pointer; animation:trackBarIn .32s var(--ease); transition:transform .3s var(--ease), opacity .3s var(--ease);}
 #liveTrackBar.show{display:flex;}
 @keyframes trackBarIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;}}
-.ltb-avatar{position:relative; width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0;}
-.ltb-avatar .dot{position:absolute; right:-1px; bottom:-1px; width:11px; height:11px; border-radius:50%; background:#4ADE80; border:2px solid #1D4501; animation:ltbPulse 1.6s ease-in-out infinite;}
-@keyframes ltbPulse{0%,100%{transform:scale(1); opacity:1;} 50%{transform:scale(1.25); opacity:.7;}}
+.ltb-avatar{position:relative; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.16); border:1.5px solid rgba(255,255,255,.28); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
+.ltb-avatar .dot{position:absolute; right:-2px; bottom:-2px; width:9px; height:9px; border-radius:50%; background:#4ADE80; border:2px solid #1D4501; animation:ltbPulse 1.6s ease-in-out infinite;}
+@keyframes ltbPulse{0%,100%{transform:scale(1); opacity:1;} 50%{transform:scale(1.3); opacity:.65;}}
 .ltb-mid{flex:1; min-width:0; color:#fff;}
-.ltb-title{font-weight:800; font-size:12.5px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.ltb-sub{font-size:11px; opacity:.85; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.ltb-cta{flex-shrink:0; font-size:11.5px; font-weight:800; color:#fff; background:rgba(255,255,255,.16); padding:7px 12px; border-radius:11px;}
+.ltb-title{font-weight:800; font-size:11px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-.005em;}
+.ltb-sub{font-size:9.5px; opacity:.82; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;}
+.ltb-cta{flex-shrink:0; display:flex; align-items:center; gap:3px; font-size:10px; font-weight:800; color:#fff; background:rgba(255,255,255,.18); padding:7px 10px 7px 11px; border-radius:999px; letter-spacing:.01em;}
+.ltb-cta svg{width:11px; height:11px; display:block;}
 
-/* full-screen live tracking overlay */
+/* ---- scroll-aware nav: bottom nav, WhatsApp FAB and the live-tracking
+   bar slide down out of the way while scrolling through content, and
+   slide back the moment the user scrolls back up (or is near the top). */
+#bottomNav, #whatsappBtn, #liveTrackBar{transition:transform .32s var(--ease), opacity .32s var(--ease), bottom .25s var(--ease), box-shadow .25s ease;}
+#bottomNav.nav-hidden{transform:translateY(140%); opacity:0; pointer-events:none;}
+#whatsappBtn.nav-hidden{transform:translateY(140%) scale(.9); opacity:0; pointer-events:none;}
+#liveTrackBar.nav-hidden{transform:translateY(140%); opacity:0; pointer-events:none;}
+
+/* full-screen live tracking overlay — redesigned: cleaner header with a
+   pulsing LIVE/status chip, a nicer ETA pill + custom animated markers on
+   the map (rider gets a radar-pulse ring, the customer's own address gets
+   a soft persistent "you are here" halo so the pin never looks static),
+   and a restructured bottom card: step progress → two stat tiles (ETA +
+   distance) → partner row with call/chat actions → compact meta → note. */
 #trackOrderScreen{display:flex; flex-direction:column;}
-#trackOrderScreen .overlay-title{display:flex; flex-direction:column; gap:1px;}
+#trackOrderScreen .overlay-title{display:flex; flex-direction:column; gap:2px;}
+#trackOrderScreen .overlay-title .t1-row{display:flex; align-items:center; gap:7px;}
 #trackOrderScreen .overlay-title .t1{font-weight:800; font-size:14.5px;}
 #trackOrderScreen .overlay-title .t2{font-size:10.5px; color:var(--ink-soft); font-weight:600;}
+.track-live-chip{display:inline-flex; align-items:center; gap:4px; font-size:9px; font-weight:800; letter-spacing:.04em; padding:3px 8px 3px 6px; border-radius:999px; text-transform:uppercase;}
+.track-live-chip .dot{width:6px; height:6px; border-radius:50%; flex-shrink:0;}
+.track-live-chip.is-live{background:#E3F5DE; color:#1D6B2A;}
+.track-live-chip.is-live .dot{background:#2FAE3F; animation:ltbPulse 1.6s ease-in-out infinite;}
+.track-live-chip.is-wait{background:#FDF1DC; color:#93650C;}
+.track-live-chip.is-wait .dot{background:#F0A93C;}
+
 #trackMapWrap{position:relative; flex:1; min-height:0; background:#E7E5DD;}
 #trackMap{position:absolute; inset:0;}
-.track-eta-pill{position:absolute; top:12px; left:50%; transform:translateX(-50%); background:var(--card); padding:8px 16px; border-radius:999px; box-shadow:var(--shadow-md); font-weight:800; font-size:12.5px; color:var(--brand-dark); display:flex; align-items:center; gap:6px; white-space:nowrap;}
+.track-eta-pill{position:absolute; top:12px; left:50%; transform:translateX(-50%); background:var(--card); padding:7px 16px 7px 8px; border-radius:999px; box-shadow:var(--shadow-md); font-weight:800; font-size:12px; color:var(--ink); display:flex; align-items:center; gap:8px; white-space:nowrap;}
+.track-eta-pill .eic{width:26px; height:26px; border-radius:50%; background:var(--grad-brand); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;}
+.track-eta-pill b{color:var(--brand-dark); font-weight:800;}
 .track-map-loading{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:var(--cream); font-size:12px; color:var(--ink-soft); font-weight:600;}
+.track-map-loading .spinner{border-color:rgba(29,69,1,.16); border-top-color:var(--brand);}
 .track-map-empty{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; background:var(--cream); padding:30px; text-align:center;}
 .track-map-empty .ic{font-size:34px;}
 .track-map-empty .t{font-weight:800; font-size:13.5px;}
 .track-map-empty .s{font-size:11.5px; color:var(--ink-soft); max-width:260px;}
-.track-boy-marker{width:34px; height:34px; border-radius:50%; background:var(--grad-brand); border:3px solid #fff; box-shadow:0 4px 12px rgba(29,69,1,.4); display:flex; align-items:center; justify-content:center; font-size:16px;}
-.track-dest-marker{width:26px; height:26px; border-radius:50% 50% 50% 0; background:var(--danger); border:3px solid #fff; transform:rotate(-45deg); box-shadow:0 3px 8px rgba(0,0,0,.3);}
-.track-bottom-card{flex-shrink:0; background:var(--card); border-radius:22px 22px 0 0; box-shadow:0 -12px 30px rgba(0,0,0,.12); padding:16px 18px calc(16px + var(--safe-b)); position:relative; z-index:2;}
-.track-partner-row{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
-.track-partner-avatar{width:46px; height:46px; border-radius:50%; background:var(--brand-light); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;}
+
+/* custom markers */
+.track-boy-marker-wrap{position:relative; width:34px; height:34px;}
+.track-boy-pulse{position:absolute; left:50%; top:50%; width:34px; height:34px; margin:-17px 0 0 -17px; border-radius:50%; border:2px solid rgba(61,138,4,.5); animation:radarPulse 1.8s ease-out infinite;}
+@keyframes radarPulse{0%{transform:scale(.55); opacity:.9;}100%{transform:scale(1.7); opacity:0;}}
+.track-boy-pin{position:absolute; inset:0; border-radius:50%; background:var(--grad-brand); border:3px solid #fff; box-shadow:0 4px 12px rgba(29,69,1,.4); display:flex; align-items:center; justify-content:center; font-size:16px;}
+.track-dest-marker-wrap{position:relative; width:28px; height:28px;}
+.track-dest-pulse{position:absolute; left:50%; top:50%; width:36px; height:36px; margin:-18px 0 0 -18px; border-radius:50%; background:rgba(168,64,47,.22); animation:destPulse 2.2s ease-in-out infinite;}
+@keyframes destPulse{0%,100%{transform:scale(.62); opacity:.85;}50%{transform:scale(1.35); opacity:.15;}}
+.track-dest-pin{position:absolute; inset:1px; border-radius:50% 50% 50% 0; background:var(--danger); border:3px solid #fff; transform:rotate(-45deg); box-shadow:0 3px 8px rgba(0,0,0,.3);}
+
+.track-bottom-card{flex-shrink:0; background:var(--card); border-radius:24px 24px 0 0; box-shadow:0 -14px 34px rgba(0,0,0,.12); padding:18px 18px calc(16px + var(--safe-b)); position:relative; z-index:2;}
+
+/* step progress */
+.track-steps{display:flex; align-items:flex-start; margin-bottom:16px; padding:0 2px;}
+.track-step{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; position:relative;}
+.track-step .sic{width:26px; height:26px; border-radius:50%; background:var(--card-2); border:2px solid var(--line); color:var(--ink-mute); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; margin-bottom:6px; transition:all .25s var(--ease); z-index:1;}
+.track-step .sl{font-size:9px; font-weight:700; color:var(--ink-mute); line-height:1.3; max-width:70px;}
+.track-step:not(:last-child)::after{content:''; position:absolute; top:13px; left:calc(50% + 17px); right:calc(-50% + 17px); height:2px; background:var(--line); z-index:0;}
+.track-step.done .sic{background:var(--grad-brand); border-color:transparent; color:#fff;}
+.track-step.done .sl{color:var(--brand-dark);}
+.track-step.done:not(:last-child)::after{background:var(--brand);}
+.track-step.active .sic{background:#fff; border-color:var(--brand); color:var(--brand-dark); box-shadow:0 0 0 4px var(--brand-light);}
+.track-step.active .sl{color:var(--ink); font-weight:800;}
+
+/* ETA + distance stat tiles */
+.track-stats-row{display:flex; gap:9px; margin-bottom:14px;}
+.track-stat-card{flex:1; background:var(--card-2); border-radius:14px; padding:10px 12px; display:flex; align-items:center; gap:9px;}
+.track-stat-card .sic{width:32px; height:32px; border-radius:50%; background:var(--brand-light); color:var(--brand-dark); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
+.track-stat-card .lbl{font-size:9.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.03em;}
+.track-stat-card .val{font-size:14px; font-weight:800; color:var(--ink); margin-top:1px; line-height:1.2;}
+
+.track-partner-row{display:flex; align-items:center; gap:12px; margin-bottom:10px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+.track-partner-avatar{width:44px; height:44px; border-radius:50%; background:var(--brand-light); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; border:2px solid #fff; box-shadow:0 0 0 1px var(--line);}
 .track-partner-mid{flex:1; min-width:0;}
-.track-partner-name{font-weight:800; font-size:14px;}
-.track-partner-sub{font-size:11px; color:var(--ink-soft);}
-.track-call-btn{width:42px; height:42px; border-radius:50%; background:var(--brand-light); color:var(--brand-dark); display:flex; align-items:center; justify-content:center; font-size:18px; text-decoration:none; flex-shrink:0;}
-.track-detail-row{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--line); font-size:12.5px;}
-.track-detail-row span:first-child{color:var(--ink-soft); font-weight:600;}
-.track-detail-row span:last-child{font-weight:800;}
-.track-note{font-size:10.5px; color:var(--ink-mute); margin-top:10px; line-height:1.5;}
+.track-partner-name{font-weight:800; font-size:13.5px;}
+.track-partner-sub{font-size:10.5px; color:var(--ink-soft); margin-top:1px;}
+.track-actions{display:flex; gap:8px; flex-shrink:0;}
+.track-call-btn,.track-chat-btn{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; text-decoration:none; flex-shrink:0; transition:transform .15s var(--ease);}
+.track-call-btn{background:var(--brand-light); color:var(--brand-dark);}
+.track-chat-btn{background:#DDF5E4; color:#1F8A3C;}
+.track-call-btn:active,.track-chat-btn:active{transform:scale(.92);}
+.track-meta-row{display:flex; justify-content:space-between; align-items:center; padding:2px 0; font-size:11px;}
+.track-meta-row span:first-child{color:var(--ink-mute); font-weight:600;}
+.track-meta-row span:last-child{font-weight:700; color:var(--ink-soft);}
+.track-note{font-size:10px; color:var(--ink-mute); margin-top:11px; line-height:1.55; display:flex; gap:6px; align-items:flex-start;}
+.track-note svg{flex-shrink:0; margin-top:1px; opacity:.7;}
 
 /* ---- sheets (profile / schedule) ---- */
 .sheet-overlay{position:absolute; inset:0; background:rgba(15,10,8,.52); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:500; display:none; align-items:flex-end; opacity:0; transition:opacity .22s var(--ease);}
@@ -1902,18 +1962,21 @@ body{font-size:14px;background:#EEF1EB;}
         <div class="ltb-title" id="ltbTitle">Aapka delivery partner nikal chuka hai</div>
         <div class="ltb-sub" id="ltbSub">Live location dekh rahe hain…</div>
       </div>
-      <div class="ltb-cta">Track ›</div>
+      <div class="ltb-cta">Track<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
     </div>
 
     <!-- ---- OVERLAY: LIVE ORDER TRACKING ---- -->
     <div class="overlay-screen" id="trackOrderScreen">
       <div class="overlay-header">
         <button class="overlay-back" id="trackBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
-        <div class="overlay-title"><span class="t1">Live Tracking</span><span class="t2" id="trackDateHeader">Today's delivery</span></div>
+        <div class="overlay-title">
+          <div class="t1-row"><span class="t1">Live Tracking</span><span class="track-live-chip" id="trackLiveChip"><span class="dot"></span><span id="trackLiveChipTxt">Live</span></span></div>
+          <span class="t2" id="trackDateHeader">Today's delivery</span>
+        </div>
       </div>
       <div id="trackMapWrap">
         <div id="trackMap"></div>
-        <div class="track-eta-pill" id="trackEtaPill" style="display:none;">🛵 <span id="trackEtaPillTxt">— min away</span></div>
+        <div class="track-eta-pill" id="trackEtaPill" style="display:none;"><span class="eic">🛵</span><span id="trackEtaPillTxt">— min away</span></div>
         <div class="track-map-loading" id="trackMapLoading"><div class="spinner"></div>Live location load ho rahi hai…</div>
         <div class="track-map-empty" id="trackMapEmpty" style="display:none;">
           <span class="ic">📍</span>
@@ -1922,18 +1985,28 @@ body{font-size:14px;background:#EEF1EB;}
         </div>
       </div>
       <div class="track-bottom-card">
+        <div class="track-steps" id="trackSteps">
+          <div class="track-step" data-step="confirmed"><div class="sic">✓</div><div class="sl">Confirmed</div></div>
+          <div class="track-step" data-step="out"><div class="sic">🛵</div><div class="sl">Out for delivery</div></div>
+          <div class="track-step" data-step="arriving"><div class="sic">📍</div><div class="sl">Arriving</div></div>
+        </div>
+        <div class="track-stats-row">
+          <div class="track-stat-card"><span class="sic">⏱️</span><div><div class="lbl">Estimated arrival</div><div class="val" id="trackEtaDetail">—</div></div></div>
+          <div class="track-stat-card"><span class="sic">📏</span><div><div class="lbl">Distance away</div><div class="val" id="trackDistDetail">—</div></div></div>
+        </div>
         <div class="track-partner-row">
           <div class="track-partner-avatar">🛵</div>
           <div class="track-partner-mid">
             <div class="track-partner-name" id="trackPartnerName">Delivery Partner</div>
             <div class="track-partner-sub" id="trackPartnerSub">Aapki fresh delivery le kar aa rahe hain</div>
           </div>
-          <a class="track-call-btn" id="trackCallBtn" href="#" style="display:none;" aria-label="Call delivery partner">📞</a>
+          <div class="track-actions">
+            <a class="track-chat-btn" id="trackChatBtn" href="#" style="display:none;" aria-label="Message delivery partner on WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.9 9.9 0 0 0 4.84 1.23h.01c5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2zm5.87 14.14c-.25.7-1.45 1.37-2 1.46-.51.08-1.15.11-1.86-.12-.43-.14-.98-.32-1.68-.63-2.96-1.28-4.89-4.27-5.04-4.47-.15-.2-1.2-1.6-1.2-3.06 0-1.45.76-2.16 1.03-2.46.27-.3.6-.37.8-.37h.57c.18 0 .43-.07.67.51.25.6.85 2.08.92 2.23.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.4-.44.53-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.02 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.08.18-.2.75-.87.95-1.17.2-.3.4-.25.67-.15.27.1 1.73.82 2.03.97.3.15.5.22.57.35.08.13.08.75-.17 1.45z"/></svg></a>
+            <a class="track-call-btn" id="trackCallBtn" href="#" style="display:none;" aria-label="Call delivery partner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+          </div>
         </div>
-        <div class="track-detail-row"><span>Estimated arrival</span><span id="trackEtaDetail">—</span></div>
-        <div class="track-detail-row"><span>Distance away</span><span id="trackDistDetail">—</span></div>
-        <div class="track-detail-row"><span>Delivery date</span><span id="trackDateDetail">—</span></div>
-        <div class="track-note">Yeh ek estimate hai, traffic aur route ke hisaab se badal sakta hai. Delivery complete hone ke baad live location dikhna band ho jaayega.</div>
+        <div class="track-meta-row"><span>Delivery date</span><span id="trackDateDetail">—</span></div>
+        <div class="track-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Yeh ek estimate hai, traffic aur route ke hisaab se badal sakta hai. Delivery complete hone ke baad live location dikhna band ho jaayega.</div>
       </div>
     </div>
 
@@ -2499,6 +2572,31 @@ function trackEtaText(boy){
   return `${mins} min mein pahunch sakte hain · ${km < 1 ? Math.round(km*1000)+' m' : km.toFixed(1)+' km'} door`;
 }
 
+/* Toggles the small LIVE / Waiting chip in the header. */
+function setTrackLiveChip(state){
+  const chip = $('#trackLiveChip'), txt = $('#trackLiveChipTxt');
+  if (!chip) return;
+  chip.classList.remove('is-live','is-wait');
+  if (state === 'live'){ chip.classList.add('is-live'); if (txt) txt.textContent = 'Live'; }
+  else { chip.classList.add('is-wait'); if (txt) txt.textContent = 'Waiting'; }
+}
+/* Drives the 3-step progress tracker (Confirmed → Out for delivery →
+   Arriving) to match the current tracking state. */
+function setTrackSteps(state){
+  const steps = $$('#trackSteps .track-step');
+  if (!steps.length) return;
+  const order = ['confirmed','out','arriving'];
+  let activeIdx = 0; // waiting_time → just confirmed
+  if (state === 'waiting_boy') activeIdx = 1;      // out for delivery (in progress)
+  if (state === 'live') activeIdx = 2;             // arriving now
+  steps.forEach((el,i)=>{
+    el.classList.remove('done','active');
+    if (i < activeIdx) el.classList.add('done');
+    else if (i === activeIdx) el.classList.add(state==='live' ? 'active' : (i===0 ? 'done' : 'active'));
+  });
+  if (state !== 'live') steps[0].classList.add('done');
+}
+
 function openTrackScreen(){
   const info = getLiveTrackInfo();
   if (!info) return; // bar shouldn't be visible/clickable if this happens, but guard anyway
@@ -2506,9 +2604,14 @@ function openTrackScreen(){
   $('#trackOrderScreen').classList.add('show');
   $('#trackDateHeader').textContent = `${fmtDateLong(todayISO())} · ${customer.shift==='evening' ? '🌆 Evening Shift' : '🌅 Morning Shift'}`;
   $('#trackPartnerName').textContent = (info.boy && info.boy.name) ? info.boy.name : 'Delivery Partner';
-  const callBtn = $('#trackCallBtn');
-  if (info.boy && info.boy.phone){ callBtn.href = 'tel:'+info.boy.phone; callBtn.style.display = 'flex'; }
-  else { callBtn.style.display = 'none'; }
+  const callBtn = $('#trackCallBtn'), chatBtn = $('#trackChatBtn');
+  if (info.boy && info.boy.phone){
+    callBtn.href = 'tel:'+info.boy.phone; callBtn.style.display = 'flex';
+    if (chatBtn){ chatBtn.href = `https://wa.me/91${info.boy.phone}`; chatBtn.style.display = 'flex'; }
+  } else {
+    callBtn.style.display = 'none';
+    if (chatBtn) chatBtn.style.display = 'none';
+  }
   $('#trackDateDetail').textContent = fmtDate(todayISO());
   ensureTrackMap();
   updateTrackScreen();
@@ -2546,6 +2649,9 @@ function updateTrackScreen(){
     showToast('Yeh delivery deliver ho chuki hai, ab track karne layak nahi hai');
     return;
   }
+  setTrackLiveChip(info.state);
+  setTrackSteps(info.state);
+
   if (info.state !== 'live'){
     loadingEl.style.display = 'none';
     etaPill.style.display = 'none';
@@ -2555,23 +2661,21 @@ function updateTrackScreen(){
       if (icon) icon.textContent = '⏰';
       if (title) title.textContent = `Live tracking ${trackStartLabel(customer.shift)} se shuru hogi`;
       if (sub) sub.textContent = 'Aapka order confirm ho chuka hai. Delivery partner nikalte hi yahaan unki live location dikhne lagegi.';
+      $('#trackPartnerSub').textContent = 'Aapki fresh delivery le kar aane wale hain';
     } else {
       if (icon) icon.textContent = '🛵';
       if (title) title.textContent = 'Delivery partner jald hi live honge';
       if (sub) sub.textContent = 'Live tracking window shuru ho chuki hai — partner ke GPS on karte hi unki location yahaan dikhegi. Yeh screen apne aap update ho jaayegi.';
+      $('#trackPartnerSub').textContent = 'GPS on karte hi live honge';
     }
     $('#trackEtaDetail').textContent = info.state === 'waiting_time' ? `${trackStartLabel(customer.shift)} se` : 'Jald hi';
     $('#trackDistDetail').textContent = '—';
     // Still center the map on the customer's own address (if known) so the
-    // screen doesn't look totally empty while waiting.
+    // screen doesn't look totally empty while waiting — this is also where
+    // the customer's own delivery-address pin lives, with its persistent
+    // "you are here" pulse so it never reads as a dead/static marker.
     if (trackMapInstance && trackMapInstance.loaded && trackMapInstance.loaded() && customer.lat != null && customer.lng != null){
-      if (!trackDestMarker){
-        const el = document.createElement('div');
-        el.className = 'track-dest-marker';
-        trackDestMarker = new maplibregl.Marker({ element: el }).setLngLat([customer.lng, customer.lat]).addTo(trackMapInstance);
-      } else {
-        trackDestMarker.setLngLat([customer.lng, customer.lat]);
-      }
+      placeDestMarker();
       trackMapInstance.easeTo({ center: [customer.lng, customer.lat], zoom: 13, duration: 400 });
     }
     return;
@@ -2580,12 +2684,13 @@ function updateTrackScreen(){
   emptyEl.style.display = 'none';
   if (!trackMapInstance || !trackMapInstance.loaded()){ loadingEl.style.display = 'flex'; return; }
   loadingEl.style.display = 'none';
+  $('#trackPartnerSub').textContent = 'Aapki fresh delivery le kar aa rahe hain';
 
   const boy = info.boy;
   if (!trackBoyMarker){
     const el = document.createElement('div');
-    el.className = 'track-boy-marker';
-    el.textContent = '🛵';
+    el.className = 'track-boy-marker-wrap';
+    el.innerHTML = '<span class="track-boy-pulse"></span><span class="track-boy-pin">🛵</span>';
     trackBoyMarker = new maplibregl.Marker({ element: el }).setLngLat([boy.lng, boy.lat]).addTo(trackMapInstance);
   } else {
     trackBoyMarker.setLngLat([boy.lng, boy.lat]);
@@ -2593,13 +2698,7 @@ function updateTrackScreen(){
 
   const bounds = new maplibregl.LngLatBounds().extend([boy.lng, boy.lat]);
   if (customer.lat != null && customer.lng != null){
-    if (!trackDestMarker){
-      const el = document.createElement('div');
-      el.className = 'track-dest-marker';
-      trackDestMarker = new maplibregl.Marker({ element: el }).setLngLat([customer.lng, customer.lat]).addTo(trackMapInstance);
-    } else {
-      trackDestMarker.setLngLat([customer.lng, customer.lat]);
-    }
+    placeDestMarker();
     bounds.extend([customer.lng, customer.lat]);
     const km = estimatedRoadKmForTrack(boy.lat, boy.lng, customer.lat, customer.lng);
     const mins = Math.max(1, Math.round((km / AVG_DELIVERY_SPEED_KMPH) * 60));
@@ -2613,6 +2712,21 @@ function updateTrackScreen(){
     $('#trackDistDetail').textContent = '—';
   }
   trackMapInstance.fitBounds(bounds, { padding: 70, maxZoom: 15, duration: 500 });
+}
+
+/* Places (or moves) the customer's own delivery-address marker — a pin
+   with a soft persistent pulse so it always reads as the live "you are
+   here" destination, not a flat static icon. Never shows anyone else's
+   location, only this logged-in customer's own saved address. */
+function placeDestMarker(){
+  if (!trackDestMarker){
+    const el = document.createElement('div');
+    el.className = 'track-dest-marker-wrap';
+    el.innerHTML = '<span class="track-dest-pulse"></span><span class="track-dest-pin"></span>';
+    trackDestMarker = new maplibregl.Marker({ element: el }).setLngLat([customer.lng, customer.lat]).addTo(trackMapInstance);
+  } else {
+    trackDestMarker.setLngLat([customer.lng, customer.lat]);
+  }
 }
 
 /* Shared phone lookup: tries the indexed query first (fast), and falls back
@@ -4208,6 +4322,42 @@ $('#bottomNav').addEventListener('click', e=>{
   if (!btn) return;
   switchTab(btn.dataset.tab);
 });
+
+/* ================= SCROLL-AWARE BOTTOM NAV =================
+   Bottom nav + WhatsApp FAB + the live-tracking pill hide together
+   as the user scrolls down into content, and slide back the moment
+   scrolling reverses (or the list is back near its top). Bound to
+   every independently-scrollable pane (#mainScroll for Home/Orders/
+   Bill, #catContent for Category) so it behaves the same everywhere. */
+(function(){
+  const navGroup = [$('#bottomNav'), $('#whatsappBtn'), $('#liveTrackBar')].filter(Boolean);
+  if (!navGroup.length) return;
+  let hidden = false;
+  const setHidden = v=>{
+    if (v === hidden) return;
+    hidden = v;
+    navGroup.forEach(el=>el.classList.toggle('nav-hidden', v));
+  };
+  const bindScroller = el=>{
+    if (!el) return;
+    let lastY = el.scrollTop || 0, ticking = false;
+    el.addEventListener('scroll', ()=>{
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(()=>{
+        const y = Math.max(0, el.scrollTop);
+        const dy = y - lastY;
+        if (y < 20){ setHidden(false); }
+        else if (dy > 4){ setHidden(true); }
+        else if (dy < -4){ setHidden(false); }
+        lastY = y;
+        ticking = false;
+      });
+    }, { passive:true });
+  };
+  bindScroller($('#mainScroll'));
+  bindScroller($('#catContent'));
+})();
 
 /* ================= PROFILE SHEET ================= */
 $('#profileBtn').addEventListener('click', ()=>{
