@@ -2513,7 +2513,14 @@ function hasActiveDeliveryToday(){
 */
 function getLiveTrackInfo(){
   if (!customer || !customer.id) return null;
-  if (customer.status === 'completed') return null; // already delivered today
+  // `status` is only meaningful for TODAY — it gets set to 'completed' by
+  // the delivery app once the boy marks today's drop done, but nothing
+  // resets it back to 'pending' at the start of a new day. Without this
+  // date check, a customer delivered on, say, Monday would have the bar
+  // permanently hidden on every later day too, even with an active
+  // delivery scheduled — so only let it block the bar if completedAt
+  // actually falls on today's date.
+  if (customer.status === 'completed' && customer.completedAt && toISO(new Date(customer.completedAt)) === todayISO()) return null;
   if (!hasActiveDeliveryToday()) return null;
   const windowOpen = isWithinTrackingWindow(customer.shift);
   const boy = customer.assignedTo ? deliveryBoysMap[customer.assignedTo] : null;
@@ -3712,16 +3719,40 @@ async function finalizeOrder(cust){
   const deliveryCharge=deliveryChargeForItemsPerDate(items);
   const total=itemsTotal+deliveryCharge;
   const order={id:'AG'+Date.now().toString().slice(-8),placedAt:new Date().toISOString(),itemsTotal,deliveryCharge,total,custId:cust.id||null,items};
-  const custKey=await syncOrderToChart(cust,order); if(custKey)order.custId=custKey;
+
+  // Resolve the Firebase customer key first (quick) so the order itself —
+  // the write the customer actually needs to see "Order placed" — can be
+  // saved as early as possible, instead of being stuck behind the slower
+  // admin chart-sync below (which reads/writes several extra fields and
+  // used to run FIRST, so a slow network made the whole thing, success
+  // animation included, look hung even after the order had gone through).
+  let custKey = cust.id || matchedCustomerKey;
+  if (!custKey){
+    const match = await withTimeout(findCustomerByPhone(cust.phone));
+    custKey = match ? match.key : await withTimeout(upsertCustomerInFirebase(cust, null));
+  }
+  order.custId = custKey;
   await pushOrderToFirebase(order);
-  // NOTE: attachOrdersListener() is already streaming customers/{id}/webOrders
-  // in real time, and Firebase's local write-echo can rebuild `orders` from
-  // that listener before this line even runs. Unconditionally unshifting here
-  // used to add the SAME order a second time -> duplicate cards, and every
-  // total/bill figure derived from `orders` got double-counted along with it.
-  // Guard by id so we only add it locally if the listener hasn't already.
+
+  // The order is now safely saved — show the success animation right away
+  // instead of making the customer keep waiting on the admin-chart mirror
+  // below. NOTE: attachOrdersListener() is already streaming
+  // customers/{id}/webOrders in real time, and Firebase's local write-echo
+  // can rebuild `orders` from that listener before this line even runs.
+  // Unconditionally unshifting here used to add the SAME order a second
+  // time -> duplicate cards, and every total/bill figure derived from
+  // `orders` got double-counted along with it. Guard by id so we only add
+  // it locally if the listener hasn't already.
   if(!orders.some(o=>o.id===order.id)) orders.unshift(order);
   saveOrders();cart=[];saveCart();refreshCartBadges();$('#screenCart').classList.remove('show');renderCart();refreshAllCtas();spawnSuccessConfetti();$('#orderSuccess').classList.add('show');decrementStockForOrder(items);
+
+  // Best-effort mirror onto the admin delivery chart. Wrapped in its own
+  // try/catch so that a slow or failed chart sync can never re-freeze the
+  // UI the customer has already moved past — the order itself is placed
+  // and visible to them regardless of whether this part succeeds. If it
+  // does fail, it's logged so it can be investigated/retried server-side.
+  try{ await syncOrderToChart(custKey, order); }
+  catch(e){ console.error('Admin chart sync failed (order itself is still placed)', e); }
 }
 
 /* Deducts each item's ordered qty from its live Firebase stock count via a
@@ -3745,14 +3776,12 @@ function decrementStockForOrder(items){
   });
 }
 
-async function syncOrderToChart(cust, order){
+async function syncOrderToChart(custKey, order){
   await waitForFirebaseConnection(5000);
-  let custKey = cust.id || matchedCustomerKey;
-  if (!custKey){
-    const match = await findCustomerByPhone(cust.phone);
-    custKey = match ? match.key : await upsertCustomerInFirebase(cust, null);
-  }
-  const custSnap = await get(ref(db,'customers/'+custKey));
+  // Wrapped with withTimeout — previously a bare get() here had no
+  // timeout at all, so on a slow/flaky connection this single read could
+  // hang indefinitely with no error and no way to recover automatically.
+  const custSnap = await withTimeout(get(ref(db,'customers/'+custKey)), 8000);
   const custData = custSnap.val() || {};
   const defaults = custData.defaultProducts || {};
   const overridesRoot = custData.overrides || {};
