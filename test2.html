@@ -2427,46 +2427,73 @@ function hasActiveDeliveryToday(){
   }
   return false;
 }
-/* Central eligibility check — returns the delivery-boy record + context
-   object when tracking should be offered right now, else null. */
+/* Central eligibility check — returns a state object describing what the
+   floating bar / tracking popup should show right now, or null when nothing
+   should be shown at all (no active delivery today, or already delivered).
+   state:
+     'live'          → partner is online with a GPS fix AND we're past the
+                       shift's tracking-start hour → show the real map.
+     'waiting_boy'   → past the tracking-start hour, but the partner hasn't
+                       gone online / sent a GPS fix yet.
+     'waiting_time'  → order is confirmed for today, but it's still before
+                       the shift's tracking-start hour (6 AM / 4 PM).
+*/
 function getLiveTrackInfo(){
-  if (!customer || !customer.id || !customer.assignedTo) return null;
+  if (!customer || !customer.id) return null;
   if (customer.status === 'completed') return null; // already delivered today
   if (!hasActiveDeliveryToday()) return null;
-  if (!isWithinTrackingWindow(customer.shift)) return null;
-  const boy = deliveryBoysMap[customer.assignedTo];
-  if (!boy) return null;
-  return { boy, boyOnline: isBoyOnline(boy), hasFix: boy.lat != null && boy.lng != null };
+  const windowOpen = isWithinTrackingWindow(customer.shift);
+  const boy = customer.assignedTo ? deliveryBoysMap[customer.assignedTo] : null;
+  const boyLive = windowOpen && isBoyOnline(boy) && boy && boy.lat != null && boy.lng != null;
+  return {
+    state: boyLive ? 'live' : (windowOpen ? 'waiting_boy' : 'waiting_time'),
+    boy
+  };
 }
+function trackStartLabel(shift){ return shift === 'evening' ? '4 PM' : '6 AM'; }
 
 let trackScreenOpen = false;
 let trackMapInstance = null;
 let trackBoyMarker = null;
 let trackDestMarker = null;
-let trackBarTickTimer = null;
 
 /* Re-renders (or hides) the floating bar. Cheap — safe to call on every
-   customer/orders/deliveryBoys update. */
+   customer/orders/deliveryBoys update, and also ticks every 30s on its own
+   so the bar flips from "waiting" to "live" right at the cutoff hour even
+   with no new Firebase data. */
 function refreshLiveTrackBar(){
   const bar = $('#liveTrackBar');
   if (!bar) return;
   const info = getLiveTrackInfo();
-  if (!info || !info.boyOnline || !info.hasFix){
+  if (!info){
     bar.classList.remove('show');
     $('#app') && $('#app').classList.remove('has-track-bar');
-    if (trackBarTickTimer){ clearInterval(trackBarTickTimer); trackBarTickTimer = null; }
     return;
   }
-  const name = info.boy.name || 'Delivery partner';
-  $('#ltbTitle').textContent = `${name} aapki delivery le kar aa rahe hain`;
-  const eta = trackEtaText(info.boy);
-  $('#ltbSub').textContent = eta ? eta : 'Live location dekh rahe hain…';
+  const name = (info.boy && info.boy.name) ? info.boy.name : 'Aapka delivery partner';
+  const dot = bar.querySelector('.dot');
+  if (info.state === 'live'){
+    $('#ltbTitle').textContent = `${name} aapki delivery le kar aa rahe hain`;
+    $('#ltbSub').textContent = trackEtaText(info.boy) || 'Live location dekh rahe hain…';
+    if (dot) dot.style.background = '#4ADE80';
+  } else if (info.state === 'waiting_boy'){
+    $('#ltbTitle').textContent = 'Order confirm ho gaya hai 🎉';
+    $('#ltbSub').textContent = `${name} jald hi live honge — location ka wait kar rahe hain…`;
+    if (dot) dot.style.background = '#F5B94D';
+  } else {
+    $('#ltbTitle').textContent = 'Order confirm ho gaya hai 🎉';
+    $('#ltbSub').textContent = `Live tracking ${trackStartLabel(customer.shift)} se shuru hogi`;
+    if (dot) dot.style.background = '#F5B94D';
+  }
   bar.classList.add('show');
   $('#app') && $('#app').classList.add('has-track-bar');
-  if (!trackBarTickTimer) trackBarTickTimer = setInterval(refreshLiveTrackBar, 20000);
 }
+// Ticks the bar/popup on a timer too — this is what catches the clock
+// crossing the shift's tracking-start hour without needing any new data.
+setInterval(()=>{ refreshLiveTrackBar(); if (trackScreenOpen) updateTrackScreen(); }, 30000);
+
 function trackEtaText(boy){
-  if (customer.lat == null || customer.lng == null || boy.lat == null || boy.lng == null) return null;
+  if (!boy || customer.lat == null || customer.lng == null || boy.lat == null || boy.lng == null) return null;
   const km = estimatedRoadKmForTrack(boy.lat, boy.lng, customer.lat, customer.lng);
   const mins = Math.max(1, Math.round((km / AVG_DELIVERY_SPEED_KMPH) * 60));
   return `${mins} min mein pahunch sakte hain · ${km < 1 ? Math.round(km*1000)+' m' : km.toFixed(1)+' km'} door`;
@@ -2478,9 +2505,9 @@ function openTrackScreen(){
   trackScreenOpen = true;
   $('#trackOrderScreen').classList.add('show');
   $('#trackDateHeader').textContent = `${fmtDateLong(todayISO())} · ${customer.shift==='evening' ? '🌆 Evening Shift' : '🌅 Morning Shift'}`;
-  $('#trackPartnerName').textContent = info.boy.name || 'Delivery Partner';
+  $('#trackPartnerName').textContent = (info.boy && info.boy.name) ? info.boy.name : 'Delivery Partner';
   const callBtn = $('#trackCallBtn');
-  if (info.boy.phone){ callBtn.href = 'tel:'+info.boy.phone; callBtn.style.display = 'flex'; }
+  if (info.boy && info.boy.phone){ callBtn.href = 'tel:'+info.boy.phone; callBtn.style.display = 'flex'; }
   else { callBtn.style.display = 'none'; }
   $('#trackDateDetail').textContent = fmtDate(todayISO());
   ensureTrackMap();
@@ -2496,7 +2523,7 @@ function ensureTrackMap(){
   trackMapInstance = new maplibregl.Map({
     container: 'trackMap',
     style: 'https://tiles.openfreemap.org/styles/liberty', // free vector tiles, no API key
-    center: [77.2090, 28.6139],
+    center: (customer.lat != null && customer.lng != null) ? [customer.lng, customer.lat] : [77.2090, 28.6139],
     zoom: 12,
     attributionControl: false
   });
@@ -2504,27 +2531,52 @@ function ensureTrackMap(){
   trackMapInstance.on('load', ()=> updateTrackScreen());
 }
 
-/* Draws/updates the two markers (delivery partner + customer's own address)
-   and fits the map to show both. Only ever shows THIS customer's own
-   address — never any other customer's location. */
+/* Draws/updates the popup for whichever state we're in — waiting card
+   (before the shift's cutoff, or partner not online yet) or the full live
+   map with both markers once tracking genuinely starts. Only ever shows
+   THIS customer's own address — never any other customer's location. */
 function updateTrackScreen(){
   if (!trackScreenOpen) return;
   const info = getLiveTrackInfo();
   const loadingEl = $('#trackMapLoading'), emptyEl = $('#trackMapEmpty'), etaPill = $('#trackEtaPill');
   if (!info){
-    // Delivery just got marked completed, or the cutoff/window closed while
-    // this screen was open — close it out gracefully instead of showing a
-    // dead map.
+    // Delivery just got marked completed while this screen was open — close
+    // it out gracefully instead of showing a dead map.
     closeTrackScreen();
-    showToast('Yeh delivery ab track karne layak nahi hai (ho sakta hai deliver ho chuki ho)');
+    showToast('Yeh delivery deliver ho chuki hai, ab track karne layak nahi hai');
     return;
   }
-  if (!info.boyOnline || !info.hasFix){
+  if (info.state !== 'live'){
     loadingEl.style.display = 'none';
-    emptyEl.style.display = 'flex';
     etaPill.style.display = 'none';
+    emptyEl.style.display = 'flex';
+    const icon = emptyEl.querySelector('.ic'), title = emptyEl.querySelector('.t'), sub = emptyEl.querySelector('.s');
+    if (info.state === 'waiting_time'){
+      if (icon) icon.textContent = '⏰';
+      if (title) title.textContent = `Live tracking ${trackStartLabel(customer.shift)} se shuru hogi`;
+      if (sub) sub.textContent = 'Aapka order confirm ho chuka hai. Delivery partner nikalte hi yahaan unki live location dikhne lagegi.';
+    } else {
+      if (icon) icon.textContent = '🛵';
+      if (title) title.textContent = 'Delivery partner jald hi live honge';
+      if (sub) sub.textContent = 'Live tracking window shuru ho chuki hai — partner ke GPS on karte hi unki location yahaan dikhegi. Yeh screen apne aap update ho jaayegi.';
+    }
+    $('#trackEtaDetail').textContent = info.state === 'waiting_time' ? `${trackStartLabel(customer.shift)} se` : 'Jald hi';
+    $('#trackDistDetail').textContent = '—';
+    // Still center the map on the customer's own address (if known) so the
+    // screen doesn't look totally empty while waiting.
+    if (trackMapInstance && trackMapInstance.loaded && trackMapInstance.loaded() && customer.lat != null && customer.lng != null){
+      if (!trackDestMarker){
+        const el = document.createElement('div');
+        el.className = 'track-dest-marker';
+        trackDestMarker = new maplibregl.Marker({ element: el }).setLngLat([customer.lng, customer.lat]).addTo(trackMapInstance);
+      } else {
+        trackDestMarker.setLngLat([customer.lng, customer.lat]);
+      }
+      trackMapInstance.easeTo({ center: [customer.lng, customer.lat], zoom: 13, duration: 400 });
+    }
     return;
   }
+
   emptyEl.style.display = 'none';
   if (!trackMapInstance || !trackMapInstance.loaded()){ loadingEl.style.display = 'flex'; return; }
   loadingEl.style.display = 'none';
@@ -2562,9 +2614,6 @@ function updateTrackScreen(){
   }
   trackMapInstance.fitBounds(bounds, { padding: 70, maxZoom: 15, duration: 500 });
 }
-// Periodically re-check ETA/eligibility while the tracking screen is open,
-// in addition to the realtime deliveryBoys listener firing on every GPS tick.
-setInterval(()=>{ if (trackScreenOpen) updateTrackScreen(); }, 15000);
 
 /* Shared phone lookup: tries the indexed query first (fast), and falls back
    to a full client-side scan if that query is rejected (e.g. missing
