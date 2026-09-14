@@ -2500,6 +2500,18 @@ function hasActiveDeliveryToday(){
   }
   return false;
 }
+const SUBSCRIPTION_QTY_KEYS = ['milk','paneer','ghee','chach','butter','curd'];
+/* True if the customer's admin-managed standing subscription (set directly
+   on the delivery chart, not through this app's own order flow) has any
+   quantity scheduled for today. `overrides/{today}` fully replaces
+   `defaultProducts` for that date when present (same rule the chart-sync
+   write uses), so an override of all-zero means today was paused. */
+function hasActiveSubscriptionToday(){
+  if (!customer) return false;
+  const source = todayOverride || customer.defaultProducts;
+  if (!source) return false;
+  return SUBSCRIPTION_QTY_KEYS.some(k => (source[k]||0) > 0);
+}
 /* Central eligibility check — returns a state object describing what the
    floating bar / tracking popup should show right now, or null when nothing
    should be shown at all (no active delivery today, or already delivered).
@@ -2513,8 +2525,18 @@ function hasActiveDeliveryToday(){
 */
 function getLiveTrackInfo(){
   if (!customer || !customer.id) return null;
-  if (customer.status === 'completed') return null; // already delivered today
-  if (!hasActiveDeliveryToday()) return null;
+  // `status` is only meaningful for TODAY — it gets set to 'completed' by
+  // the delivery app once the boy marks today's drop done, but nothing
+  // resets it back to 'pending' at the start of a new day. Without this
+  // date check, a customer delivered on, say, Monday would have the bar
+  // permanently hidden on every later day too, even with an active
+  // delivery scheduled — so only let it block the bar if completedAt
+  // actually falls on today's date.
+  if (customer.status === 'completed' && customer.completedAt && toISO(new Date(customer.completedAt)) === todayISO()) return null;
+  // Covers BOTH a one-off order placed through this app today AND a
+  // standing admin-set subscription active today — a customer can have
+  // either, and previously only the former was checked.
+  if (!hasActiveDeliveryToday() && !hasActiveSubscriptionToday()) return null;
   const windowOpen = isWithinTrackingWindow(customer.shift);
   const boy = customer.assignedTo ? deliveryBoysMap[customer.assignedTo] : null;
   const boyLive = windowOpen && isBoyOnline(boy) && boy && boy.lat != null && boy.lng != null;
@@ -2563,7 +2585,7 @@ function refreshLiveTrackBar(){
 }
 // Ticks the bar/popup on a timer too — this is what catches the clock
 // crossing the shift's tracking-start hour without needing any new data.
-setInterval(()=>{ refreshLiveTrackBar(); if (trackScreenOpen) updateTrackScreen(); }, 30000);
+setInterval(()=>{ if (customer && customer.id) attachTodayOverrideListener(customer.id); refreshLiveTrackBar(); if (trackScreenOpen) updateTrackScreen(); }, 30000);
 
 function trackEtaText(boy){
   if (!boy || customer.lat == null || customer.lng == null || boy.lat == null || boy.lng == null) return null;
@@ -2630,7 +2652,6 @@ function ensureTrackMap(){
     zoom: 12,
     attributionControl: false
   });
-  trackMapInstance.addControl(new maplibregl.AttributionControl({ compact: true }));
   trackMapInstance.on('load', ()=> updateTrackScreen());
 }
 
@@ -2826,6 +2847,9 @@ let custListenerAttachedFor = null;
 let custListenerRef = null;
 let ordersListenerAttachedFor = null;
 let ordersListenerRef = null;
+let overrideListenerAttachedFor = null; // `${custId}:${date}` — date-scoped, see attachTodayOverrideListener
+let overrideListenerRef = null;
+let todayOverride = null; // customers/{id}/overrides/{today} snapshot, or null if none set
 
 /* Detaches any live listeners from a previous session — called on logout
    and before attaching a new customer's listeners, so switching accounts
@@ -2834,8 +2858,33 @@ let ordersListenerRef = null;
 function detachSessionListeners(){
   if (custListenerRef){ off(custListenerRef); custListenerRef = null; }
   if (ordersListenerRef){ off(ordersListenerRef); ordersListenerRef = null; }
+  if (overrideListenerRef){ off(overrideListenerRef); overrideListenerRef = null; }
   custListenerAttachedFor = null;
   ordersListenerAttachedFor = null;
+  overrideListenerAttachedFor = null;
+  todayOverride = null;
+}
+
+/* Many customers never place an order through this web app at all — the
+   admin sets their daily milk/paneer/etc. quota directly on the delivery
+   chart (customers/{id}/defaultProducts, optionally overridden per-date at
+   customers/{id}/overrides/{date}). hasActiveDeliveryToday() only knows
+   about this app's own webOrders, so those customers' tracking bar was
+   silently never showing even with a real delivery scheduled for today.
+   This listens to just today's override doc (re-attached whenever the id
+   or the date changes) so getLiveTrackInfo() can also see that. */
+function attachTodayOverrideListener(id){
+  if (!id) return;
+  const date = todayISO();
+  const key = id + ':' + date;
+  if (overrideListenerAttachedFor === key) return;
+  if (overrideListenerRef) off(overrideListenerRef);
+  overrideListenerAttachedFor = key;
+  overrideListenerRef = ref(db, 'customers/'+id+'/overrides/'+date);
+  onValue(overrideListenerRef, snap=>{
+    todayOverride = snap.val() || null;
+    refreshLiveTrackBar();
+  });
 }
 
 function attachCustomerListener(id){
@@ -2871,6 +2920,7 @@ function attachCustomerListener(id){
     refreshLiveTrackBar();
   });
   attachOrdersListener(id);
+  attachTodayOverrideListener(id);
 }
 
 /* Mirrors customers/{id}/webOrders in real time into the local `orders`
@@ -3712,16 +3762,40 @@ async function finalizeOrder(cust){
   const deliveryCharge=deliveryChargeForItemsPerDate(items);
   const total=itemsTotal+deliveryCharge;
   const order={id:'AG'+Date.now().toString().slice(-8),placedAt:new Date().toISOString(),itemsTotal,deliveryCharge,total,custId:cust.id||null,items};
-  const custKey=await syncOrderToChart(cust,order); if(custKey)order.custId=custKey;
+
+  // Resolve the Firebase customer key first (quick) so the order itself —
+  // the write the customer actually needs to see "Order placed" — can be
+  // saved as early as possible, instead of being stuck behind the slower
+  // admin chart-sync below (which reads/writes several extra fields and
+  // used to run FIRST, so a slow network made the whole thing, success
+  // animation included, look hung even after the order had gone through).
+  let custKey = cust.id || matchedCustomerKey;
+  if (!custKey){
+    const match = await withTimeout(findCustomerByPhone(cust.phone));
+    custKey = match ? match.key : await withTimeout(upsertCustomerInFirebase(cust, null));
+  }
+  order.custId = custKey;
   await pushOrderToFirebase(order);
-  // NOTE: attachOrdersListener() is already streaming customers/{id}/webOrders
-  // in real time, and Firebase's local write-echo can rebuild `orders` from
-  // that listener before this line even runs. Unconditionally unshifting here
-  // used to add the SAME order a second time -> duplicate cards, and every
-  // total/bill figure derived from `orders` got double-counted along with it.
-  // Guard by id so we only add it locally if the listener hasn't already.
+
+  // The order is now safely saved — show the success animation right away
+  // instead of making the customer keep waiting on the admin-chart mirror
+  // below. NOTE: attachOrdersListener() is already streaming
+  // customers/{id}/webOrders in real time, and Firebase's local write-echo
+  // can rebuild `orders` from that listener before this line even runs.
+  // Unconditionally unshifting here used to add the SAME order a second
+  // time -> duplicate cards, and every total/bill figure derived from
+  // `orders` got double-counted along with it. Guard by id so we only add
+  // it locally if the listener hasn't already.
   if(!orders.some(o=>o.id===order.id)) orders.unshift(order);
   saveOrders();cart=[];saveCart();refreshCartBadges();$('#screenCart').classList.remove('show');renderCart();refreshAllCtas();spawnSuccessConfetti();$('#orderSuccess').classList.add('show');decrementStockForOrder(items);
+
+  // Best-effort mirror onto the admin delivery chart. Wrapped in its own
+  // try/catch so that a slow or failed chart sync can never re-freeze the
+  // UI the customer has already moved past — the order itself is placed
+  // and visible to them regardless of whether this part succeeds. If it
+  // does fail, it's logged so it can be investigated/retried server-side.
+  try{ await syncOrderToChart(custKey, order); }
+  catch(e){ console.error('Admin chart sync failed (order itself is still placed)', e); }
 }
 
 /* Deducts each item's ordered qty from its live Firebase stock count via a
@@ -3745,14 +3819,12 @@ function decrementStockForOrder(items){
   });
 }
 
-async function syncOrderToChart(cust, order){
+async function syncOrderToChart(custKey, order){
   await waitForFirebaseConnection(5000);
-  let custKey = cust.id || matchedCustomerKey;
-  if (!custKey){
-    const match = await findCustomerByPhone(cust.phone);
-    custKey = match ? match.key : await upsertCustomerInFirebase(cust, null);
-  }
-  const custSnap = await get(ref(db,'customers/'+custKey));
+  // Wrapped with withTimeout — previously a bare get() here had no
+  // timeout at all, so on a slow/flaky connection this single read could
+  // hang indefinitely with no error and no way to recover automatically.
+  const custSnap = await withTimeout(get(ref(db,'customers/'+custKey)), 8000);
   const custData = custSnap.val() || {};
   const defaults = custData.defaultProducts || {};
   const overridesRoot = custData.overrides || {};
