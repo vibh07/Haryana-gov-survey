@@ -2851,10 +2851,15 @@ let overrideListenerAttachedFor = null; // `${custId}:${date}` — date-scoped, 
 let overrideListenerRef = null;
 let todayOverride = null; // customers/{id}/overrides/{today} snapshot, or null if none set
 
-/* Detaches any live listeners from a previous session — called on logout
-   and before attaching a new customer's listeners, so switching accounts
-   on the same device (or logging out) never keeps streaming someone
-   else's orders/bill into view. */
+/* Detaches any live listeners from a previous session AND wipes the
+   previous customer's orders/tracking state — called on logout and before
+   attaching a new customer's listeners, so switching accounts on the same
+   device never keeps showing someone else's orders, bill, or tracking bar,
+   even for the brief moment before the new customer's own Firebase data
+   streams in. (Previously this only detached the listener refs — the old
+   `orders` array itself was left in place until the new listener's first
+   callback overwrote it, which could briefly show the PREVIOUS customer's
+   tracking bar under the NEW customer's login.) */
 function detachSessionListeners(){
   if (custListenerRef){ off(custListenerRef); custListenerRef = null; }
   if (ordersListenerRef){ off(ordersListenerRef); ordersListenerRef = null; }
@@ -2863,6 +2868,8 @@ function detachSessionListeners(){
   ordersListenerAttachedFor = null;
   overrideListenerAttachedFor = null;
   todayOverride = null;
+  orders = []; saveOrders(); renderOrders(); renderBill(); refreshRejectionBadge();
+  closeTrackScreen(); refreshLiveTrackBar();
 }
 
 /* Many customers never place an order through this web app at all — the
@@ -2895,8 +2902,6 @@ function attachCustomerListener(id){
   onValue(custListenerRef, snap=>{
     if (!snap.exists()){
       customer = null; saveCustomer(); detachSessionListeners();
-      orders = []; saveOrders(); renderOrders(); renderBill(); refreshRejectionBadge();
-      closeTrackScreen(); refreshLiveTrackBar();
       showToast('Aapka account admin dwara hata diya gaya hai');
       if ($('#profileSheetOverlay').classList.contains('show')) openProfileSheet();
       return;
@@ -4074,6 +4079,7 @@ function deleteOrder(oi, cardEl){
     renderOrders();
     restoreOpenOrderIds(openIds);
     renderBill();
+    refreshLiveTrackBar();
     showToast('Order safaltapoorvak delete kar diya gaya');
   });
 }
@@ -4110,6 +4116,7 @@ function deleteOrderItem(oi, ii, rowEl){
     renderOrders();
     restoreOpenOrderIds(openIds);
     renderBill();
+    refreshLiveTrackBar();
     showToast('Product safaltapoorvak delete kar diya gaya');
   });
 }
@@ -4136,6 +4143,7 @@ $('#ordersList').addEventListener('click', async e=>{
     renderOrders();
     restoreOpenOrderIds(openIds);
     renderBill();
+    refreshLiveTrackBar();
     showToast(d.stopped ? 'Delivery safaltapoorvak stop kar di gayi' : 'Delivery safaltapoorvak resume kar di gayi');
     try{
       await adjustChartQty(order, item, d.date, d.stopped);
@@ -4473,8 +4481,6 @@ function openProfileSheet(){
       $('#profileSheetOverlay').classList.remove('show');
       openConfirm('Kya aap logout karna chahte hain?', 'Aap dobara apna mobile number darj karke turant login kar sakenge.', ()=>{
         customer = null; localStorage.removeItem('ag_customer'); detachSessionListeners();
-        orders = []; saveOrders(); renderOrders(); renderBill(); refreshRejectionBadge();
-        closeTrackScreen(); refreshLiveTrackBar();
         showToast('Aap safaltapoorvak logout ho gaye hain');
       });
     });
