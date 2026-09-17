@@ -30,18 +30,13 @@
 <!-- MapLibre GL JS — free, open-source map engine used for live delivery-partner tracking below (no API key needed; tiles come from OpenFreeMap). -->
 <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
 <script defer src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-<!-- OneSignal — free web push notifications (order updates reach the phone
-     even when this app/tab is closed, once the user allows notifications).
-     ⚠️ Replace ONESIGNAL_APP_ID below with your real App ID from
-     onesignal.com → Settings → Keys & IDs, once you've created a free
-     account and a "Web" app there with the Custom Code integration type. -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   const ONESIGNAL_APP_ID = "5e6397e0-125d-44fc-b430-8d2aff90fff4"; // <-- paste your real App ID here
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal){
     await OneSignal.init({
-      appId: "5e6397e0-125d-44fc-b430-8d2aff90fff4",
+      appId: ONESIGNAL_APP_ID,
       allowLocalhostAsSecureOrigin: true, // lets you test on http://localhost before going live
       notifyButton: { enable: false } // we ask permission ourselves at a better moment, see below
     });
@@ -60,16 +55,12 @@
   --saffron:#2C6602; --saffron-dark:#1D4501; --saffron-light:#E3EEDA;
   --leaf:#2C6602; --leaf-dark:#1D4501; --leaf-light:#E3EEDA;
   --gold:#2C6602; --gold-light:#E3EEDA;
-  --clay:#2C6602; --clay-dark:#1D4501; --clay-light:#E3EEDA;
-  --plum:#2C6602; --plum-light:#E3EEDA;
-  --navy:#1D4501; --navy-2:#153801;
   --danger:#A8402F; --danger-light:#F6E4DF;
   --grad-brand:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
   --grad-leaf:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
   --grad-gold:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
   --grad-plum:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
   --grad-navy:linear-gradient(160deg,#0F2A01 0%,#153801 45%,#1D4501 78%,#245401 100%);
-  --grad-clay:linear-gradient(135deg,#3A8003 0%,#1D4501 100%);
   --tile-dairy:linear-gradient(150deg,#F6F5F1 0%,#EEECE4 100%);
   --tile-pooja:linear-gradient(150deg,#F6F4EC 0%,#EEEADC 100%);
   --tile-gift:linear-gradient(150deg,#F5F4F0 0%,#ECEAE2 100%);
@@ -235,7 +226,6 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .btn-ghost{background:var(--card); color:var(--ink); border:1.5px solid #E7DFCC; width:100%;}
 .btn-leaf{background:var(--grad-leaf); color:#fff; box-shadow:var(--shadow-glow-leaf);}
 .btn-danger{background:transparent; color:var(--danger); border:1.5px solid #F6D3D7;}
-.btn-sm{padding:9px 13px; font-size:12.5px; min-height:36px;}
 .btn-block{width:100%;}
 .spinner{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite; flex-shrink:0;}
 /* visually hidden but screen-reader-accessible text — paired with every
@@ -312,7 +302,7 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .pcard-lg .badge-oos,.pcard-lg .badge-soon,.pd-slide .badge-oos,.pd-slide .badge-soon{top:8px; left:8px; font-size:9px; padding:3px 7px; border-radius:6px;}
 .badge-oos{background:var(--danger); color:#fff;}
 .badge-soon{background:var(--gold); color:#fff;}
-.tile.unavailable .tile-media,.tile.unavailable img{filter:grayscale(.55) brightness(.9); opacity:.75;}
+.tile.unavailable img{filter:grayscale(.55) brightness(.9); opacity:.75;}
 .add-btn:disabled,.mini-add:disabled{background:var(--ink-mute) !important; box-shadow:none !important; cursor:not-allowed; opacity:.75;}
 .pcard-sm .body{padding:7px 6px 9px; flex:1; display:flex; flex-direction:column;}
 .pcard-sm .body>[data-cta-host]{margin-top:auto;}
@@ -462,7 +452,6 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .sched-btn.has-dates{background:var(--leaf-light); border:1.5px solid #BEE7D2; color:var(--leaf-dark);}
 .date-chips-mini{display:flex; flex-wrap:wrap; gap:5px; margin-top:9px;}
 .date-chip-mini{background:var(--saffron-light); color:var(--saffron-dark); font-size:10px; font-weight:700; padding:4px 8px; border-radius:999px;}
- .cart-day-total{font-size:10.5px; color:var(--ink-mute); font-weight:600; margin:5px 0 2px;}
 .cart-total-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); padding:15px 16px; margin-top:8px; margin-bottom:8px; box-shadow:var(--shadow-sm);}
 .cart-total-row{display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-soft); margin-bottom:7px;}
 .cart-total-row.grand{font-size:15px; font-weight:800; color:var(--ink); border-top:1px dashed var(--line); padding-top:10px; margin-top:4px;}
@@ -702,7 +691,6 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .cal-chips{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:18px; min-height:14px;}
 .cal-chip{background:var(--leaf-light); color:var(--leaf-dark); font-size:11px; font-weight:700; padding:5px 9px 5px 10px; border-radius:999px; display:flex; align-items:center; gap:5px;}
 .cal-chip button{background:none; border:none; color:var(--leaf-dark); font-size:12px; cursor:pointer; line-height:1; padding:0;}
-.cal-empty-note{font-size:11.5px; color:var(--ink-mute); margin-bottom:18px;}
 .sheet-actions{display:flex; gap:10px;}
 .sheet-actions .btn{flex:1;}
 
@@ -741,7 +729,9 @@ body::before{content:'';position:fixed; inset:0; z-index:0; pointer-events:none;
 .oi-date{display:flex; align-items:center; gap:6px; background:var(--card-2); border:1px solid var(--line); border-radius:999px; padding:4px 4px 4px 10px; font-size:10px; font-weight:700;}
 .oi-date.stopped{background:var(--danger-light); border-color:#F6C7CC; color:var(--danger); text-decoration:line-through; opacity:.85;}
 .oi-date.rejected{background:var(--danger-light); border-color:#F6C7CC; color:var(--danger); padding:4px 10px;}
+.oi-date.delivered{background:var(--brand-light); border-color:#BEE7D2; color:var(--brand-dark); padding:4px 10px;}
 .oi-rejected-tag{font-size:8.5px; font-weight:800; letter-spacing:.01em;}
+.oi-delivered-tag{font-size:8.5px; font-weight:800; letter-spacing:.01em;}
 .oi-date button{background:var(--card); border:1px solid var(--line); color:var(--ink-soft); font-size:8.5px; font-weight:800; padding:3px 7px; border-radius:999px; cursor:pointer; text-decoration:none;}
 .oi-date.stopped button{background:var(--leaf-light); color:var(--leaf-dark); border-color:#BEE7D2;}
 .oi-date button:disabled{opacity:.55; cursor:not-allowed;}
@@ -1422,8 +1412,6 @@ body{font-size:14px;background:#EEF1EB;}
 .route-sk-thumb{width:58px;height:58px;border-radius:12px;flex:none;}
 .route-sk-row-copy{flex:1;padding-top:5px;}
 .route-sk-total{height:110px;border-radius:15px;margin-top:12px;}
-.route-sk-detail{padding:12px 4px;}
-.route-sk-detail .route-sk-line{height:12px;margin-bottom:10px;}
 .skeleton.route-skeleton{background:#B9BBB7;position:relative;overflow:hidden;}
 .skeleton.route-skeleton::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.48),transparent);animation:shimmer 1.15s ease-in-out infinite;}
 
@@ -1542,17 +1530,11 @@ body{font-size:14px;background:#EEF1EB;}
 .sheet-overlay.show .sheet-handle{opacity:1;transform:scaleX(1);}
 .profile-card-hero,
 .profile-row,
-.profile-sheet-actions{
-  opacity:0;
-  transform:translateY(8px);
-  transition:opacity .28s ease, transform .42s cubic-bezier(.16,1,.3,1);
-}
 .sheet-overlay.show .profile-card-hero{opacity:1;transform:none;transition-delay:.06s;}
 .sheet-overlay.show .profile-row:nth-of-type(2){opacity:1;transform:none;transition-delay:.10s;}
 .sheet-overlay.show .profile-row:nth-of-type(3){opacity:1;transform:none;transition-delay:.13s;}
 .sheet-overlay.show .profile-row:nth-of-type(4){opacity:1;transform:none;transition-delay:.16s;}
 .sheet-overlay.show .profile-row:nth-of-type(5){opacity:1;transform:none;transition-delay:.19s;}
-.sheet-overlay.show .profile-sheet-actions{opacity:1;transform:none;transition-delay:.22s;}
 .login-prompt,
 .login-prompt .btn{
   transition:opacity .28s ease, transform .42s cubic-bezier(.16,1,.3,1);
@@ -1773,6 +1755,7 @@ body{font-size:14px;background:#EEF1EB;}
   font-weight:800;
 }
 .bill-status-chip.active{background:#EAF5E7;color:#2F6B35;}
+.bill-status-chip.delivered{background:var(--brand-light);color:var(--brand-dark);}
 .bill-status-chip.stopped{background:#F8E5E1;color:#A24B3A;}
 .bill-status-chip.rejected{background:var(--danger-light);color:var(--danger);}
 .bill-day-total{
@@ -2687,6 +2670,7 @@ function stopCutoffHourFor(shift){ return shift === 'evening' ? STOP_CUTOFF_HOUR
    right up until they themselves become "today" and pass the cutoff. */
 function isDateStoppable(dateStr, shift){
   const today = todayISO();
+  if (dateStr < today) return false; // already delivered/passed — locked forever, not just today's cutoff
   if (dateStr !== today) return true;
   return new Date().getHours() < stopCutoffHourFor(shift);
 }
@@ -2741,13 +2725,13 @@ function hasActiveSubscriptionToday(){
    future date (kal/parso) still gets a status shown right away instead of
    only ever appearing once that date actually becomes "today". Returns
    null when there's no upcoming scheduled date at all. */
-function nextActiveDeliveryDate(){
+function nextActiveDeliveryDate(strictlyFuture){
   const today = todayISO();
   let best = null;
   for (const o of orders){
     for (const it of (o.items||[])){
       for (const d of (it.dates||[])){
-        if (d.date >= today && !d.stopped && !isDateRejected(o, d.date)){
+        if ((strictlyFuture ? d.date > today : d.date >= today) && !d.stopped && !isDateRejected(o, d.date)){
           if (!best || d.date < best) best = d.date;
         }
       }
@@ -2947,7 +2931,15 @@ function getLiveTrackInfo(){
   const completedToday = customer.status === 'completed' && customer.completedAt && toISO(new Date(customer.completedAt)) === todayISO();
   if (completedToday){
     const key = customer.id + ':' + todayISO();
-    if (arrivedDismissedKey === key) return null; // customer already closed/auto-dismissed this one
+    if (arrivedDismissedKey === key){
+      // Today's "Delivered!" toast has already been shown/closed — don't just
+      // hide the bar. If a future date is still active, surface that instead,
+      // so the bar keeps showing the next scheduled order regardless of
+      // whether today's product was delivered or not.
+      const nextDate = nextActiveDeliveryDate(true);
+      if (nextDate) return { state: 'scheduled', boy, boyOnline, boyHasFix, date: nextDate };
+      return null;
+    }
     return { state: 'arrived', boy, boyOnline, boyHasFix, completedAt: customer.completedAt, dismissKey: key };
   }
   // Covers BOTH a one-off order placed through this app today AND a
@@ -2994,6 +2986,19 @@ let trackDestMarker = null;
    customer/orders/deliveryBoys update, and also ticks every 30s on its own
    so the bar flips from "waiting" to "live" right at the cutoff hour even
    with no new Firebase data. */
+/* Fires a push exactly once per customer+delivery-state (e.g. "today's
+   delivery went live" or "today's delivery arrived") — refreshLiveTrackBar()
+   runs on every 30s poll and on every customer/orders/deliveryBoys update,
+   so without this dedupe the same push would get sent dozens of times a
+   day for the same event. Persisted in localStorage so it survives a page
+   reload too (a refresh right after the push shouldn't re-send it). */
+function notifyDeliveryStateOnce(stateKey, title, message){
+  if (!customer || !customer.id) return;
+  const key = 'ag_push_sent_' + customer.id + ':' + stateKey;
+  if (localStorage.getItem(key)) return;
+  localStorage.setItem(key, '1');
+  sendPushToCustomer(customer.id, title, message);
+}
 function refreshLiveTrackBar(){
   const bar = $('#liveTrackBar');
   if (!bar) return;
@@ -3010,6 +3015,7 @@ function refreshLiveTrackBar(){
     $('#ltbTitle').textContent = `${name} is bringing your delivery`;
     $('#ltbSub').textContent = trackEtaText(info.boy) || 'Fetching live location…';
     if (dot) dot.style.background = '#4ADE80';
+    notifyDeliveryStateOnce(todayISO()+':live', `${name} is on the way! 🛵`, 'Your delivery partner is live — tap to track your order in real time.');
   } else if (info.state === 'waiting_boy'){
     $('#ltbTitle').textContent = 'Order confirmed 🎉';
     $('#ltbSub').textContent = `${name} will be live soon — waiting for their location…`;
@@ -3020,6 +3026,7 @@ function refreshLiveTrackBar(){
     if (dot) dot.style.background = '#4ADE80';
     if (closeBtn) closeBtn.classList.add('show');
     scheduleArrivedAutoDismiss(info.dismissKey);
+    notifyDeliveryStateOnce(todayISO()+':arrived', 'Delivered! 🎉', 'Aapka order deliver ho gaya hai. Fresh again tomorrow!');
   } else if (info.state === 'scheduled'){
         $('#ltbTitle').textContent = 'Order confirmed 🎉';
     $('#ltbSub').textContent = `Delivery scheduled for ${fmtDate(info.date)}`;
@@ -3619,6 +3626,7 @@ function attachOrdersListener(id){
         ? `Delivery for Order #${orderId} on ${fmtDate(dateStr)} was rejected ❗`
         : `${freshKeys.length} deliveries were rejected ❗ Check My Orders`;
       showToast(label, 'warning');
+      sendPushToCustomer(id, 'Delivery Rejected ❗', label);
     }
     refreshRejectionBadge();
     refreshLiveTrackBar();
@@ -3829,12 +3837,6 @@ function setQty(id, qty){
   else it.qty = qty;
   saveCart(); refreshCartBadges();
 }
-function removeFromCart(id){
-  cart = cart.filter(c=>c.id!==id);
-  saveCart(); refreshCartBadges();
-  renderCart(); refreshAllCtas();
-}
-
 /* ================= STEPPER / ADD BUTTON RENDER ================= */
 function ctaMarkup(id, size){ // size: 'sm' or 'lg'
   const p = prodMap[id];
@@ -4253,7 +4255,7 @@ function renderCalendar(){
   const minMonth = now.getFullYear()*12+now.getMonth();
   const curMonth = calYear*12+calMonth;
   $('#calPrev').disabled = curMonth<=minMonth;
-  $('#calNext').disabled = curMonth>=minMonth+2;
+  $('#calNext').disabled = false;
   const shift = (customer && customer.shift==='evening') ? 'evening' : 'morning';
 
   let cells = '';
@@ -4846,12 +4848,16 @@ function renderOrders(){
             <span class="oi-rejected-tag">❌ Rejected</span>
           </div>`;
         }
+        const isPastDate = dd.date < todayISO();
         const stoppable = isDateStoppable(dd.date, customer ? customer.shift : 'morning');
-        return `<div class="oi-date ${dd.stopped?'stopped':''}">
-          ${fmtDate(dd.date)}
-          ${stoppable
+        const actionHtml = isPastDate
+          ? `<span class="oi-delivered-tag">✅ Delivered</span>`
+          : (stoppable
             ? `<button data-stop="${oi}:${ii}:${di}">${dd.stopped?'Resume':'Stop'}</button>`
-            : `<button disabled title="Cutoff time has passed — this delivery can no longer be stopped or resumed" aria-label="Locked — cutoff time has passed">🔒 Locked</button>`}
+            : `<button disabled title="Cutoff time has passed — this delivery can no longer be stopped or resumed" aria-label="Locked — cutoff time has passed">🔒 Locked</button>`);
+        return `<div class="oi-date ${dd.stopped?'stopped':''} ${isPastDate?'delivered':''}">
+          ${fmtDate(dd.date)}
+          ${actionHtml}
         </div>`;
       }).join('');
       return `<div class="oi-row" data-item="${oi}:${ii}">
@@ -4975,7 +4981,7 @@ $('#ordersList').addEventListener('click', async e=>{
     const [oi,ii,di] = stopBtn.getAttribute('data-stop').split(':').map(Number);
     const order = orders[oi], item = order.items[ii], d = item.dates[di];
     if (!isDateStoppable(d.date, customer ? customer.shift : 'morning')){
-      showToast('Cutoff time has passed — this delivery can no longer be stopped or resumed', 'warning');
+      showToast(d.date < todayISO() ? 'This delivery is already delivered and can\u2019t be stopped' : 'Cutoff time has passed — this delivery can no longer be stopped or resumed', 'warning');
       renderOrders();
       return;
     }
@@ -5036,10 +5042,10 @@ function buildDayWiseMap(){
   return map;
 }
 
-function billItemRowHtml(it){
+function billItemRowHtml(it, delivered){
   const amount = it.price * it.qty;
-  const statusLabel = it.rejected ? 'Rejected' : (it.stopped ? 'Stopped' : 'Included');
-  const statusCls = it.rejected ? 'rejected' : (it.stopped ? 'stopped' : 'active');
+  const statusLabel = it.rejected ? 'Rejected' : (delivered ? 'Delivered' : (it.stopped ? 'Stopped' : 'Included'));
+  const statusCls = it.rejected ? 'rejected' : (delivered ? 'delivered' : (it.stopped ? 'stopped' : 'active'));
   return `<div class="bill-item-row">
     <div>
       <div class="bill-item-name">${escapeHtml(it.name)}</div>
@@ -5066,17 +5072,18 @@ function renderBillTimeline(){
     </div>
     ${dates.map((iso, idx)=>{
       const day = map.get(iso);
+      const dayDelivered = iso < todayISO();
       return `<div class="bill-timeline-card ${idx===0?'open':''} ${day.hasRejected?'rejected':''}" data-bill-day-card="${iso}">
         <button class="bill-timeline-head" data-bill-day-toggle="${iso}" aria-expanded="${idx===0?'true':'false'}">
           <div class="bill-date-main">
-            <div class="bill-date-title">${fmtDateLong(iso)}${day.hasRejected?' <span class="bill-rejected-tag">❌ Rejected</span>':''}</div>
+            <div class="bill-date-title">${fmtDateLong(iso)}${dayDelivered?' <span class="bill-delivered-tag">✅ Delivered</span>':(day.hasRejected?' <span class="bill-rejected-tag">❌ Rejected</span>':'')}</div>
             <div class="bill-date-meta">${day.items.length} item${day.items.length===1?'':'s'} · delivery date</div>
           </div>
           <div class="bill-head-right"><div class="bill-head-amount">${money(day.total)}</div><div class="bill-chevron">⌄</div></div>
         </button>
         <div class="bill-card-body">
           <div class="bill-items-wrap">
-            ${day.items.map(billItemRowHtml).join('')}
+            ${day.items.map(it=>billItemRowHtml(it, dayDelivered)).join('')}
             <div class="bill-day-total"><span>Amount for this delivery</span><strong>${money(day.total)}</strong></div>
           </div>
         </div>
@@ -5115,10 +5122,13 @@ function renderBillOrders(){
               const active = (it.dates||[]).filter(d=>!d.stopped && !isDateRejected(o,d.date)).length;
               const stopped = (it.dates||[]).filter(d=>d.stopped).length;
               const rejected = (it.dates||[]).filter(d=>isDateRejected(o,d.date)).length;
+              const itemDelivered = (it.dates||[]).length>0 && (it.dates||[]).every(d=>d.date<todayISO());
               const dates = (it.dates||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)).map(d=>{
                 const r = isDateRejected(o, d.date);
                 return r ? `<span class="bill-rejected-date">${fmtDate(d.date)} ❌</span>` : fmtDate(d.date);
               }).join(', ');
+              const chipCls = rejected&&!active ? 'rejected' : (itemDelivered ? 'delivered' : (active?'active':'stopped'));
+              const chipLabel = rejected&&!active ? 'Rejected' : (itemDelivered ? 'Delivered' : (active?'Active':'Stopped'));
               return `<div class="bill-item-row">
                 <div>
                   <div class="bill-item-name">${escapeHtml(it.name)}</div>
@@ -5126,7 +5136,7 @@ function renderBillOrders(){
                   ${stopped?`<div class="bill-item-meta" style="color:#A24B3A;">${stopped} stopped date${stopped===1?'':'s'} · ${active} active</div>`:''}
                   ${rejected?`<div class="bill-item-meta" style="color:var(--danger);font-weight:700;">${rejected} rejected date${rejected===1?'':'s'}</div>`:''}
                 </div>
-                <div class="bill-item-side"><div class="bill-item-amount">${money(it.price*it.qty*active)}</div><span class="bill-status-chip ${rejected&&!active?'rejected':(active?'active':'stopped')}">${rejected&&!active?'Rejected':(active?'Active':'Stopped')}</span></div>
+                <div class="bill-item-side"><div class="bill-item-amount">${money(it.price*it.qty*active)}</div><span class="bill-status-chip ${chipCls}">${chipLabel}</span></div>
               </div>`;
             }).join('')}
             ${orderBreakdownHtml(b)}
