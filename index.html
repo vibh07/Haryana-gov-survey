@@ -4618,11 +4618,19 @@ async function finalizeOrder(cust){
 async function sendPushToCustomer(custId, title, message){
   if (!custId) return;
   try{
-    await fetch('/api/send-notification', {
+    const res = await fetch('/api/send-notification', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ externalId: custId, title, message })
     });
+    // fetch() only rejects on a genuine network failure — a 4xx/5xx from
+    // the endpoint itself (wrong OneSignal App ID, bad REST API key,
+    // customer not actually subscribed, etc.) still resolves normally and
+    // was silently treated as success before this check.
+    if (!res.ok){
+      const body = await res.text().catch(()=> '');
+      console.error(`Push notification send failed — server returned ${res.status}`, body);
+    }
   } catch(e){
     console.error('Push notification send failed (order itself is unaffected)', e);
   }
